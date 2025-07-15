@@ -1,0 +1,7 @@
+id=LastStandTogether
+name=Last Stand Together
+description=Adaptation of the Single Player Challenge mode for Multiplayer.
+poster=poster.png
+icon=icon.png
+author=Chuckleberry Finn
+require=pz-shops-and-traders,
