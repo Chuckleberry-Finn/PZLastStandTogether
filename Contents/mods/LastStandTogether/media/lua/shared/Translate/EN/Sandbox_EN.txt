@@ -1,0 +1,12 @@
+Sandbox_EN = {
+    Sandbox_LastStandTogether = "Last Stand Together",
+
+    Sandbox_LastStandTogether_BufferSize = "Buffer Size",
+    Sandbox_LastStandTogether_BufferSize_tooltip = "How many tiles ON TOP of the building's size should the zone be.",
+
+    Sandbox_LastStandTogether_OutOutBoundsTick = "Out of Bounds Tick",
+    Sandbox_LastStandTogether_OutOutBoundsTick_tooltip = "How many seconds between out-of-bounds damage ticks.",
+
+    Sandbox_LastStandTogether_OutOfBoundsDamage = "Out of Bounds Damage",
+    Sandbox_LastStandTogether_OutOfBoundsDamage_tooltip = "How much damage per tick should occur when out of bounds.",
+}

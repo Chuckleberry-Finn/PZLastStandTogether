@@ -1,0 +1,19 @@
+VERSION = 1,
+
+option LastStandTogether.BufferSize
+{
+	type = integer, min = 0, max = 25, default = 6,
+	page = LastStandTogether, translation = LastStandTogether_BufferSize,
+}
+
+option LastStandTogether.OutOutBoundsTick
+{
+	type = integer, min = 0, max = 30, default = 2,
+	page = LastStandTogether, translation = LastStandTogether_OutOutBoundsTick,
+}
+
+option LastStandTogether.OutOfBoundsDamage
+{
+	type = integer, min = 0, max = 100, default = 5,
+	page = LastStandTogether, translation = LastStandTogether_OutOfBoundsDamage,
+}
