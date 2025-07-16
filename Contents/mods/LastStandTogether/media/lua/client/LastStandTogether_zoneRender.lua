@@ -32,14 +32,28 @@ function zoneRender.playerStatus()
     if not zoneDef or not zoneDef.center or not zoneDef.radius then return end
 
     local pX, pY = player:getX(), player:getY()
-    local dx = zoneDef.center.x-pX
-    local dy = zoneDef.center.y-pY
+    local dx = math.abs(zoneDef.center.x-pX)
+    local dy = math.abs(zoneDef.center.y-pY)
 
     ---circle math, save for later maybe
     --local distance = math.sqrt(dx * dx + dy * dy)
     --if distance > zoneDef.radius then
 
-    if (math.abs(dx) > zoneDef.radius) or (math.abs(dy) > zoneDef.radius) then
+    if ((dx) > zoneDef.radius) or ((dy) > zoneDef.radius) then
+
+        if ((dx) > zoneDef.radius*2) or ((dy) > zoneDef.radius*2) then
+            local minX = zoneDef.center.x - (zoneDef.radius*2)
+            local maxX = zoneDef.center.x + (zoneDef.radius*2)
+            local minY = zoneDef.center.y - (zoneDef.radius*2)
+            local maxY = zoneDef.center.y + (zoneDef.radius*2)
+            local clampedX = math.max(minX, math.min(player:getX(), maxX))
+            local clampedY = math.max(minY, math.min(player:getY(), maxY))
+            player:setX(clampedX)
+            player:setY(clampedY)
+            player:setLx(clampedX)
+            player:setLy(clampedY)
+            player:setZ(0)
+        end
 
         local tick = (SandboxVars.LastStandTogether.OutOutBoundsTick or 2) * 1000
 
