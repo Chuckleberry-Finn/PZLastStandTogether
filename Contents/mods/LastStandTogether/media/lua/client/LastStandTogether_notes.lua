@@ -1,5 +1,3 @@
-LastStandTogether_Zone = require "LastStandTogether_zoneHandler.lua"
-
 --- def = {}
 --def.center = false
 --def.building = false
@@ -7,7 +5,17 @@ LastStandTogether_Zone = require "LastStandTogether_zoneHandler.lua"
 --def.center = false
 --def.radius = false
 
+--[[
+Able to set:
+number of waves
+cooldown between waves
+Zombies per wave
+Zombie increase per wave
 
+How long the waves are ?
+A popup WAVE 3.... WAVE 4...
+
+--]]
 
 --- DEBUG TEST
 --[[

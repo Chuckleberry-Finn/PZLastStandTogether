@@ -1,3 +1,5 @@
+local waveGen = require "LastStandTogether_waveGenerator.lua"
+
 local zone = {}
 
 zone.def = {}
@@ -6,12 +8,86 @@ zone.def.building = false
 zone.def.buildingDef = false
 zone.def.center = false
 zone.def.radius = false
+zone.def.error = false
 
-zone.error = false
+zone.def.wave = false
+zone.def.nextWaveTime = false
+zone.def.popMulti = false
+
 zone.players = {}
+zone.schedulingProcess = false
+zone.initiateLoop = false
 
-function zone.returnDef()
-    return zone.def
+
+function zone.onDead(zombie)
+    local attacker = zombie:getAttackedBy()
+    if attacker then
+        local value = SandboxVars.LastStandTogether.MoneyPerKill
+        local walletID = getOrSetWalletID(attacker)
+        if not walletID then
+            local moneyTypes = _internal.getMoneyTypes()
+            local type = moneyTypes[ZombRand(#moneyTypes)+1]
+            local money = InventoryItemFactory.CreateItem(type)
+            if money then
+                generateMoneyValue(money, value, true)
+                attacker:getInventory():AddItem(money)
+            end
+            return
+        end
+        sendClientCommand("shop", "transferFunds", {playerWalletID=walletID, amount=value})
+    end
+end
+
+
+function zone.scheduleWave()
+    if zone.schedulingProcess then return end
+    zone.schedulingProcess = true
+
+    if not zone.def.popMulti then
+        zone.def.popMulti = 1
+    else
+        zone.def.popMulti = zone.def.popMulti * (SandboxVars.LastStandTogether.WavePopMultiplier or 1.5)
+    end
+
+    local cooldown
+
+    if not zone.def.wave then
+        cooldown = 60000 * (SandboxVars.LastStandTogether.SetUpGracePeriod or 10)
+        zone.def.wave = 0
+    else
+        cooldown = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 5)
+        zone.def.wave = zone.def.wave + 1
+        local numberOf = zone.def.popMulti * (SandboxVars.LastStandTogether.NumberOfZombiesPerWave or 10)
+        waveGen.spawnZombies(numberOf)
+    end
+
+    if cooldown then
+        local setTime = getTimestampMs() + cooldown
+        zone.def.nextWaveTime = setTime
+        zone.schedulingProcess = false
+        zone.sendZoneDef()
+    end
+end
+
+
+function zone.schedulerLoop()
+    if not zone.initiateLoop then return end
+    if not zone.def then return end
+    if not zone.def.nextWaveTime or (getTimestampMs() > zone.def.nextWaveTime) then
+        zone.scheduleWave()
+    end
+end
+
+
+function zone.sendZoneDef()
+
+    if isServer() then
+        sendServerCommand("LastStandTogether", "updateZone", zone.def)
+    else
+        if not lastStandTogetherWaveAlert.instance then
+            lastStandTogetherWaveAlert:setToScreen()
+        end
+    end
 end
 
 
@@ -37,14 +113,20 @@ function zone.setToCurrentBuilding(player)
     zone.def = {}
 
     local building = player:getCurrentBuilding()
+
+    if zone.def.building and zone.def.building == building then
+
+        return
+    end
+
     if not building then
-        zone.error = "NO BUILDING FOUND!"
+        zone.def.error = "NO BUILDING FOUND!"
         return
     end
 
     local buildingDef = building and building:getDef()
     if not buildingDef then
-        zone.error = "NO BUILDING DEFINITION FOUND!"
+        zone.def.error = "NO BUILDING DEFINITION FOUND!"
         return
     end
 
@@ -57,10 +139,15 @@ function zone.setToCurrentBuilding(player)
     local centerX = (buildingDef:getX()+(buildingDefW/2))
     local centerY = (buildingDef:getY()+(buildingDefH/2))
 
-    local boundsRadius = math.max(buildingDefW,buildingDefH) + (SandboxVars.LastStandTogether.BufferSize or 4)
+    local boundsRadius = math.max(1, math.max(buildingDefW,buildingDefH) + (SandboxVars.LastStandTogether.BufferSize or 4))
 
     zone.def.radius = boundsRadius
     zone.def.center = {x=centerX, y=centerY}
+
+    zone.initiateLoop = true
+
+    zone.sendZoneDef()
 end
+
 
 return zone

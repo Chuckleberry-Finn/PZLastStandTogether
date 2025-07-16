@@ -1,5 +1,3 @@
-if isServer() then LastStandTogether_Zone = require "LastStandTogether_zoneHandler.lua" end
-
 local waveGenerator = {}
 
 function waveGenerator.spawnZombies(numberOf)
@@ -14,6 +12,8 @@ function waveGenerator.spawnZombies(numberOf)
     local y1 = zoneDef.center.y-(zoneDef.radius*2)
     local x2 = zoneDef.center.x+(zoneDef.radius*2)
     local y2 = zoneDef.center.y+(zoneDef.radius*2)
+
+    numberOf = math.floor(numberOf)
 
     for i=1, numberOf do
 

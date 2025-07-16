@@ -35,6 +35,21 @@ function zoneRender.playerStatus()
     local dx = math.abs(zoneDef.center.x-pX)
     local dy = math.abs(zoneDef.center.y-pY)
 
+    --[[
+    if getDebug() then
+        local zombies = getWorld():getCell():getZombieList()
+        local color = {r=1, g=0.125490196 , b=0.125490196, a=1}
+        if zombies and zombies:size() > 0 then
+            for i=0, zombies:size()-1 do
+                local zombie = zombies:get(i)
+                if zombie then
+                    zoneRender.drawSquare(zombie:getX(), zombie:getY(), 0.3, color, 2)
+                end
+            end
+        end
+    end
+    --]]
+
     ---circle math, save for later maybe
     --local distance = math.sqrt(dx * dx + dy * dy)
     --if distance > zoneDef.radius then

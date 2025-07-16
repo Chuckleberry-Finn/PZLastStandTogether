@@ -4,9 +4,26 @@ Sandbox_EN = {
     Sandbox_LastStandTogether_BufferSize = "Buffer Size",
     Sandbox_LastStandTogether_BufferSize_tooltip = "How many tiles ON TOP of the building's size should the zone be.",
 
+    Sandbox_LastStandTogether_SetUpGracePeriod = "SetUp Grace Period",
+    Sandbox_LastStandTogether_SetUpGracePeriod_tooltip = "How many minutes before waves begin.",
+
+    Sandbox_LastStandTogether_CoolDownBetweenWave = "Cooldown Between Waves",
+    Sandbox_LastStandTogether_CoolDownBetweenWave_tooltip = "Cooldown is in minutes.",
+
     Sandbox_LastStandTogether_OutOutBoundsTick = "Out of Bounds Tick",
     Sandbox_LastStandTogether_OutOutBoundsTick_tooltip = "How many seconds between out-of-bounds damage ticks.",
 
     Sandbox_LastStandTogether_OutOfBoundsDamage = "Out of Bounds Damage",
     Sandbox_LastStandTogether_OutOfBoundsDamage_tooltip = "How much damage per tick should occur when out of bounds.",
+
+    Sandbox_LastStandTogether_OutOfBoundsDamage = "Out of Bounds Damage",
+    Sandbox_LastStandTogether_OutOfBoundsDamage_tooltip = "How much damage per tick should occur when out of bounds.",
+
+    Sandbox_LastStandTogether_NumberOfZombiesPerWave = "Number of Zombies per Wave",
+
+    Sandbox_LastStandTogether_WavePopMultiplier = "Wave Population Multiplier",
+    Sandbox_LastStandTogether_WavePopMultiplier_tooltip = "Multiplier applied inbetween waves.",
+
+    Sandbox_LastStandTogether_MoneyPerKill = "Money Earned Per Kill",
+
 }
