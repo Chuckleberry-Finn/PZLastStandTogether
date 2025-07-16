@@ -1,6 +1,5 @@
 local zoneRender = {}
 
-
 function zoneRender.drawSquare(centerX, centerY, radius, color, thickness)
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
@@ -86,6 +85,9 @@ function zoneRender.draw()
 
     local color = {r=0.854901961, g=0.64705882352 , b=0.125490196, a=0.5}
     zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y, zoneDef.radius, color, 3)
+
+    color = {r=0.854901961, g=0.125490196 , b=0.125490196, a=0.5}
+    zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y, zoneDef.radius*2, color, 1)
 end
 
 return zoneRender

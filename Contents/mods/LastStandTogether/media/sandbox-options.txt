@@ -2,7 +2,7 @@ VERSION = 1,
 
 option LastStandTogether.BufferSize
 {
-	type = integer, min = 0, max = 25, default = 6,
+	type = integer, min = 0, max = 25, default = 4,
 	page = LastStandTogether, translation = LastStandTogether_BufferSize,
 }
 

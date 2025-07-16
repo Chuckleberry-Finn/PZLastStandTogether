@@ -57,11 +57,10 @@ function zone.setToCurrentBuilding(player)
     local centerX = (buildingDef:getX()+(buildingDefW/2))
     local centerY = (buildingDef:getY()+(buildingDefH/2))
 
-    local boundsRadius = math.max(buildingDefW,buildingDefH) + (SandboxVars.LastStandTogether.BufferSize or 6)
+    local boundsRadius = math.max(buildingDefW,buildingDefH) + (SandboxVars.LastStandTogether.BufferSize or 4)
 
     zone.def.radius = boundsRadius
     zone.def.center = {x=centerX, y=centerY}
 end
-
 
 return zone
