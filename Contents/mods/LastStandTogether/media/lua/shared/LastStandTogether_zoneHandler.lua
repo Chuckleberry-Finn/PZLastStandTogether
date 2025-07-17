@@ -120,8 +120,6 @@ end
 function zone.establishShopFront(buildingDef)
 
     local rooms = buildingDef:getRooms()
-    print("rooms: ", rooms:size())
-
     local roomContainers = {} -- Maps roomID -> list of containers
     local totalContainers = 0
 
@@ -151,7 +149,7 @@ function zone.establishShopFront(buildingDef)
                                     objModData.storeObjID = nil
                                     obj:transmitModData()
                                 end
-                                
+
                                 roomContainers[ID] = roomContainers[ID] or {}
                                 table.insert(roomContainers[ID], obj)
                                 totalContainers = totalContainers + 1
