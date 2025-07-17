@@ -4,6 +4,7 @@ if not isClient() then --SP and Server Only
         print("SCHEDULE LOOP")
         Events.OnTick.Add(LastStandTogether_Zone.schedulerLoop)
     end
+    Events.OnZombieDead.Add(LastStandTogether_Zone.onDead)
 end
 
 

@@ -23,9 +23,14 @@ function lastStandTogetherWaveAlert.getWaveNumberParts(n)
         return parts
     end
 
-    local tens = math.floor(n / 10) * 10
-    local ones = n % 10
+    local hundreds = math.floor(n / 100) * 100
+    local remainder = n % 100
+    local tens = math.floor(remainder / 10) * 10
+    local ones = remainder % 10
 
+    if hundreds > 0 then
+        table.insert(parts, tostring(hundreds))
+    end
     if tens > 0 then
         table.insert(parts, tostring(tens))
     end
@@ -38,69 +43,77 @@ end
 
 
 function lastStandTogetherWaveAlert:prerender()
-    local LST_zone = LastStandTogether_Zone
-    if not LST_zone then self:setVisible(false) return end
-
-    local zoneDef = LST_zone.def
-    if not zoneDef or not zoneDef.center or not zoneDef.radius or not zoneDef.wave then self:setVisible(false) return end
-
     ISPanel.prerender(self)
+    local LST_zone = LastStandTogether_Zone
+    local zoneDef = LST_zone and LST_zone.def
 
     --- def = {}
     --zoneDef.wave = false
     --zoneDef.nextWaveTime = false
     --zoneDef.popMulti = false
 
-    self.textLine1 = (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave) or ""
-    local nextWaveMs = zoneDef.nextWaveTime - getTimestampMs()
+    self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or ""
+
     local nextText
-    if nextWaveMs > 0 then
-        local totalSeconds = math.floor(nextWaveMs / 1000)
-        local hours = math.floor(totalSeconds / 3600)
-        local minutes = math.floor((totalSeconds % 3600) / 60)
-        local seconds = totalSeconds % 60
+    if zoneDef.wave and zoneDef.nextWaveTime then
+        local nextWaveMs = zoneDef.nextWaveTime - getTimestampMs()
+        if nextWaveMs > 0 then
+            local totalSeconds = math.floor(nextWaveMs / 1000)
+            local hours = math.floor(totalSeconds / 3600)
+            local minutes = math.floor((totalSeconds % 3600) / 60)
+            local seconds = totalSeconds % 60
 
-        if hours > 0 then
-            nextText = string.format("%d:%02d:%02d", hours, minutes, seconds)
-        elseif minutes > 0 then
-            nextText = string.format("%d:%02d", minutes, seconds)
-        else
-            nextText = string.format("%d", seconds)
-        end
+            if hours > 0 then
+                nextText = string.format("%d:%02d:%02d", hours, minutes, seconds)
+            elseif minutes > 0 then
+                nextText = string.format("%d:%02d", minutes, seconds)
+            else
+                nextText = string.format("%d", seconds)
+            end
 
-        if nextWaveMs <= 10000 then
-
-            if self.waveAnnounceParts and #self.waveAnnounceParts > 0 then
+            if self.waveAnnounceParts and self.waveAnnouncePartsSaid <= #self.waveAnnounceParts then
                 local noLongerPlaying = (self.playWaveAnnouncePart and not self.emitter:isPlaying(self.playWaveAnnouncePart))
                 if (not self.playWaveAnnouncePart) or noLongerPlaying then
-                    if noLongerPlaying then table.remove(self.waveAnnounceParts) end
-                    self.playWaveAnnouncePart = self.emitter:playSound("LastStandTogether/" .. self.waveAnnounceParts[#self.waveAnnounceParts])
+                    local sound = self.waveAnnounceParts[self.waveAnnouncePartsSaid]
+                    print("sound: ", sound, " -- ", self.waveAnnouncePartsSaid)
+                    if sound then
+                        self.playWaveAnnouncePart = self.emitter:playSound("lastStandTogether_" .. sound)
+                        self.waveAnnouncePartsSaid = self.waveAnnouncePartsSaid + 1
+                    end
                 end
+
             end
 
-            if self.announced == 0 then
-                self.emitter:playSound("LastStandTogether/countdown")
-                self.announced = 1
-                self.waveAnnounceParts = lastStandTogetherWaveAlert.getWaveNumberParts(zoneDef.wave)
+            if nextWaveMs <= 10001 then
+                if self.announced == 0 then
+                    print("countdown!")
+                    self.emitter:playSound("lastStandTogether_countDown")
+                    self.announced = 1
+                end
+                if self.announced == 1 and nextWaveMs <= 200 then
+                    print("WAVE?")
+                    self.announced = 2
+                    self.waveAnnounceParts = lastStandTogetherWaveAlert.getWaveNumberParts(zoneDef.wave+1)
+                    self.waveAnnouncePartsSaid = 1
+                end
+            else
+                self.announced = 0
             end
-            if self.announced == 1 and nextWaveMs <= 1000 then
-                self.announced = 2
-            end
-        else
-            self.waveAnnounceParts = nil
-            self.announced = false
         end
     end
 
     self.textLine2 = nextText and ("Next wave: " .. nextText) or ""
 
-    self:setVisible(true)
+    local zombies = getWorld():getCell():getZombieList():size() or 0
+
+    self.textLine3 = zombies .. " left."
 end
 
 
 function lastStandTogetherWaveAlert:render()
     ISPanel.render(self)
     self:drawTextCentre(self.textLine1, self.width/2, self.textY, 0.9, 0.2, 0.2, 0.8, UIFont.Title)
+    self:drawTextCentre(self.textLine2, self.width/2, self.textY+self.textLine2Hgt, 0.9, 0.2, 0.2, 0.7, UIFont.Large)
     self:drawTextCentre(self.textLine2, self.width/2, self.textY+self.textLine2Hgt, 0.9, 0.2, 0.2, 0.7, UIFont.Large)
 end
 
@@ -122,6 +135,7 @@ function lastStandTogetherWaveAlert:setToScreen()
     alert:initialise()
     alert:addToUIManager()
     lastStandTogetherWaveAlert.instance = alert
+
     return alert
 end
 
@@ -137,6 +151,7 @@ function lastStandTogetherWaveAlert:new()
     self.__index = self
     o.x = x
     o.y = y
+    o.announced = 0
     o.background = true
     o.backgroundColor = {r=0, g=0, b=0, a=0}
     o.borderColor = {r=0.9, g=0.2, b=0.2, a=1}

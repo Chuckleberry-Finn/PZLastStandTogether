@@ -80,7 +80,6 @@ end
 
 
 function zone.sendZoneDef()
-
     if isServer() then
         sendServerCommand("LastStandTogether", "updateZone", zone.def)
     else
@@ -113,9 +112,7 @@ function zone.setToCurrentBuilding(player)
     zone.def = {}
 
     local building = player:getCurrentBuilding()
-
-    if zone.def.building and zone.def.building == building then
-
+    if building and zone.def.building and zone.def.building == building then
         return
     end
 

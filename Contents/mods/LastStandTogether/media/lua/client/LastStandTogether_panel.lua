@@ -1,5 +1,7 @@
 require "ISUI/ISPanel"
 
+if ((not getDebug()) and (not isAdmin()) and (not isCoopHost())) then return end
+
 lastStandTogetherPanel = ISPanel:derive("lastStandTogetherPanel")
 
 function lastStandTogetherPanel:prerender()

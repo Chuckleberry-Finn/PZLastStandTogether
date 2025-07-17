@@ -1,0 +1,32 @@
+module lastStandTogether {
+    sound lastStandTogether_1 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/1.ogg, } }
+    sound lastStandTogether_2 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/2.ogg, } }
+    sound lastStandTogether_3 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/3.ogg, } }
+    sound lastStandTogether_4 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/4.ogg, } }
+    sound lastStandTogether_5 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/5.ogg, } }
+    sound lastStandTogether_6 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/6.ogg, } }
+    sound lastStandTogether_7 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/7.ogg, } }
+    sound lastStandTogether_8 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/8.ogg, } }
+    sound lastStandTogether_9 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/9.ogg, } }
+    sound lastStandTogether_10 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/10.ogg, } }
+
+    sound lastStandTogether_11 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/11.ogg, } }
+    sound lastStandTogether_12 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/12.ogg, } }
+    sound lastStandTogether_13 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/13.ogg, } }
+    sound lastStandTogether_14 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/14.ogg, } }
+    sound lastStandTogether_15 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/15.ogg, } }
+
+    sound lastStandTogether_20 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/20.ogg, } }
+    sound lastStandTogether_30 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/30.ogg, } }
+    sound lastStandTogether_40 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/40.ogg, } }
+    sound lastStandTogether_50 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/50.ogg, } }
+    sound lastStandTogether_60 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/60.ogg, } }
+    sound lastStandTogether_70 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/70.ogg, } }
+    sound lastStandTogether_80 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/80.ogg, } }
+    sound lastStandTogether_90 { category = lastStandTogether, clip { file = media/sound/LastStandTogether/90.ogg, } }
+
+    sound lastStandTogether_hundred { category = lastStandTogether, clip { file = media/sound/LastStandTogether/hundred.ogg, } }
+    sound lastStandTogether_teen { category = lastStandTogether, clip { file = media/sound/LastStandTogether/teen.ogg, } }
+    sound lastStandTogether_wave { category = lastStandTogether, clip { file = media/sound/LastStandTogether/wave.ogg, } }
+    sound lastStandTogether_countDown { category = lastStandTogether, clip { file = media/sound/LastStandTogether/countdown.ogg, } }
+}
