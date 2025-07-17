@@ -48,7 +48,7 @@ function waveGenerator.spawnZombies(numberOf)
         end
     end
 
-    addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, zoneDef.radius*3, 1000)
+    addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 301, 1000)
 end
 
 return waveGenerator
