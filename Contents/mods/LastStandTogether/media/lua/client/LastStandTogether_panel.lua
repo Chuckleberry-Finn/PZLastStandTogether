@@ -82,8 +82,7 @@ function lastStandTogetherPanel:onTextEntryEntered()
         local option = options and options:getOptionByName("LastStandTogether."..self.sandBoxOption)
         if option then
             option:setValue(value)
-
-            if isClient then
+            if isClient() then
                 options:sendToServer()
             end
             options:toLua()

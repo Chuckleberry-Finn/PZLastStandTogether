@@ -47,12 +47,6 @@ function waveGenerator.spawnZombies(numberOf)
             print("ERROR: NO ZOMBIES SPAWNED, EXPECTED: ", numberOf)
         end
     end
-
-    if isServer() then
-        sendClientCommand("LastStandTogether", "callZombies", {x=zoneDef.center.x, y=zoneDef.center.y})
-    else
-        addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 301, 1000)
-    end
 end
 
 return waveGenerator

@@ -47,11 +47,12 @@ function lastStandTogetherWaveAlert:prerender()
     local LST_zone = LastStandTogether_Zone
     local zoneDef = LST_zone and LST_zone.def
 
-    --- def = {}
-    --zoneDef.wave = false
-    --zoneDef.nextWaveTime = false
-    --zoneDef.popMulti = false
-
+    if not zoneDef then
+        self.textLine1 = ""
+        self.textLine2 = ""
+        self.textLine3 = ""
+        return
+    end
 
     self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or ""
 
@@ -66,9 +67,11 @@ function lastStandTogetherWaveAlert:prerender()
         end
     end
 
+    local currentTime = getTimestampMs()
+
     local nextText
     if zoneDef.wave and zoneDef.nextWaveTime then
-        local nextWaveMs = zoneDef.nextWaveTime - getTimestampMs()
+        local nextWaveMs = zoneDef.nextWaveTime - currentTime
         if nextWaveMs > 0 then
             local totalSeconds = math.floor(nextWaveMs / 1000)
             local hours = math.floor(totalSeconds / 3600)
@@ -83,7 +86,7 @@ function lastStandTogetherWaveAlert:prerender()
                 nextText = string.format("%d", seconds)
             end
 
-            if nextWaveMs <= 10001 then
+            if nextWaveMs <= 11000 then
                 if self.announced == 0 then
                     self.emitter:playSound("lastStandTogether_countDown")
                     self.announced = 1
@@ -100,6 +103,14 @@ function lastStandTogetherWaveAlert:prerender()
     end
     self.textLine2 = nextText and ("Next wave: " .. nextText) or ""
     self.zombies = getWorld():getCell():getZombieList():size() or 0
+
+    if self.zombies > 0 then
+        if (not self.lastYellOut) or (currentTime > self.lastYellOut) then
+            self.lastYellOut = currentTime+5000
+            addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 1000)
+        end
+    end
+
     self.textLine3 = (self.zombies>0) and (self.zombies .. " zombies left.") or ""
 end
 
@@ -147,6 +158,7 @@ function lastStandTogetherWaveAlert:new()
     o.x = x
     o.y = y
     o.announced = 0
+    o.lastYellOut = false
     o.background = true
     o.backgroundColor = {r=0, g=0, b=0, a=0}
     o.borderColor = {r=0.9, g=0.2, b=0.2, a=1}
