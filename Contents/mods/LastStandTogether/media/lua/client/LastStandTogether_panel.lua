@@ -95,7 +95,12 @@ end
 
 function lastStandTogetherPanel:startWaves(button)
     if not button then return end
-    LastStandTogether_Zone.setToCurrentBuilding(getPlayer())
+
+    if isClient() then
+        sendClientCommand("LastStandTogether", "setZone", {})
+    else
+        LastStandTogether_Zone.setToCurrentBuilding(getPlayer())
+    end
 end
 
 
@@ -111,7 +116,6 @@ function lastStandTogetherPanel:initialise()
     self:addChild(self.StartButton)
 
     for k,v in pairs(SandboxVars.LastStandTogether) do
-        print("option: ",k," = ",v)
         local title = getText("Sandbox_LastStandTogether_"..k)
         local button = ISButton:new(x, y, self.buttonWidth, self.buttonHeight, title, self, lastStandTogetherPanel.onButton)
         button.sandBoxOption = k

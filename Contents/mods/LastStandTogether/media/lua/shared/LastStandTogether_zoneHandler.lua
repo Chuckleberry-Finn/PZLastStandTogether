@@ -116,6 +116,96 @@ function zone.drawEdge(x1, y1, x2, y2, width, color)
 end
 
 
+---@param buildingDef BuildingDef
+function zone.establishShopFront(buildingDef)
+
+    local rooms = buildingDef:getRooms()
+    print("rooms: ", rooms:size())
+
+    local roomContainers = {} -- Maps roomID -> list of containers
+    local totalContainers = 0
+
+    for i = 0, rooms:size() - 1 do
+        ---@type RoomDef
+        local roomDef = rooms:get(i)
+        if roomDef then
+            local ID = roomDef:getID()
+
+            local roomX, roomX2 = roomDef:getX(), roomDef:getX2()
+            local roomY, roomY2 = roomDef:getY(), roomDef:getY2()
+            local roomZ = roomDef:getZ()
+
+            for x=roomX, roomX2 do
+                for y=roomY, roomY2 do
+                    local sq = getSquare(x, y, roomZ)
+                    if sq then
+                        local objects = sq:getObjects()
+                        for o=0, objects:size()-1 do
+                            ---@type IsoObject
+                            local obj = objects:get(o)
+
+                            if obj and obj:getContainer() then
+
+                                local objModData = obj:getModData()
+                                if objModData then
+                                    objModData.storeObjID = nil
+                                    obj:transmitModData()
+                                end
+                                
+                                roomContainers[ID] = roomContainers[ID] or {}
+                                table.insert(roomContainers[ID], obj)
+                                totalContainers = totalContainers + 1
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    if totalContainers == 0 then
+        zone.def.error = "ERROR: UNABLE TO ESTABLISH SHOP!"
+        return
+    end
+
+    local sortedRooms = {}
+    for roomID, containers in pairs(roomContainers) do
+        table.insert(sortedRooms, { id = roomID, containers = containers })
+    end
+    table.sort(sortedRooms, function(a, b) return #a.containers > #b.containers end)
+
+
+    local shops = (isServer() and GLOBAL_STORES) or CLIENT_STORES
+
+    local allContainers = {}
+    for _, roomData in ipairs(sortedRooms) do
+        for _, container in ipairs(roomData.containers) do
+            table.insert(allContainers, container)
+        end
+    end
+
+    local assignedShops = 0
+    for shopID,shopData in pairs(shops) do
+
+        local storeObj = STORE_HANDLER.getStoreByID(shopID)
+        storeObj.locations = {}
+
+        assignedShops = assignedShops + 1
+        ---@type IsoObject
+        local container = allContainers[assignedShops]
+        if container then
+            container:setOutlineHighlightCol(1,1,1,1)
+            STORE_HANDLER.connectStoreByID(container, shopID)
+        else
+            zone.def.error = "ERROR: Not enough containers to assign all shops!"
+        end
+
+        STORE_HANDLER.updateStore(storeObj)
+    end
+
+end
+
+
 ---@param player IsoObject|IsoMovingObject|IsoGameCharacter|IsoPlayer
 function zone.setToCurrentBuilding(player)
 
@@ -153,7 +243,10 @@ function zone.setToCurrentBuilding(player)
 
     zone.initiateLoop = true
 
+    getWorld():ForceKillAllZombies()
+
     zone.sendZoneDef()
+    zone.establishShopFront(buildingDef)
 end
 
 
