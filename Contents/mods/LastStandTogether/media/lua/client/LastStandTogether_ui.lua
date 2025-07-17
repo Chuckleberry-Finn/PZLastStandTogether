@@ -54,6 +54,17 @@ function lastStandTogetherWaveAlert:prerender()
 
     self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or ""
 
+    if self.waveAnnounceParts and self.waveAnnouncePartsSaid <= #self.waveAnnounceParts then
+        local noLongerPlaying = (self.playWaveAnnouncePart and not self.emitter:isPlaying(self.playWaveAnnouncePart))
+        if (not self.playWaveAnnouncePart) or noLongerPlaying then
+            local sound = self.waveAnnounceParts[self.waveAnnouncePartsSaid]
+            if sound then
+                self.playWaveAnnouncePart = self.emitter:playSound("lastStandTogether_" .. sound)
+                self.waveAnnouncePartsSaid = self.waveAnnouncePartsSaid + 1
+            end
+        end
+    end
+
     local nextText
     if zoneDef.wave and zoneDef.nextWaveTime then
         local nextWaveMs = zoneDef.nextWaveTime - getTimestampMs()
@@ -69,18 +80,6 @@ function lastStandTogetherWaveAlert:prerender()
                 nextText = string.format("%d:%02d", minutes, seconds)
             else
                 nextText = string.format("%d", seconds)
-            end
-
-            if self.waveAnnounceParts and self.waveAnnouncePartsSaid <= #self.waveAnnounceParts then
-                local noLongerPlaying = (self.playWaveAnnouncePart and not self.emitter:isPlaying(self.playWaveAnnouncePart))
-                if (not self.playWaveAnnouncePart) or noLongerPlaying then
-                    local sound = self.waveAnnounceParts[self.waveAnnouncePartsSaid]
-                    if sound then
-                        self.playWaveAnnouncePart = self.emitter:playSound("lastStandTogether_" .. sound)
-                        self.waveAnnouncePartsSaid = self.waveAnnouncePartsSaid + 1
-                    end
-                end
-
             end
 
             if nextWaveMs <= 10001 then
@@ -100,16 +99,17 @@ function lastStandTogetherWaveAlert:prerender()
     end
     self.textLine2 = nextText and ("Next wave: " .. nextText) or ""
 
-    local zombies = getWorld():getCell():getZombieList():size() or 0
-    self.textLine3 = (zombies>0) and (zombies .. " zombies left.") or ""
+    self.zombies = getWorld():getCell():getZombieList():size() or 0
+    self.textLine3 = (self.zombies>0) and (self.zombies .. " zombies left.") or ""
 end
 
 
 function lastStandTogetherWaveAlert:render()
     ISPanel.render(self)
-    self:drawTextCentre(self.textLine1, self.width/2, self.textY-10, 0.9, 0.2, 0.2, 0.8, UIFont.Title)
-    self:drawTextCentre(self.textLine2, self.width/2, self.textY+self.textLine2Hgt, 0.9, 0.2, 0.2, 0.7, UIFont.Large)
-    self:drawTextCentre(self.textLine3, self.width/2, self.textY+(self.textLine2Hgt*2), 0.9, 0.2, 0.2, 0.6, UIFont.Medium)
+    local waveAlpha = (self.zombies and self.zombies > 0 and 0.8) or 0.5
+    self:drawTextCentre(self.textLine1, self.width/2, self.textY-10, 0.9, 0.2, 0.2, waveAlpha, UIFont.Title)
+    self:drawTextCentre(self.textLine2, self.width/2, self.textY+self.textLine2Hgt, 0.9, 0.2, 0.2, 0.8, UIFont.Large)
+    self:drawTextCentre(self.textLine3, self.width/2, self.textY+(self.textLine2Hgt*2), 0.9, 0.2, 0.2, 0.7, UIFont.Medium)
 end
 
 

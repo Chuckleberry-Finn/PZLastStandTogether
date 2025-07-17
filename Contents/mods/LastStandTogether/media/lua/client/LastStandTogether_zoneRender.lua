@@ -35,26 +35,22 @@ function zoneRender.playerStatus()
     local dx = math.abs(zoneDef.center.x-pX)
     local dy = math.abs(zoneDef.center.y-pY)
 
-    --[[
-    if getDebug() then
-        local zombies = getWorld():getCell():getZombieList()
-        local color = {r=1, g=0.125490196 , b=0.125490196, a=1}
-        if zombies and zombies:size() > 0 then
-            for i=0, zombies:size()-1 do
-                local zombie = zombies:get(i)
-                if zombie then
-                    zoneRender.drawSquare(zombie:getX(), zombie:getY(), 0.3, color, 2)
-                end
-            end
-        end
-    end
-    --]]
-
-    ---circle math, save for later maybe
-    --local distance = math.sqrt(dx * dx + dy * dy)
-    --if distance > zoneDef.radius then
-
     if ((dx) > zoneDef.radius) or ((dy) > zoneDef.radius) then
+
+        local fadeRate = SandboxVars.LastStandTogether.OutOfBoundsFade or 0.33
+        if fadeRate < 1 then
+            local inner = zoneDef.radius
+            local outer = inner * (1 + fadeRate)
+            local transitionRange = outer - inner
+            local maxFadeDistSquared = transitionRange * transitionRange * 2
+            local excessX = dx > inner and (dx - inner) or 0
+            local excessY = dy > inner and (dy - inner) or 0
+            local fadeDistSq = excessX * excessX + excessY * excessY
+            local fade = fadeDistSq > 0 and math.min(1, fadeDistSq / maxFadeDistSquared) or 0
+            local zoom = getCore():getZoom(0)
+            fade = fade * fade * (3 - 2 * fade)
+            getRenderer():renderRect(0, 0, getCore():getScreenWidth()*zoom, getCore():getScreenHeight()*zoom, 0.1, 0.1, 0.1, fade)
+        end
 
         if ((dx) > zoneDef.radius*2) or ((dy) > zoneDef.radius*2) then
             local minX = zoneDef.center.x - (zoneDef.radius*2)
@@ -91,7 +87,6 @@ function zoneRender.playerStatus()
         end
 
         getRenderer():renderRect(sx1-(w/2), sy1, fill * w, 8, color.r, color.g, color.b, color.a)
-        --zoneRender.drawSquare(pX, pY, 0.3, color, 2)
     else
         LST_zone.players[player] = nil
     end

@@ -104,13 +104,14 @@ function lastStandTogetherPanel:initialise()
 
     local x, y = self.buttonX, self.titleY
 
-    self.StartButton = ISButton:new(10, 10, self.width-20, self.fontMedHeight*1.5, "Last Stand Together", self, lastStandTogetherPanel.startWaves)
+    self.StartButton = ISButton:new(self.buttonX, 10, self.width-(self.buttonX*2)+10, self.fontMedHeight*1.5, "Last Stand Together", self, lastStandTogetherPanel.startWaves)
     self.StartButton.font = UIFont.Medium
     self.StartButton:initialise()
     self.StartButton:instantiate()
     self:addChild(self.StartButton)
 
     for k,v in pairs(SandboxVars.LastStandTogether) do
+        print("option: ",k," = ",v)
         local title = getText("Sandbox_LastStandTogether_"..k)
         local button = ISButton:new(x, y, self.buttonWidth, self.buttonHeight, title, self, lastStandTogetherPanel.onButton)
         button.sandBoxOption = k

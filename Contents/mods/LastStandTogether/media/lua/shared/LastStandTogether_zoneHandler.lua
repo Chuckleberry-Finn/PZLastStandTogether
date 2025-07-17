@@ -49,32 +49,42 @@ function zone.scheduleWave()
         zone.def.popMulti = zone.def.popMulti * (SandboxVars.LastStandTogether.WavePopMultiplier or 1.5)
     end
 
-    local cooldown
-
     if not zone.def.wave then
-        cooldown = 60000 * (SandboxVars.LastStandTogether.SetUpGracePeriod or 10)
         zone.def.wave = 0
+        local cooldown = 60000 * (SandboxVars.LastStandTogether.SetUpGracePeriod or 10)
+        zone.def.nextWaveTime = getTimestampMs() + cooldown
     else
-        cooldown = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 5)
         zone.def.wave = zone.def.wave + 1
         local numberOf = zone.def.popMulti * (SandboxVars.LastStandTogether.NumberOfZombiesPerWave or 10)
         waveGen.spawnZombies(numberOf)
+        zone.def.nextWaveTime = nil
     end
 
-    if cooldown then
-        local setTime = getTimestampMs() + cooldown
-        zone.def.nextWaveTime = setTime
-        zone.schedulingProcess = false
-        zone.sendZoneDef()
-    end
+    zone.schedulingProcess = false
+    zone.sendZoneDef()
 end
 
 
 function zone.schedulerLoop()
-    if not zone.initiateLoop then return end
-    if not zone.def then return end
-    if not zone.def.nextWaveTime or (getTimestampMs() > zone.def.nextWaveTime) then
+    if not zone.initiateLoop or not zone.def then return end
+
+    local zombiesLeft = getWorld():getCell():getZombieList():size()
+
+    if not zone.def.wave and (not zone.def.nextWaveTime or getTimestampMs() > zone.def.nextWaveTime) then
         zone.scheduleWave()
+        return
+    end
+
+    if zone.def.wave and not zone.def.nextWaveTime and zombiesLeft <= 0 then
+        local cooldown = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 5)
+        zone.def.nextWaveTime = getTimestampMs() + cooldown
+        zone.sendZoneDef()
+        return
+    end
+
+    if zone.def.wave and zone.def.nextWaveTime and getTimestampMs() > zone.def.nextWaveTime and zombiesLeft <= 0 then
+        zone.scheduleWave()
+        return
     end
 end
 

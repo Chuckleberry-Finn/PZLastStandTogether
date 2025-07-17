@@ -16,8 +16,8 @@ Sandbox_EN = {
     Sandbox_LastStandTogether_OutOfBoundsDamage = "Out of Bounds Damage",
     Sandbox_LastStandTogether_OutOfBoundsDamage_tooltip = "How much damage per tick should occur when out of bounds.",
 
-    Sandbox_LastStandTogether_OutOfBoundsDamage = "Out of Bounds Damage",
-    Sandbox_LastStandTogether_OutOfBoundsDamage_tooltip = "How much damage per tick should occur when out of bounds.",
+    Sandbox_LastStandTogether_OutOfBoundsFade = "Out of Bounds Fade",
+    Sandbox_LastStandTogether_OutOfBoundsFade_tooltip = "At what distance should max blindness occur.",
 
     Sandbox_LastStandTogether_NumberOfZombiesPerWave = "Number of Zombies per Wave",
 
