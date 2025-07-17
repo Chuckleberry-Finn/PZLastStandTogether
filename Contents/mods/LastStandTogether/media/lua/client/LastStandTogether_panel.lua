@@ -43,6 +43,7 @@ function lastStandTogetherPanel:prerender()
     end
 end
 
+
 function lastStandTogetherPanel:render() ISPanel.render(self) end
 
 
@@ -50,6 +51,26 @@ function lastStandTogetherPanel:instantiate()
     ISPanel.instantiate(self)
     self.javaObject:setConsumeMouseEvents(false)
 end
+
+
+--[[
+local options = getSandboxOptions()
+local optionsToValues = {
+    ["ZombieConfig.PopulationMultiplier"] = 0.0,
+    ["ZombieConfig.PopulationStartMultiplier"] = 0.0,
+    ["ZombieConfig.PopulationPeakMultiplier"] = 0.0,
+    ["ZombieConfig.RespawnHours"] = 0.0,
+    ["ZombieConfig.RespawnUnseenHours"] = 0.0,
+    ["ZombieConfig.RespawnMultiplier"] = 0.0,
+    ["ZombieConfig.RedistributeHours"] = 0.0,
+}
+for option,value in pairs(optionsToValues) do
+    local option = options:getOptionByName(option)
+    if option then option:setValue(value) end
+end
+if isClient then options:sendToServer() end
+options:toLua()
+--]]
 
 
 function lastStandTogetherPanel:onTextEntryEntered()

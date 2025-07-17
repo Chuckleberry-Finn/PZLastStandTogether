@@ -1,5 +1,6 @@
+LastStandTogether_Zone = LastStandTogether_Zone or require "LastStandTogether_zoneHandler.lua"
+
 if not isClient() then --SP and Server Only
-    LastStandTogether_Zone = LastStandTogether_Zone or require "LastStandTogether_zoneHandler.lua"
     if LastStandTogether_Zone then
         Events.OnTick.Add(LastStandTogether_Zone.schedulerLoop)
     end
@@ -10,15 +11,17 @@ end
 if isServer() then
     local function onClientCommand(_module, _command, _player, _data)
         if _module ~= "LastStandTogether" then return end
-        if _command == "setZone" then
-            LastStandTogether_Zone.setToCurrentBuilding(_player)
-        end
+        if _command == "setZone" then LastStandTogether_Zone.setToCurrentBuilding(_player) end
+        if _command == "requestZone" then LastStandTogether_Zone.sendZoneDef(_player) end
     end
     Events.OnClientCommand.Add(onClientCommand)--what the server gets from the client
 end
 
 
 if isClient() then
+
+    Events.OnLoad.Add(LastStandTogether_Zone.requestZoneDef)
+
     local handler = require "LastStandTogether_networkHandler"
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end

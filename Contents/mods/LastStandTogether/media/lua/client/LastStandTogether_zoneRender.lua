@@ -1,8 +1,22 @@
 local zoneRender = {}
 
+function zoneRender.drawEdge(x1, y1, x2, y2, width, color)
+    local dx, dy = x2 - x1, y2 - y1
+    local len = math.sqrt(dx*dx + dy*dy)
+    if len == 0 then return end
+    local px, py = -dy / len, dx / len
+    local ox, oy = px * (width / 2), py * (width / 2)
+
+    local x1a, y1a = x1 + ox, y1 + oy
+    local x1b, y1b = x1 - ox, y1 - oy
+    local x2a, y2a = x2 + ox, y2 + oy
+    local x2b, y2b = x2 - ox, y2 - oy
+
+    getRenderer():renderPoly(x1a, y1a, x2a, y2a, x2b, y2b, x1b, y1b, color.r, color.g, color.b, color.a)
+end
+
+
 function zoneRender.drawSquare(centerX, centerY, radius, color, thickness)
-    local LST_zone = LastStandTogether_Zone
-    if not LST_zone then return end
 
     local x1 = centerX - radius
     local y1 = centerY - radius
@@ -14,10 +28,10 @@ function zoneRender.drawSquare(centerX, centerY, radius, color, thickness)
     local sx3, sy3 = ISCoordConversion.ToScreen(x2, y2, 0) -- Bottom-right
     local sx4, sy4 = ISCoordConversion.ToScreen(x1, y2, 0) -- Bottom-left
 
-    LST_zone.drawEdge(sx1, sy1, sx2, sy2, thickness, color) -- Top
-    LST_zone.drawEdge(sx2, sy2, sx3, sy3, thickness, color) -- Right
-    LST_zone.drawEdge(sx3, sy3, sx4, sy4, thickness, color) -- Bottom
-    LST_zone.drawEdge(sx4, sy4, sx1, sy1, thickness, color) -- Left
+    zoneRender.drawEdge(sx1, sy1, sx2, sy2, thickness, color) -- Top
+    zoneRender.drawEdge(sx2, sy2, sx3, sy3, thickness, color) -- Right
+    zoneRender.drawEdge(sx3, sy3, sx4, sy4, thickness, color) -- Bottom
+    zoneRender.drawEdge(sx4, sy4, sx1, sy1, thickness, color) -- Left
 end
 
 
@@ -37,6 +51,8 @@ function zoneRender.playerStatus()
 
     if ((dx) > zoneDef.radius) or ((dy) > zoneDef.radius) then
 
+        local zoom = getCore():getZoom(0)
+
         local fadeRate = SandboxVars.LastStandTogether.OutOfBoundsFade or 0.33
         if fadeRate < 1 then
             local inner = zoneDef.radius
@@ -47,7 +63,6 @@ function zoneRender.playerStatus()
             local excessY = dy > inner and (dy - inner) or 0
             local fadeDistSq = excessX * excessX + excessY * excessY
             local fade = fadeDistSq > 0 and math.min(1, fadeDistSq / maxFadeDistSquared) or 0
-            local zoom = getCore():getZoom(0)
             fade = fade * fade * (3 - 2 * fade)
             getRenderer():renderRect(0, 0, getCore():getScreenWidth()*zoom, getCore():getScreenHeight()*zoom, 0.1, 0.1, 0.1, fade)
         end
@@ -77,7 +92,7 @@ function zoneRender.playerStatus()
         local diff = (LST_zone.players[player]-getTimestampMs())
         local fill = 1-math.max(0,math.min(1,diff/tick))
 
-        getRenderer():renderRect(sx1-(w/2), sy1, w, 8, 0.2, 0.2,0.2, 1)
+        getRenderer():renderRect((sx1-(w/2))*zoom, sy1*zoom, w, 8, 0.2, 0.2,0.2, 1)
 
         if fill >= 1 then
             LST_zone.players[player] = nil
@@ -86,7 +101,7 @@ function zoneRender.playerStatus()
             player:playSound("BulletHitBody")
         end
 
-        getRenderer():renderRect(sx1-(w/2), sy1, fill * w, 8, color.r, color.g, color.b, color.a)
+        getRenderer():renderRect((sx1-(w/2))*zoom, sy1*zoom, fill * w, 8, color.r, color.g, color.b, color.a)
     else
         LST_zone.players[player] = nil
     end
@@ -99,13 +114,8 @@ function zoneRender.draw()
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
 
-    ---@type BuildingDef
     local zoneDef = LST_zone.def
-    if not zoneDef then return end
-
-    ---@type BuildingDef
-    local bDef = zoneDef.buildingDef
-    if not bDef then return end
+    if not zoneDef or not zoneDef.center or not zoneDef.radius then return end
 
     local color = {r=0.854901961, g=0.64705882352 , b=0.125490196, a=0.5}
     zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y, zoneDef.radius, color, 3)

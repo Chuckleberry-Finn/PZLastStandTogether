@@ -14,8 +14,9 @@ end
 --]]
 
 function networkHandler.receiveUpdate(data)--x, y, z
+    if isServer() then return end
     LastStandTogether_Zone.def = data
-    if not lastStandTogetherWaveAlert.instance then
+    if lastStandTogetherWaveAlert and (not lastStandTogetherWaveAlert.instance) then
         lastStandTogetherWaveAlert:setToScreen()
     end
 end

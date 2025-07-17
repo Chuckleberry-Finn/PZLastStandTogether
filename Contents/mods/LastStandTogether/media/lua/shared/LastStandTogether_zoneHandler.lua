@@ -89,30 +89,25 @@ function zone.schedulerLoop()
 end
 
 
-function zone.sendZoneDef()
+function zone.requestZoneDef()
+    if isClient() then
+        sendClientCommand(getPlayer(),"LastStandTogether", "requestZone", {})
+    end
+end
+
+
+function zone.sendZoneDef(player)
     if isServer() then
-        sendServerCommand("LastStandTogether", "updateZone", zone.def)
+        if player then
+            sendServerCommand(player, "LastStandTogether", "updateZone", zone.def)
+        else
+            sendServerCommand("LastStandTogether", "updateZone", zone.def)
+        end
     else
         if not lastStandTogetherWaveAlert.instance then
             lastStandTogetherWaveAlert:setToScreen()
         end
     end
-end
-
-
-function zone.drawEdge(x1, y1, x2, y2, width, color)
-    local dx, dy = x2 - x1, y2 - y1
-    local len = math.sqrt(dx*dx + dy*dy)
-    if len == 0 then return end
-    local px, py = -dy / len, dx / len
-    local ox, oy = px * (width / 2), py * (width / 2)
-
-    local x1a, y1a = x1 + ox, y1 + oy
-    local x1b, y1b = x1 - ox, y1 - oy
-    local x2a, y2a = x2 + ox, y2 + oy
-    local x2b, y2b = x2 - ox, y2 - oy
-
-    getRenderer():renderPoly(x1a, y1a, x2a, y2a, x2b, y2b, x1b, y1b, color.r, color.g, color.b, color.a)
 end
 
 
@@ -211,22 +206,24 @@ function zone.setToCurrentBuilding(player)
 
     local building = player:getCurrentBuilding()
     if building and zone.def.building and zone.def.building == building then
+        zone.sendZoneDef()
         return
     end
 
     if not building then
         zone.def.error = "NO BUILDING FOUND!"
+        zone.sendZoneDef()
         return
     end
 
     local buildingDef = building and building:getDef()
     if not buildingDef then
         zone.def.error = "NO BUILDING DEFINITION FOUND!"
+        zone.sendZoneDef()
         return
     end
 
     zone.def.building = building
-    zone.def.buildingDef = buildingDef
 
     local buildingDefW = buildingDef:getW()
     local buildingDefH = buildingDef:getH()

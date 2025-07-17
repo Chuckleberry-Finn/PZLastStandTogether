@@ -8,13 +8,13 @@ option LastStandTogether.BufferSize
 
 option LastStandTogether.SetUpGracePeriod
 {
-	type = double, min = 1, max = 60, default = 10,
+	type = double, min = 0.0001, max = 60, default = 10,
 	page = LastStandTogether, translation = LastStandTogether_SetUpGracePeriod,
 }
 
 option LastStandTogether.CoolDownBetweenWave
 {
-	type = double, min = 1, max = 60, default = 5,
+	type = double, min = 0.0001, max = 60, default = 5,
 	page = LastStandTogether, translation = LastStandTogether_CoolDownBetweenWave,
 }
 
