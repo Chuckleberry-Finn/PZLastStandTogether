@@ -15,7 +15,6 @@ end
 
 function networkHandler.receiveUpdate(data)--x, y, z
     LastStandTogether_Zone.def = data
-    print("UPDATE TO ZONE RECEIVED")
     if not lastStandTogetherWaveAlert.instance then
         lastStandTogetherWaveAlert:setToScreen()
     end

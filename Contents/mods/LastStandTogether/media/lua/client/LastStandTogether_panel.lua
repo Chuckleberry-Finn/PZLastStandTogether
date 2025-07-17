@@ -54,16 +54,12 @@ end
 
 function lastStandTogetherPanel:onTextEntryEntered()
 
-    print("self:getText(): ", self:getText())
-
     ---self = text entry
     local value = tonumber(self:getText())
     if value then
         local options = getSandboxOptions()
-        print("option: checking for: ", self.sandBoxOption)
         local option = options and options:getOptionByName("LastStandTogether."..self.sandBoxOption)
         if option then
-            print("SETTING: ", self.sandBoxOption)
             option:setValue(value)
 
             if isClient then

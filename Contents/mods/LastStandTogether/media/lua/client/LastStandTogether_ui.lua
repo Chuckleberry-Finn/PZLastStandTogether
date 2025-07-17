@@ -75,7 +75,6 @@ function lastStandTogetherWaveAlert:prerender()
                 local noLongerPlaying = (self.playWaveAnnouncePart and not self.emitter:isPlaying(self.playWaveAnnouncePart))
                 if (not self.playWaveAnnouncePart) or noLongerPlaying then
                     local sound = self.waveAnnounceParts[self.waveAnnouncePartsSaid]
-                    print("sound: ", sound, " -- ", self.waveAnnouncePartsSaid)
                     if sound then
                         self.playWaveAnnouncePart = self.emitter:playSound("lastStandTogether_" .. sound)
                         self.waveAnnouncePartsSaid = self.waveAnnouncePartsSaid + 1
@@ -86,12 +85,10 @@ function lastStandTogetherWaveAlert:prerender()
 
             if nextWaveMs <= 10001 then
                 if self.announced == 0 then
-                    print("countdown!")
                     self.emitter:playSound("lastStandTogether_countDown")
                     self.announced = 1
                 end
                 if self.announced == 1 and nextWaveMs <= 200 then
-                    print("WAVE?")
                     self.announced = 2
                     self.waveAnnounceParts = lastStandTogetherWaveAlert.getWaveNumberParts(zoneDef.wave+1)
                     self.waveAnnouncePartsSaid = 1
@@ -101,20 +98,18 @@ function lastStandTogetherWaveAlert:prerender()
             end
         end
     end
-
     self.textLine2 = nextText and ("Next wave: " .. nextText) or ""
 
     local zombies = getWorld():getCell():getZombieList():size() or 0
-
-    self.textLine3 = zombies .. " left."
+    self.textLine3 = (zombies>0) and (zombies .. " zombies left.") or ""
 end
 
 
 function lastStandTogetherWaveAlert:render()
     ISPanel.render(self)
-    self:drawTextCentre(self.textLine1, self.width/2, self.textY, 0.9, 0.2, 0.2, 0.8, UIFont.Title)
+    self:drawTextCentre(self.textLine1, self.width/2, self.textY-10, 0.9, 0.2, 0.2, 0.8, UIFont.Title)
     self:drawTextCentre(self.textLine2, self.width/2, self.textY+self.textLine2Hgt, 0.9, 0.2, 0.2, 0.7, UIFont.Large)
-    self:drawTextCentre(self.textLine2, self.width/2, self.textY+self.textLine2Hgt, 0.9, 0.2, 0.2, 0.7, UIFont.Large)
+    self:drawTextCentre(self.textLine3, self.width/2, self.textY+(self.textLine2Hgt*2), 0.9, 0.2, 0.2, 0.6, UIFont.Medium)
 end
 
 

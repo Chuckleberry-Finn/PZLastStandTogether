@@ -1,7 +1,6 @@
 if not isClient() then --SP and Server Only
     LastStandTogether_Zone = LastStandTogether_Zone or require "LastStandTogether_zoneHandler.lua"
     if LastStandTogether_Zone then
-        print("SCHEDULE LOOP")
         Events.OnTick.Add(LastStandTogether_Zone.schedulerLoop)
     end
     Events.OnZombieDead.Add(LastStandTogether_Zone.onDead)
