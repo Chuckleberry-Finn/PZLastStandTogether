@@ -26,6 +26,9 @@ if isClient() then
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
         if _command == "updateZone" then handler.receiveUpdate(_data) end
+        if _command == "callZombies" then
+            addSound(nil,  _data.x,  _data.y, 0, 301, 1000)
+        end
     end
     Events.OnServerCommand.Add(onServerCommand)--what clients gets from the server
 end

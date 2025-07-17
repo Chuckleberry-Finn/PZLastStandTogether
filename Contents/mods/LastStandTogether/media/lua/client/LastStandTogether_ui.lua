@@ -100,15 +100,6 @@ function lastStandTogetherWaveAlert:prerender()
     end
     self.textLine2 = nextText and ("Next wave: " .. nextText) or ""
     self.zombies = getWorld():getCell():getZombieList():size() or 0
-
-    if self.zombies > 0 then
-        self.lastWaveCount = self.lastWaveCount or zoneDef.wave
-        if self.lastWaveCount ~= zoneDef.wave then
-            self.lastWaveCount = zoneDef.wave
-            addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 1000)
-        end
-    end
-
     self.textLine3 = (self.zombies>0) and (self.zombies .. " zombies left.") or ""
 end
 
