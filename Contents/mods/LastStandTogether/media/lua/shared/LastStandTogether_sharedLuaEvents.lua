@@ -4,9 +4,9 @@ if not isClient() then --SP and Server Only
     if LastStandTogether_Zone then
         Events.OnTick.Add(LastStandTogether_Zone.schedulerLoop)
     end
-    Events.OnZombieDead.Add(LastStandTogether_Zone.onDead)
 end
 
+Events.OnZombieDead.Add(LastStandTogether_Zone.onDead)
 
 if isServer() then
     local function onClientCommand(_module, _command, _player, _data)

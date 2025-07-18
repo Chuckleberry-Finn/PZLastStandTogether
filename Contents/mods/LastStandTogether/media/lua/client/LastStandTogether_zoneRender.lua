@@ -86,13 +86,13 @@ function zoneRender.playerStatus()
         LST_zone.players[player] = LST_zone.players[player] or getTimestampMs()+tick
 
         local color = {r=1, g=0.125490196 , b=0.125490196, a=1}
-        local sx1, sy1 = ISCoordConversion.ToScreen(pX, pY, 0.8)-- Top-left
+        local sx1, sy1 = ISCoordConversion.ToScreen(pX, pY, 0.9)
         local w = 64
 
         local diff = (LST_zone.players[player]-getTimestampMs())
         local fill = 1-math.max(0,math.min(1,diff/tick))
 
-        getRenderer():renderRect((sx1-(w/2))*zoom, sy1*zoom, w, 8, 0.2, 0.2,0.2, 1)
+        getRenderer():renderRect((sx1-(w/2)), sy1, w, 8, 0.2, 0.2,0.2, 1)
 
         if fill >= 1 then
             LST_zone.players[player] = nil
@@ -101,7 +101,7 @@ function zoneRender.playerStatus()
             player:playSound("BulletHitBody")
         end
 
-        getRenderer():renderRect((sx1-(w/2))*zoom, sy1*zoom, fill * w, 8, color.r, color.g, color.b, color.a)
+        getRenderer():renderRect((sx1-(w/2)), sy1, fill * w, 8, color.r, color.g, color.b, color.a)
     else
         LST_zone.players[player] = nil
     end

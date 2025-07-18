@@ -42,6 +42,7 @@ function waveGenerator.spawnZombies(numberOf)
             local zombie = spawned:get(0)
             if zombie then
                 zombie:pathToLocationF(zoneDef.center.x,zoneDef.center.y,0)
+                zoneDef.zombies = (zoneDef.zombies or 0) + 1
             end
         else
             print("ERROR: NO ZOMBIES SPAWNED, EXPECTED: ", numberOf)

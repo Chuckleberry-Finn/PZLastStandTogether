@@ -102,7 +102,7 @@ function lastStandTogetherWaveAlert:prerender()
         end
     end
     self.textLine2 = nextText and ("Next wave: " .. nextText) or ""
-    self.zombies = getWorld():getCell():getZombieList():size() or 0
+    self.zombies = zoneDef.zombies or 0--getWorld():getCell():getZombieList():size() or 0
 
     if self.zombies > 0 then
         if (not self.lastYellOut) or (currentTime > self.lastYellOut) then

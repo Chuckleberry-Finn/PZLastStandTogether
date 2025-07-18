@@ -13,6 +13,7 @@ zone.def.error = false
 zone.def.wave = false
 zone.def.nextWaveTime = false
 zone.def.popMulti = false
+zone.def.zombies = 0
 
 zone.players = {}
 zone.schedulingProcess = false
@@ -20,21 +21,24 @@ zone.initiateLoop = false
 
 
 function zone.onDead(zombie)
-    local attacker = zombie:getAttackedBy()
-    if attacker then
-        local value = SandboxVars.LastStandTogether.MoneyPerKill
-        local walletID = getOrSetWalletID(attacker)
-        if not walletID then
-            local moneyTypes = _internal.getMoneyTypes()
-            local type = moneyTypes[ZombRand(#moneyTypes)+1]
-            local money = InventoryItemFactory.CreateItem(type)
-            if money then
-                generateMoneyValue(money, value, true)
-                attacker:getInventory():AddItem(money)
+    zone.def.zombies = (zone.def.zombies or 0) - 1
+    if not isServer() then
+        local attacker = zombie:getAttackedBy()
+        if attacker then
+            local value = SandboxVars.LastStandTogether.MoneyPerKill
+            local walletID = getOrSetWalletID(attacker)
+            if not walletID then
+                local moneyTypes = _internal.getMoneyTypes()
+                local type = moneyTypes[ZombRand(#moneyTypes)+1]
+                local money = InventoryItemFactory.CreateItem(type)
+                if money then
+                    generateMoneyValue(money, value, true)
+                    attacker:getInventory():AddItem(money)
+                end
+                return
             end
-            return
+            sendClientCommand("shop", "transferFunds", {playerWalletID=walletID, amount=value})
         end
-        sendClientCommand("shop", "transferFunds", {playerWalletID=walletID, amount=value})
     end
 end
 
@@ -68,7 +72,7 @@ end
 function zone.schedulerLoop()
     if not zone.initiateLoop or not zone.def then return end
 
-    local zombiesLeft = getWorld():getCell():getZombieList():size()
+    local zombiesLeft = zone.def.zombies or 0--getWorld():getCell():getZombieList():size()
 
     if not zone.def.wave and (not zone.def.nextWaveTime or getTimestampMs() > zone.def.nextWaveTime) then
         zone.scheduleWave()
