@@ -106,8 +106,8 @@ function lastStandTogetherWaveAlert:prerender()
 
     if self.zombies > 0 then
         if (not self.lastYellOut) or (currentTime > self.lastYellOut) then
-            self.lastYellOut = currentTime+5000
-            addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 1000)
+            self.lastYellOut = currentTime+2000
+            addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 600)
         end
     end
 
@@ -117,10 +117,18 @@ end
 
 function lastStandTogetherWaveAlert:render()
     ISPanel.render(self)
+    self:backMost()
     local waveAlpha = (self.zombies and self.zombies > 0 and 0.8) or 0.5
-    self:drawTextCentre(self.textLine1, self.width/2, self.textY-10, 0.9, 0.2, 0.2, waveAlpha, UIFont.Title)
-    self:drawTextCentre(self.textLine2, self.width/2, self.textY+self.textLine2Hgt, 0.9, 0.2, 0.2, 0.8, UIFont.Large)
-    self:drawTextCentre(self.textLine3, self.width/2, self.textY+(self.textLine2Hgt*2), 0.9, 0.2, 0.2, 0.7, UIFont.Medium)
+
+    local tempTextY = self.textY
+
+    self:drawTextCentre(self.textLine1, self.width/2, tempTextY, 0.9, 0.2, 0.2, waveAlpha, UIFont.Title)
+    if self.textLine1 ~= "" then tempTextY = tempTextY + self.textTitleH end
+
+    self:drawTextCentre(self.textLine2, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.8, UIFont.Large)
+    if self.textLine2 ~= "" then tempTextY = tempTextY + self.textLargeH end
+    
+    self:drawTextCentre(self.textLine3, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.7, UIFont.Medium)
 end
 
 
@@ -167,8 +175,10 @@ function lastStandTogetherWaveAlert:new()
     o.emitter = getPlayer():getEmitter()
     o.textLine1 = ""
     o.textLine2 = ""
-    o.textY = getCore():getScreenHeight()/8
-    o.textLine2Hgt = getTextManager():getFontHeight(UIFont.Title)
+    o.textY = (getCore():getScreenHeight()/8)-10
+    o.textTitleH = getTextManager():getFontHeight(UIFont.Title)
+    o.textLargeH = getTextManager():getFontHeight(UIFont.Large)
+    o.textMediumH = getTextManager():getFontHeight(UIFont.Medium)
     o.anchorLeft = true
     o.anchorRight = false
     o.anchorTop = true

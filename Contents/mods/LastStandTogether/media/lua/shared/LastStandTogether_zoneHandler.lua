@@ -4,8 +4,6 @@ local zone = {}
 
 zone.def = {}
 zone.def.center = false
-zone.def.building = false
-zone.def.buildingDef = false
 zone.def.center = false
 zone.def.radius = false
 zone.def.error = false
@@ -14,6 +12,8 @@ zone.def.wave = false
 zone.def.nextWaveTime = false
 zone.def.popMulti = false
 zone.def.zombies = 0
+
+zone.building = false
 
 zone.players = {}
 zone.schedulingProcess = false
@@ -93,10 +93,13 @@ function zone.schedulerLoop()
 end
 
 
-function zone.requestZoneDef()
-    if isClient() then
+zone.clientSideLoginCheck = 2
+function zone.onLogin()
+    zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
+    if zone.clientSideLoginCheck <= 0 then
         print("ZONE REQUESTED")
         sendClientCommand(getPlayer(),"LastStandTogether", "requestZone", {})
+        Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
 end
 
@@ -213,7 +216,8 @@ function zone.setToCurrentBuilding(player)
     zone.def = {}
 
     local building = player:getCurrentBuilding()
-    if building and zone.def.building and zone.def.building == building then
+    if building and zone.building and zone.building == building then
+        zone.building = nil
         zone.sendZoneDef()
         return
     end
@@ -245,8 +249,6 @@ function zone.setToCurrentBuilding(player)
     zone.def.center = {x=centerX, y=centerY}
 
     zone.initiateLoop = true
-
-    getWorld():ForceKillAllZombies()
 
     zone.sendZoneDef()
     zone.establishShopFront(buildingDef)

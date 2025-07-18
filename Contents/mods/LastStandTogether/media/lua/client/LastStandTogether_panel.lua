@@ -22,11 +22,9 @@ function lastStandTogetherPanel:prerender()
         text = zoneDef.error
     end
 
-    if zoneDef and not zoneDef.building then
+    if zoneDef and (not zoneDef.center) then
         local building = getPlayer():getCurrentBuilding()
-        if building then
-            text = "Valid Building"
-        end
+        if building then text = (text and text .. "  -  " or "") .. "Inside Valid Building" end
     end
 
     if zoneDef and text then

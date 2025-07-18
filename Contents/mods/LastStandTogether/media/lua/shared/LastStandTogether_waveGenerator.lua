@@ -1,12 +1,19 @@
 local waveGenerator = {}
 
+
 function waveGenerator.spawnZombies(numberOf)
 
     local LST_zone = LastStandTogether_Zone
-    if not LST_zone then return end
+    if not LST_zone then
+        print("ERROR: WAVE-GEN: spawnZombies FAILED! - NO LST_zone!")
+        return
+    end
 
     local zoneDef = LST_zone.def
-    if not zoneDef or not zoneDef.center or not zoneDef.radius then return end
+    if not zoneDef or not zoneDef.center or not zoneDef.radius then
+        print("ERROR: WAVE-GEN: spawnZombies FAILED! - zoneDef invalid!")
+        return
+    end
 
     local x1 = zoneDef.center.x-(zoneDef.radius*2)
     local y1 = zoneDef.center.y-(zoneDef.radius*2)
@@ -14,6 +21,11 @@ function waveGenerator.spawnZombies(numberOf)
     local y2 = zoneDef.center.y+(zoneDef.radius*2)
 
     numberOf = math.floor(numberOf)
+
+    local player = 0
+    local players = (isServer() and getOnlinePlayers())
+
+    zoneDef.zombies = numberOf
 
     for i=1, numberOf do
 
@@ -36,16 +48,21 @@ function waveGenerator.spawnZombies(numberOf)
             y = y2
         end
 
+
         local spawned = addZombiesInOutfit(x, y, 0, 1, nil, nil)
         if spawned and spawned:size() > 0 then
             ---@type IsoObject|IsoMovingObject|IsoGameCharacter|IsoZombie
             local zombie = spawned:get(0)
-            if zombie then
-                zombie:pathToLocationF(zoneDef.center.x,zoneDef.center.y,0)
-                zoneDef.zombies = (zoneDef.zombies or 0) + 1
-            end
         else
-            print("ERROR: NO ZOMBIES SPAWNED, EXPECTED: ", numberOf)
+            print("ERROR: WAVE-GEN: spawnZombie FAILED!")
+        end
+
+        if isServer() then
+            AddWorldSound(players:get(player), 600, 600)
+            player = player + 1
+            if player >= players:size() then player = 0 end
+        else
+            AddWorldSound(getPlayer(), 600, 600)
         end
     end
 end
