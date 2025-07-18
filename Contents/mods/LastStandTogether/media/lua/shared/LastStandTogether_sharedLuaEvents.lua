@@ -20,7 +20,7 @@ end
 
 if isClient() then
 
-    Events.OnLoad.Add(LastStandTogether_Zone.requestZoneDef)
+    Events.OnPlayerCreate.Add(LastStandTogether_Zone.requestZoneDef)
 
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
