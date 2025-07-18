@@ -97,7 +97,6 @@ zone.clientSideLoginCheck = 2
 function zone.onLogin()
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
-        print("ZONE REQUESTED")
         sendClientCommand(getPlayer(),"LastStandTogether", "requestZone", {})
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
@@ -106,12 +105,9 @@ end
 
 function zone.sendZoneDef(player)
     if isServer() then
-        print("SENDING ZONE DEF!")
         if player then
-            print("   player!")
             sendServerCommand(player, "LastStandTogether", "updateZone", zone.def)
         else
-            print("   all!")
             sendServerCommand("LastStandTogether", "updateZone", zone.def)
         end
     else
@@ -198,7 +194,6 @@ function zone.establishShopFront(buildingDef)
         ---@type IsoObject
         local container = allContainers[assignedShops]
         if container then
-            container:setOutlineHighlightCol(1,1,1,1)
             STORE_HANDLER.connectStoreByID(container, shopID)
         else
             zone.def.error = "ERROR: Not enough containers to assign all shops!"

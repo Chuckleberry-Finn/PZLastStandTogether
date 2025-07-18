@@ -1,19 +1,12 @@
 local waveGenerator = {}
 
-
 function waveGenerator.spawnZombies(numberOf)
 
     local LST_zone = LastStandTogether_Zone
-    if not LST_zone then
-        print("ERROR: WAVE-GEN: spawnZombies FAILED! - NO LST_zone!")
-        return
-    end
+    if not LST_zone then print("ERROR: spawnZombies FAILED! - NO LST_zone!") return end
 
     local zoneDef = LST_zone.def
-    if not zoneDef or not zoneDef.center or not zoneDef.radius then
-        print("ERROR: WAVE-GEN: spawnZombies FAILED! - zoneDef invalid!")
-        return
-    end
+    if not zoneDef or not zoneDef.center or not zoneDef.radius then print("ERROR: spawnZombies FAILED! - zoneDef invalid!") return end
 
     local x1 = zoneDef.center.x-(zoneDef.radius*2)
     local y1 = zoneDef.center.y-(zoneDef.radius*2)

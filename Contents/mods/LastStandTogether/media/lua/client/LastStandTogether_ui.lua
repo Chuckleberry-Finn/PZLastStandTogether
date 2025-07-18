@@ -127,7 +127,7 @@ function lastStandTogetherWaveAlert:render()
 
     self:drawTextCentre(self.textLine2, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.8, UIFont.Large)
     if self.textLine2 ~= "" then tempTextY = tempTextY + self.textLargeH end
-    
+
     self:drawTextCentre(self.textLine3, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.7, UIFont.Medium)
 end
 
@@ -176,9 +176,9 @@ function lastStandTogetherWaveAlert:new()
     o.textLine1 = ""
     o.textLine2 = ""
     o.textY = (getCore():getScreenHeight()/8)-10
-    o.textTitleH = getTextManager():getFontHeight(UIFont.Title)
-    o.textLargeH = getTextManager():getFontHeight(UIFont.Large)
-    o.textMediumH = getTextManager():getFontHeight(UIFont.Medium)
+    o.textTitleH = getTextManager():getFontHeight(UIFont.Title)*1.25
+    o.textLargeH = getTextManager():getFontHeight(UIFont.Large)*1.25
+    o.textMediumH = getTextManager():getFontHeight(UIFont.Medium)*1.25
     o.anchorLeft = true
     o.anchorRight = false
     o.anchorTop = true
