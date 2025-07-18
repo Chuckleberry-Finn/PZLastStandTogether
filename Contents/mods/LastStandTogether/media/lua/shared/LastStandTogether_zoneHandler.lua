@@ -19,6 +19,25 @@ zone.players = {}
 zone.schedulingProcess = false
 zone.initiateLoop = false
 
+function zone.setSandboxForLastStand()
+    local options = getSandboxOptions()
+    local optionsToValues = {
+        ["ZombieConfig.PopulationMultiplier"] = 0.0001,
+        ["ZombieConfig.PopulationStartMultiplier"] = 0.0,
+        ["ZombieConfig.PopulationPeakMultiplier"] = 0.0,
+        ["ZombieConfig.RespawnHours"] = 0.0,
+        ["ZombieConfig.RespawnUnseenHours"] = 0.0,
+        ["ZombieConfig.RespawnMultiplier"] = 0.0,
+        ["ZombieConfig.RedistributeHours"] = 0.0,
+    }
+    for o,value in pairs(optionsToValues) do
+        local option = options:getOptionByName(o)
+        if option then option:setValue(value) end
+    end
+    if isClient then options:sendToServer() end
+    options:toLua()
+end
+
 
 function zone.onDead(zombie)
     zone.def.zombies = (zone.def.zombies or 0) - 1

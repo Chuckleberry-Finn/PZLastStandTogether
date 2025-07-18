@@ -51,39 +51,16 @@ function lastStandTogetherPanel:instantiate()
 end
 
 
---[[
-local options = getSandboxOptions()
-local optionsToValues = {
-    ["ZombieConfig.PopulationMultiplier"] = 0.0,
-    ["ZombieConfig.PopulationStartMultiplier"] = 0.0,
-    ["ZombieConfig.PopulationPeakMultiplier"] = 0.0,
-    ["ZombieConfig.RespawnHours"] = 0.0,
-    ["ZombieConfig.RespawnUnseenHours"] = 0.0,
-    ["ZombieConfig.RespawnMultiplier"] = 0.0,
-    ["ZombieConfig.RedistributeHours"] = 0.0,
-}
-for option,value in pairs(optionsToValues) do
-    local option = options:getOptionByName(option)
-    if option then option:setValue(value) end
-end
-if isClient then options:sendToServer() end
-options:toLua()
---]]
-
-
 function lastStandTogetherPanel:onTextEntryEntered()
-
     ---self = text entry
     local value = tonumber(self:getText())
     if value then
         local options = getSandboxOptions()
+
         local option = options and options:getOptionByName("LastStandTogether."..self.sandBoxOption)
         if option then
             option:setValue(value)
-            if isClient() then
-                options:sendToServer()
-            end
-            options:toLua()
+            if isClient() then options:sendToServer() end
         end
     end
     lastStandTogetherPanel.instance.textEntry = nil

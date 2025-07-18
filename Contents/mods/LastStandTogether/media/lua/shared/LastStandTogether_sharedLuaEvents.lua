@@ -17,6 +17,8 @@ if isServer() then
     Events.OnClientCommand.Add(onClientCommand)--what the server gets from the client
 end
 
+Events.OnInitWorld.Add(LastStandTogether_Zone.setSandboxForLastStand)
+
 
 if isClient() then
 
