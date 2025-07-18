@@ -95,6 +95,7 @@ end
 
 function zone.requestZoneDef()
     if isClient() then
+        print("ZONE REQUESTED")
         sendClientCommand(getPlayer(),"LastStandTogether", "requestZone", {})
     end
 end
@@ -102,9 +103,12 @@ end
 
 function zone.sendZoneDef(player)
     if isServer() then
+        print("SENDING ZONE DEF!")
         if player then
+            print("   player!")
             sendServerCommand(player, "LastStandTogether", "updateZone", zone.def)
         else
+            print("   all!")
             sendServerCommand("LastStandTogether", "updateZone", zone.def)
         end
     else

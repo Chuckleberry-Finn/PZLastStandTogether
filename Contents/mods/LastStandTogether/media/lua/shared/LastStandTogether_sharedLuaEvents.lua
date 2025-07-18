@@ -22,10 +22,12 @@ if isClient() then
 
     Events.OnLoad.Add(LastStandTogether_Zone.requestZoneDef)
 
-    local handler = require "LastStandTogether_networkHandler"
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
-        if _command == "updateZone" then handler.receiveUpdate(_data) end
+        if _command == "updateZone" then
+            LastStandTogether_Zone.def = _data
+            LastStandTogether_Zone.sendZoneDef()--this called on clientside sets the wave UI
+        end
     end
     Events.OnServerCommand.Add(onServerCommand)--what clients gets from the server
 end
