@@ -61,6 +61,7 @@ function lastStandTogetherPanel:onTextEntryEntered()
         if option then
             option:setValue(value)
             if isClient() then options:sendToServer() end
+            options:toLua()
         end
     end
     lastStandTogetherPanel.instance.textEntry = nil
