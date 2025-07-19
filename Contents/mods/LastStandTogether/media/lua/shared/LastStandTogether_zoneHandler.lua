@@ -193,7 +193,6 @@ function zone.establishShopFront(buildingDef)
     end
     table.sort(sortedRooms, function(a, b) return #a.containers > #b.containers end)
 
-
     local shops = (isServer() and GLOBAL_STORES) or CLIENT_STORES
 
     local empty = true
@@ -203,7 +202,7 @@ function zone.establishShopFront(buildingDef)
     end
     if empty then
         local defaultShops = require "LastStandTogether_defaultShops.lua"
-        for shopID,shopData in pairs(defaultShops) do shops[shopID] = shopData end
+        for shopID,shopData in pairs(defaultShops) do shops[shopID] = copyTable(shopData) end
     end
 
     local allContainers = {}
