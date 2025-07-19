@@ -195,7 +195,16 @@ function zone.establishShopFront(buildingDef)
 
 
     local shops = (isServer() and GLOBAL_STORES) or CLIENT_STORES
-    if (next(shops) == nil) then shops = (require "LastStandTogether_defaultShops.lua") end
+
+    local empty = true
+    for k,v in pairs(shops) do
+        empty = false
+        break
+    end
+    if empty then
+        local defaultShops = require "LastStandTogether_defaultShops.lua"
+        for shopID,shopData in pairs(defaultShops) do shops[shopID] = shopData end
+    end
 
     local allContainers = {}
     for _, roomData in ipairs(sortedRooms) do
@@ -206,20 +215,20 @@ function zone.establishShopFront(buildingDef)
 
     local assignedShops = 0
     for shopID,shopData in pairs(shops) do
-
         local storeObj = STORE_HANDLER.getStoreByID(shopID)
-        storeObj.locations = {}
+        if storeObj then
+            storeObj.locations = {}
+            assignedShops = assignedShops + 1
+            ---@type IsoObject
+            local container = allContainers[assignedShops]
+            if container then
+                STORE_HANDLER.connectStoreByID(container, shopID)
+            else
+                zone.def.error = "ERROR: Not enough containers to assign all shops!"
+            end
 
-        assignedShops = assignedShops + 1
-        ---@type IsoObject
-        local container = allContainers[assignedShops]
-        if container then
-            STORE_HANDLER.connectStoreByID(container, shopID)
-        else
-            zone.def.error = "ERROR: Not enough containers to assign all shops!"
+            STORE_HANDLER.updateStore(storeObj)
         end
-
-        STORE_HANDLER.updateStore(storeObj)
     end
 
 end
