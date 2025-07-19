@@ -195,6 +195,7 @@ function zone.establishShopFront(buildingDef)
 
 
     local shops = (isServer() and GLOBAL_STORES) or CLIENT_STORES
+    if (next(shops) == nil) then shops = (require "LastStandTogether_defaultShops.lua") end
 
     local allContainers = {}
     for _, roomData in ipairs(sortedRooms) do
