@@ -47,7 +47,7 @@ function lastStandTogetherWaveAlert:prerender()
     local LST_zone = LastStandTogether_Zone
     local zoneDef = LST_zone and LST_zone.def
 
-    if not zoneDef then
+    if not zoneDef or not zoneDef.center then
         self.textLine1 = ""
         self.textLine2 = ""
         self.textLine3 = ""
@@ -106,8 +106,8 @@ function lastStandTogetherWaveAlert:prerender()
 
     if self.zombies > 0 then
         if (not self.lastYellOut) or (currentTime > self.lastYellOut) then
-            self.lastYellOut = currentTime+2000
-            addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 600)
+            self.lastYellOut = currentTime+1000
+            AddWorldSound(getPlayer(), 600, 600)
         end
     end
 
