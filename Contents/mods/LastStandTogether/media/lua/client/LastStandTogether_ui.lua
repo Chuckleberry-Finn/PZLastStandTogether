@@ -143,9 +143,9 @@ function lastStandTogetherWaveAlert:render()
     local walletBalance = lastStandTogetherWaveAlert.walletBalance(self.player)
     if walletBalance then
         local speedControls = UIManager.getSpeedControls()
-        local x = speedControls:getX()-(25)
-        local y = speedControls:getY()
-        self:drawTextRight(walletBalance, x, y, 0.9, 0.9, 0.9, 1, UIFont.Medium)
+        local x = speedControls:getX() - 15 - self:getX()
+        local y = speedControls:getY() - self:getY()
+        self:drawTextRight(walletBalance, x, y, 0.9, 0.9, 0.9, 1, UIFont.Small)
     end
 end
 

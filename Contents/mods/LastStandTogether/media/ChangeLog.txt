@@ -20,4 +20,5 @@ Welcome to the Last Stand!
 - Added server-sided updates to zombie deaths.
 - Added retargeting for zombies out of bounds.
 - Added safety check to spawn more zombies if needed.
+- Added wallet-balance to UI.
 [ ------ ]
