@@ -15,4 +15,5 @@ Welcome to the Last Stand!
 
 [ 7/20/25]
 - Fixed sandbox-panel covering options menu.
+- Fixed wave announcer broadcasting to other players.
 [ ------ ]

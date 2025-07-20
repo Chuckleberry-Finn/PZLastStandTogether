@@ -61,7 +61,7 @@ function lastStandTogetherWaveAlert:prerender()
         if (not self.playWaveAnnouncePart) or noLongerPlaying then
             local sound = self.waveAnnounceParts[self.waveAnnouncePartsSaid]
             if sound then
-                self.playWaveAnnouncePart = self.emitter:playSound("lastStandTogether_" .. sound)
+                self.playWaveAnnouncePart = self.emitter:playSoundLocal("lastStandTogether_" .. sound)
                 self.waveAnnouncePartsSaid = self.waveAnnouncePartsSaid + 1
             end
         end
