@@ -39,7 +39,7 @@ function zone.setSandboxForLastStand()
 end
 
 
-function zone.onDead(zombie)
+function zone.onZombieDead(zombie)
     --- To future Chuck, I'm sorry
     --This is not client so it works in SP and Server only
     if not isClient() then zone.def.zombies = (zone.def.zombies or 0) - 1 end

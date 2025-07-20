@@ -6,7 +6,7 @@ if not isClient() then --SP and Server Only
     end
 end
 
-Events.OnZombieDead.Add(LastStandTogether_Zone.onDead)
+Events.OnZombieDead.Add(LastStandTogether_Zone.onZombieDead)
 
 if isServer() then
     local function onClientCommand(_module, _command, _player, _data)
