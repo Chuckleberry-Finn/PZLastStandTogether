@@ -17,4 +17,5 @@ Welcome to the Last Stand!
 - Fixed sandbox-panel covering options menu.
 - Fixed wave announcer broadcasting to other players.
 - Refactored some internal code stuffs. (Shops is empty check)
+- Added server-sided updates to zombie deaths.
 [ ------ ]

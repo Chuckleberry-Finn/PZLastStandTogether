@@ -26,6 +26,11 @@ if isClient() then
 
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
+
+        if _command == "updateZoneDefZombies" then
+            LastStandTogether_Zone.def.zombies = _data.zombies
+        end
+
         if _command == "updateZone" then
             LastStandTogether_Zone.def = _data
             LastStandTogether_Zone.sendZoneDef()--this called on clientside sets the wave UI

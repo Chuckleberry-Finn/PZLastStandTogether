@@ -40,7 +40,12 @@ end
 
 
 function zone.onDead(zombie)
-    zone.def.zombies = (zone.def.zombies or 0) - 1
+    --- To future Chuck, I'm sorry
+    --This is not client so it works in SP and Server only
+    if not isClient() then zone.def.zombies = (zone.def.zombies or 0) - 1 end
+    --updates the players if server
+    if isServer() then sendServerCommand("LastStandTogether", "updateZoneDefZombies", { zombies=zone.def.zombies }) end
+    --sends money handling for clients
     if not isServer() then
         local attacker = zombie:getAttackedBy()
         if attacker then
