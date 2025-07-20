@@ -18,4 +18,6 @@ Welcome to the Last Stand!
 - Fixed wave announcer broadcasting to other players.
 - Refactored some internal code stuffs. (Shops is empty check)
 - Added server-sided updates to zombie deaths.
+- Added retargeting for zombies out of bounds.
+- Added safety check to spawn more zombies if needed.
 [ ------ ]

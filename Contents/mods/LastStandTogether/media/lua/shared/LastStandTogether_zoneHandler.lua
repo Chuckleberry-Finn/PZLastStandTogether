@@ -84,6 +84,7 @@ function zone.scheduleWave()
     else
         zone.def.wave = zone.def.wave + 1
         local numberOf = zone.def.popMulti * (SandboxVars.LastStandTogether.NumberOfZombiesPerWave or 10)
+        zone.def.zombies = numberOf
         waveGen.spawnZombies(numberOf)
         zone.def.nextWaveTime = nil
     end
@@ -94,9 +95,15 @@ end
 
 
 function zone.schedulerLoop()
-    if not zone.initiateLoop or not zone.def then return end
+    if not zone.initiateLoop or not zone.def or not zone.def.center then return end
 
     local zombiesLeft = zone.def.zombies or 0--getWorld():getCell():getZombieList():size()
+
+    local sanityCheck = getWorld():getCell():getZombieList():size()
+    if zone.def.wave and zombiesLeft > 0 and sanityCheck <= 0 then
+        waveGen.spawnZombies(1)
+        print("WARNING: HAD TO SPAWN EXTRA ZOMBIE")
+    end
 
     if not zone.def.wave and (not zone.def.nextWaveTime or getTimestampMs() > zone.def.nextWaveTime) then
         zone.scheduleWave()

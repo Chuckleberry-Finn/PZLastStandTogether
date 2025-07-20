@@ -18,8 +18,6 @@ function waveGenerator.spawnZombies(numberOf)
     local player = 0
     local players = (isServer() and getOnlinePlayers())
 
-    zoneDef.zombies = numberOf
-
     for i=1, numberOf do
 
         local side = ZombRand(4)+1
