@@ -1,6 +1,16 @@
 require "ISUI/ISPanel"
+local _internal = require "shop-shared"
 
 lastStandTogetherWaveAlert = ISPanel:derive("lastStandTogetherWaveAlert")
+
+function lastStandTogetherWaveAlert.walletBalance(player)
+    local wallet = getWallet(player)
+    local walletBalance = wallet and wallet.amount
+    if wallet then
+        local walletBalanceLine = getText("IGUI_WALLETBALANCE")..": ".._internal.numToCurrency(walletBalance)
+        return walletBalanceLine
+    end
+end
 
 
 function lastStandTogetherWaveAlert.getWaveNumberParts(n)
@@ -57,11 +67,11 @@ function lastStandTogetherWaveAlert:prerender()
     self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or ""
 
     if self.waveAnnounceParts and self.waveAnnouncePartsSaid <= #self.waveAnnounceParts then
-        local noLongerPlaying = (self.playWaveAnnouncePart and not self.emitter:isPlaying(self.playWaveAnnouncePart))
+        local noLongerPlaying = (self.playWaveAnnouncePart and not self.player:getEmitter():isPlaying(self.playWaveAnnouncePart))
         if (not self.playWaveAnnouncePart) or noLongerPlaying then
             local sound = self.waveAnnounceParts[self.waveAnnouncePartsSaid]
             if sound then
-                self.playWaveAnnouncePart = self.emitter:playSoundLocal("lastStandTogether_" .. sound)
+                self.playWaveAnnouncePart = self.player:getEmitter():playSoundImpl("lastStandTogether_" .. sound)
                 self.waveAnnouncePartsSaid = self.waveAnnouncePartsSaid + 1
             end
         end
@@ -88,7 +98,7 @@ function lastStandTogetherWaveAlert:prerender()
 
             if nextWaveMs <= 11000 then
                 if self.announced == 0 then
-                    self.emitter:playSound("lastStandTogether_countDown")
+                    self.player:getEmitter():playSoundImpl("lastStandTogether_countDown")
                     self.announced = 1
                 end
                 if self.announced == 1 and nextWaveMs <= 200 then
@@ -129,6 +139,14 @@ function lastStandTogetherWaveAlert:render()
     if self.textLine2 ~= "" then tempTextY = tempTextY + self.textLargeH end
 
     self:drawTextCentre(self.textLine3, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.7, UIFont.Medium)
+
+    local walletBalance = lastStandTogetherWaveAlert.walletBalance(self.player)
+    if walletBalance then
+        local speedControls = UIManager.getSpeedControls()
+        local x = speedControls:getX()-(25)
+        local y = speedControls:getY()
+        self:drawTextRight(walletBalance, x, y, 0.9, 0.9, 0.9, 1, UIFont.Medium)
+    end
 end
 
 
@@ -172,7 +190,7 @@ function lastStandTogetherWaveAlert:new()
     o.borderColor = {r=0.9, g=0.2, b=0.2, a=1}
     o.width = width
     o.height = height
-    o.emitter = getPlayer():getEmitter()
+    o.player = getPlayer()
     o.textLine1 = ""
     o.textLine2 = ""
     o.textY = (getCore():getScreenHeight()/8)-10
