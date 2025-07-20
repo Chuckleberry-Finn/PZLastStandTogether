@@ -7,7 +7,7 @@ function lastStandTogetherWaveAlert.walletBalance(player)
     local wallet = getWallet(player)
     local walletBalance = wallet and wallet.amount
     if wallet then
-        local walletBalanceLine = getText("IGUI_WALLETBALANCE")..": ".._internal.numToCurrency(walletBalance)
+        local walletBalanceLine = _internal.numToCurrency(walletBalance)
         return walletBalanceLine
     end
 end
@@ -61,6 +61,7 @@ function lastStandTogetherWaveAlert:prerender()
         self.textLine1 = ""
         self.textLine2 = ""
         self.textLine3 = ""
+        print("test")
         return
     end
 
@@ -71,7 +72,7 @@ function lastStandTogetherWaveAlert:prerender()
         if (not self.playWaveAnnouncePart) or noLongerPlaying then
             local sound = self.waveAnnounceParts[self.waveAnnouncePartsSaid]
             if sound then
-                self.playWaveAnnouncePart = self.player:getEmitter():playSoundImpl("lastStandTogether_" .. sound)
+                self.playWaveAnnouncePart = self.player:playSoundLocal("lastStandTogether_" .. sound)
                 self.waveAnnouncePartsSaid = self.waveAnnouncePartsSaid + 1
             end
         end
@@ -98,7 +99,7 @@ function lastStandTogetherWaveAlert:prerender()
 
             if nextWaveMs <= 11000 then
                 if self.announced == 0 then
-                    self.player:getEmitter():playSoundImpl("lastStandTogether_countDown")
+                    self.player:playSoundLocal("lastStandTogether_countDown")
                     self.announced = 1
                 end
                 if self.announced == 1 and nextWaveMs <= 200 then
