@@ -137,6 +137,14 @@ function zone.sendZoneDef(player)
 end
 
 
+function zone.checkIfShopsEmpty()
+    local shops = (isServer() and GLOBAL_STORES) or CLIENT_STORES
+    local empty = true
+    for k,v in pairs(shops) do empty = false break end
+    return empty, shops
+end
+
+
 ---@param buildingDef BuildingDef
 function zone.establishShopFront(buildingDef)
 
@@ -193,14 +201,9 @@ function zone.establishShopFront(buildingDef)
     end
     table.sort(sortedRooms, function(a, b) return #a.containers > #b.containers end)
 
-    local shops = (isServer() and GLOBAL_STORES) or CLIENT_STORES
-
-    local empty = true
-    for k,v in pairs(shops) do
-        empty = false
-        break
-    end
+    local empty, shops = zone.checkIfShopsEmpty()
     if empty then
+        zone.def.error = "Warning: Default Shops Enabled!"
         local defaultShops = require "LastStandTogether_defaultShops.lua"
         for shopID,shopData in pairs(defaultShops) do shops[shopID] = copyTable(shopData) end
     end
