@@ -5,6 +5,8 @@ if ((not getDebug()) and (not isAdmin()) and (not isCoopHost())) then return end
 lastStandTogetherPanel = ISPanel:derive("lastStandTogetherPanel")
 
 function lastStandTogetherPanel:prerender()
+    if MainScreen.instance.mainOptions:isVisible() then self:close(false) return end
+
     ISPanel.prerender(self)
     self:bringToTop()
 

@@ -12,3 +12,7 @@ Welcome to the Last Stand!
 - Fix UI issue when Last-Stand Disabled.
 - Pings to zombies come from players not the house.
 [ ------ ]
+
+[ 7/20/25]
+- Fixed sandbox-panel covering options menu.
+[ ------ ]
