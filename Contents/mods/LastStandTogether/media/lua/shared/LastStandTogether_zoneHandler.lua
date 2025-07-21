@@ -87,8 +87,8 @@ function zone.scheduleWave()
         zone.def.wave = zone.def.wave + 1
         local numberOf = zone.def.popMulti * (SandboxVars.LastStandTogether.NumberOfZombiesPerWave or 10)
         numberOf = math.floor(numberOf)
-        zone.def.zombies = numberOf
-        waveGen.spawnZombies(numberOf)
+        local spawnedZ = waveGen.spawnZombies(numberOf)
+        zone.def.zombies = spawnedZ
         zone.def.nextWaveTime = nil
     end
 
@@ -104,8 +104,8 @@ function zone.schedulerLoop()
 
     local sanityCheck = getWorld():getCell():getZombieList():size()
     if zone.def.wave and zombiesLeft > 0 and sanityCheck <= 0 then
-        waveGen.spawnZombies(1)
-        print("WARNING: HAD TO SPAWN EXTRA ZOMBIE")
+        local spawnedZ = waveGen.spawnZombies(1)
+        print("WARNING: HAD TO SPAWN EXTRA ZOMBIE", (spawnedZ <=0) and " - FAILED" or "")
     end
 
     if not zone.def.wave and (not zone.def.nextWaveTime or getTimestampMs() > zone.def.nextWaveTime) then
@@ -116,7 +116,7 @@ function zone.schedulerLoop()
     if zone.def.wave and not zone.def.nextWaveTime and zombiesLeft <= 0 then
         local coolDown = (SandboxVars.LastStandTogether.CoolDownBetweenWave or 5)
         zone.def.waveCooldown = (zone.def.waveCooldown or (60000 * coolDown))
-        local coolDownMulti = (SandboxVars.LastStandTogether.CoolDownMulti or 1.2)
+        local coolDownMulti = (SandboxVars.LastStandTogether.CoolDownMulti or 1.01)
         local coolDownMax = ((SandboxVars.LastStandTogether.CoolDownMax or 10) * 60000)
         zone.def.waveCooldown = math.min(coolDownMax, zone.def.waveCooldown * coolDownMulti)
         zone.def.nextWaveTime = getTimestampMs() + zone.def.waveCooldown
