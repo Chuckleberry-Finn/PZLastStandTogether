@@ -1,5 +1,9 @@
 local zoneRender = {}
 
+zoneRender.shopTexture = getTexture("media/textures/highlights/shopMarker.png")
+zoneRender.shopTexture_up = getTexture("media/textures/highlights/shopMarker_up.png")
+zoneRender.shopTexture_down = getTexture("media/textures/highlights/shopMarker_down.png")
+
 function zoneRender.drawEdge(x1, y1, x2, y2, width, color)
     local dx, dy = x2 - x1, y2 - y1
     local len = math.sqrt(dx*dx + dy*dy)
@@ -39,19 +43,51 @@ function zoneRender.drawZoneEffects()
     local player = getPlayer()
     if not player then return end
 
+    if not lastStandTogetherWaveAlert.instance or not lastStandTogetherWaveAlert.instance:getIsVisible() then return end
+
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
 
     local zoneDef = LST_zone.def
     if not zoneDef or not zoneDef.center or not zoneDef.radius then return end
 
-    local pX, pY = player:getX(), player:getY()
+    local pX, pY, pZ = player:getX(), player:getY(), player:getZ()
     local dx = math.abs(zoneDef.center.x-pX)
     local dy = math.abs(zoneDef.center.y-pY)
+    local zoom = getCore():getZoom(0)
+
+    local building = player:getCurrentBuilding()
+    local buildingID = building and building:getID()
+    if buildingID == zoneDef.buildingID then
+        local roomDef = player:getCurrentRoomDef()
+        local currentRoomID = roomDef and roomDef:getID()
+        for roomID,coord in pairs(zoneDef.shopMarkersRooms) do
+            if currentRoomID == roomID then
+                local shops = zoneDef.shopMarkersInRoom and zoneDef.shopMarkersInRoom[roomID]
+                if shops then
+                    for s=1, #shops do
+                        local shop = shops[s]
+                        local sx1, sy1 = ISCoordConversion.ToScreen(shop.x, shop.y, shop.z+0.33)
+                        local size = 32 * zoom
+                        getRenderer():render(zoneRender.shopTexture, sx1-(size/2), sy1-(size/2), size, size, 1, 1, 1, 0.15, nil)
+                    end
+                end
+            else
+                local sx1, sy1 = ISCoordConversion.ToScreen(coord.x, coord.y, coord.z+0.33)
+                local zDiff = (coord.z > pZ and "_up") or (coord.z < pZ and "_down") or ""
+
+                local distX = math.abs(coord.x - pX)
+                local distY = math.abs(coord.y - pY)
+                local distance = math.sqrt(distX * distX + distY * distY)
+                local normalized = math.min(distance / 50, 1)
+                local scale = 1 + (7 - 1) * normalized
+                local size = 24 * zoom * scale
+                getRenderer():render(zoneRender["shopTexture"..zDiff], sx1-(size/2), sy1-(size/2), size, size, 1, 1, 1, 0.05 * scale/2, nil)
+            end
+        end
+    end
 
     if ((dx) > zoneDef.radius) or ((dy) > zoneDef.radius) then
-
-        local zoom = getCore():getZoom(0)
 
         local fadeRate = SandboxVars.LastStandTogether.OutOfBoundsFade or 0.33
         if fadeRate < 1 then

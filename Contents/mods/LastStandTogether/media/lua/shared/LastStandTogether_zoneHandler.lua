@@ -12,10 +12,9 @@ zone.def.wave = false
 zone.def.nextWaveTime = false
 zone.def.popMulti = false
 zone.def.zombies = 0
-
+zone.def.buildingID = false
 zone.def.shopMarkers = {}
-
-zone.building = false
+zone.def.shopMarkersRooms = {}
 
 zone.players = {}
 zone.schedulingProcess = false
@@ -159,7 +158,7 @@ end
 function zone.checkIfShopsEmpty()
     local shops = (isServer() and GLOBAL_STORES) or CLIENT_STORES
     local empty = true
-    for k,v in pairs(shops) do empty = false break end
+    for _,_ in pairs(shops) do empty = false break end
     return empty, shops
 end
 
@@ -167,41 +166,39 @@ end
 ---@param buildingDef BuildingDef
 function zone.establishShopFront(buildingDef)
 
-    zone.def.shopMarkers = {}
+    zone.def.shopMarkersInRoom = {}
+    zone.def.shopMarkersRooms = {}
 
-    local rooms = buildingDef:getRooms()
+    local buildingX, buildingX2 = buildingDef:getX(), buildingDef:getX2()
+    local buildingY, buildingY2 = buildingDef:getY(), buildingDef:getY2()
+
     local roomContainers = {} -- Maps roomID -> list of containers
     local totalContainers = 0
 
-    for i = 0, rooms:size() - 1 do
-        ---@type RoomDef
-        local roomDef = rooms:get(i)
-        if roomDef then
-            local ID = roomDef:getID()
+    for z=0, 8 do --B41's max level is 8 I think
+        local validZ = false
+        for x=buildingX, buildingX2 do
+            for y=buildingY, buildingY2 do
+                local sq = getSquare(x, y, z)
+                if sq then
+                    validZ = true
+                    local objects = sq:getObjects()
+                    for o=0, objects:size()-1 do
+                        ---@type IsoObject
+                        local obj = objects:get(o)
 
-            local roomX, roomX2 = roomDef:getX(), roomDef:getX2()
-            local roomY, roomY2 = roomDef:getY(), roomDef:getY2()
-            local roomZ = roomDef:getZ()
+                        if obj and obj:getContainer() then
 
-            for x=roomX, roomX2 do
-                for y=roomY, roomY2 do
-                    local sq = getSquare(x, y, roomZ)
-                    if sq then
-                        local objects = sq:getObjects()
-                        for o=0, objects:size()-1 do
-                            ---@type IsoObject
-                            local obj = objects:get(o)
+                            local objModData = obj:getModData()
+                            if objModData then
+                                objModData.storeObjID = nil
+                                obj:transmitModData()
+                            end
 
-                            if obj and obj:getContainer() then
-
-                                local objModData = obj:getModData()
-                                if objModData then
-                                    objModData.storeObjID = nil
-                                    obj:transmitModData()
-                                end
-
-                                roomContainers[ID] = roomContainers[ID] or {}
-                                table.insert(roomContainers[ID], obj)
+                            local roomID = sq:getRoomID()
+                            if roomID >= 0 then
+                                roomContainers[roomID] = roomContainers[roomID] or {}
+                                table.insert(roomContainers[roomID], obj)
                                 totalContainers = totalContainers + 1
                             end
                         end
@@ -209,18 +206,13 @@ function zone.establishShopFront(buildingDef)
                 end
             end
         end
+        if not validZ then break end
     end
 
     if totalContainers == 0 then
-        zone.def.error = "ERROR: UNABLE TO ESTABLISH SHOP!"
+        zone.def.error = "ERROR: UNABLE TO ESTABLISH SHOPS!"
         return
     end
-
-    local sortedRooms = {}
-    for roomID, containers in pairs(roomContainers) do
-        table.insert(sortedRooms, { id = roomID, containers = containers })
-    end
-    table.sort(sortedRooms, function(a, b) return #a.containers > #b.containers end)
 
     local empty, shops = zone.checkIfShopsEmpty()
     if empty then
@@ -229,6 +221,10 @@ function zone.establishShopFront(buildingDef)
         for shopID,shopData in pairs(defaultShops) do shops[shopID] = copyTable(shopData) end
     end
 
+    local sortedRooms = {}
+    for roomID, containers in pairs(roomContainers) do table.insert(sortedRooms, { id = roomID, containers = containers }) end
+    table.sort(sortedRooms, function(a, b) return #a.containers > #b.containers end)
+
     local allContainers = {}
     for _, roomData in ipairs(sortedRooms) do
         for _, container in ipairs(roomData.containers) do
@@ -236,28 +232,45 @@ function zone.establishShopFront(buildingDef)
         end
     end
 
-    local assignedShops = 0
-    for shopID,shopData in pairs(shops) do
+    local assignedShops = 1
+    for shopID,_ in pairs(shops) do
         ---@type IsoObject
         local storeObj = STORE_HANDLER.getStoreByID(shopID)
         if storeObj then
             storeObj.locations = {}
-            assignedShops = assignedShops + 1
             ---@type IsoObject
             local container = allContainers[assignedShops]
             if container then
                 STORE_HANDLER.connectStoreByID(container, shopID)
-
                 local sq = container:getSquare()
                 if sq then
-                    table.insert(zone.def.shopMarkers, { x=sq:getX(), y=sq:getY() })
+                    local roomID = sq:getRoomID()
+                    if roomID then
+                        assignedShops = assignedShops + 1
+                        zone.def.shopMarkersInRoom[roomID] = zone.def.shopMarkersInRoom[roomID] or {}
+                        local zOffset = container:isTableTopObject() and 0.25 or 0
+                        table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=zOffset })
+                        STORE_HANDLER.updateStore(storeObj)
+                    end
                 end
-
-            else
-                zone.def.error = "ERROR: Not enough containers to assign all shops!"
             end
+        end
+    end
 
-            STORE_HANDLER.updateStore(storeObj)
+    for roomID, shopLocations in pairs(zone.def.shopMarkersInRoom) do
+
+        if #shopLocations > 0 then
+            local avgX, avgY, avgZ = 0, 0, shopLocations[1].z
+            for s=1, #shopLocations do
+                local shop = shopLocations[s]
+                if shop then
+                    avgX = avgX + shop.x
+                    avgY = avgY + shop.y
+                end
+            end
+            avgX = avgX/#shopLocations
+            avgY = avgY/#shopLocations
+            zone.def.shopMarkersRooms[roomID] = {x=avgX, y=avgY, z=avgZ}
         end
     end
 
@@ -270,8 +283,10 @@ function zone.setToCurrentBuilding(player)
     zone.def = {}
 
     local building = player:getCurrentBuilding()
-    if building and zone.building and zone.building == building then
-        zone.building = nil
+    local buildingID = building and building:getID()
+
+    if building and zone.def.buildingID and zone.def.buildingID == buildingID then
+        zone.def.buildingID = nil
         zone.sendZoneDef()
         return
     end
@@ -284,12 +299,12 @@ function zone.setToCurrentBuilding(player)
 
     local buildingDef = building and building:getDef()
     if not buildingDef then
-        zone.def.error = "NO BUILDING DEFINITION FOUND!"
+        zone.def.error = "NO BUILDING DEFINITION FOUND!?"
         zone.sendZoneDef()
         return
     end
 
-    zone.def.building = building
+    zone.def.buildingID = buildingID
 
     local buildingDefW = buildingDef:getW()
     local buildingDefH = buildingDef:getH()

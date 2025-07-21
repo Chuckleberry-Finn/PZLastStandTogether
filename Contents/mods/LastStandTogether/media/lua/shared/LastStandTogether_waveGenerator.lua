@@ -73,7 +73,7 @@ function waveGenerator.spawnZombies(numberOf)
         end
 
     end
-    
+
     if attempts >= maxAttempts then
         print("WARNING: Max attempts reached when spawning zombies, consider a different location.   spawnedZombies:",spawnedZombies, "  expected: ",numberOf)
     end
