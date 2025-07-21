@@ -15,7 +15,6 @@ function lastStandTogetherPanel:prerender()
         lastStandTogetherPanel.textEntry:bringToTop()
     end
 
-
     local LST_zone = LastStandTogether_Zone
     local zoneDef = LST_zone and LST_zone.def
 
@@ -29,6 +28,8 @@ function lastStandTogetherPanel:prerender()
         local building = getPlayer():getCurrentBuilding()
         if building then text = (text and text .. "  -  " or "") .. "Inside Valid Building" end
     end
+
+    self.resetButton:setEnable(not not zoneDef.center)
 
     if zoneDef and text then
         self:drawTextCentre(tostring(text), self.width/2, 0-self.fontMedHeight, 0.9, 0.2, 0.2, 1, UIFont.Medium)
@@ -108,15 +109,22 @@ function lastStandTogetherPanel:initialise()
 
     local x, y = self.buttonX, self.titleY
 
-    self.StartButton = ISButton:new(self.buttonX, 10, self.width-(self.buttonX*2)+10, self.fontMedHeight*1.5, "Last Stand Together", self, lastStandTogetherPanel.startWaves)
+    self.StartButton = ISButton:new(self.buttonX, 10, self.width-(self.buttonX*4)+10, self.fontMedHeight*1.5, "Start Last Stand Together", self, lastStandTogetherPanel.startWaves)
     self.StartButton.font = UIFont.Medium
     self.StartButton:initialise()
     self.StartButton:instantiate()
     self:addChild(self.StartButton)
 
+    self.resetButton = ISButton:new(self.StartButton.x+self.StartButton.width+8, 10, self.width-(self.StartButton.width)-30-self.buttonX, self.fontMedHeight*1.5, "Reset", self, LastStandTogether_Zone.resetShopMarkers)
+    self.resetButton.font = UIFont.Small
+    self.resetButton:setImage(getTexture("media/textures/ui/resetShopButton.png"))
+    self.resetButton:initialise()
+    self.resetButton:instantiate()
+    self:addChild(self.resetButton)
+
     for k,v in pairs(SandboxVars.LastStandTogether) do
         local title = getText("Sandbox_LastStandTogether_"..k)
-        local button = ISButton:new(x, y, self.buttonWidth, self.buttonHeight, title, self, lastStandTogetherPanel.onButton)
+        local button = ISButton:new(x, y+5, self.buttonWidth, self.buttonHeight, title, self, lastStandTogetherPanel.onButton)
         button.sandBoxOption = k
         local tooltip = getTextOrNull("Sandbox_LastStandTogether_"..k.."_tooltip")
         if tooltip then button:setTooltip(tooltip) end
@@ -176,7 +184,6 @@ function lastStandTogetherPanel:new()
     o.buttonWidth = (width/1.5)-20
     o.labelWidth = (o.buttonWidth/3)+10
     o.buttonX = (width-o.buttonWidth-o.labelWidth)/2
-
     o.background = true
     o.backgroundColor = {r=0, g=0, b=0, a=0.4}
     o.borderColor = {r=0.2, g=0.2, b=0.2, a=0.9}

@@ -163,6 +163,72 @@ function zone.checkIfShopsEmpty()
 end
 
 
+function zone.setRoomsWithShopsMarkers()
+    for roomID, shopLocations in pairs(zone.def.shopMarkersInRoom) do
+        if #shopLocations > 0 then
+            local avgX, avgY, avgZ = 0, 0, shopLocations[1].z
+            for s=1, #shopLocations do
+                local shop = shopLocations[s]
+                if shop then
+                    avgX = avgX + shop.x
+                    avgY = avgY + shop.y
+                end
+            end
+            avgX = avgX/#shopLocations
+            avgY = avgY/#shopLocations
+            zone.def.shopMarkersRooms[roomID] = {x=avgX, y=avgY, z=avgZ}
+        end
+    end
+end
+
+
+function zone.resetShopMarkers()
+    if isClient() then sendClientCommand("LastStandTogether", "resetShopMarkers", {}) end
+
+    if not zone.def or not zone.def.center then
+        zone.def.error = "Warning: No building set for Last Stand Together!"
+        return
+    end
+
+    zone.def.shopMarkersInRoom = {}
+    zone.def.shopMarkersRooms = {}
+
+    local empty, shops = zone.checkIfShopsEmpty()
+    if empty then
+        zone.def.error = "Warning: Default Shops Enabled!"
+        local defaultShops = require "LastStandTogether_defaultShops.lua"
+        for shopID,shopData in pairs(defaultShops) do shops[shopID] = copyTable(shopData) end
+    end
+
+    for shopID,_ in pairs(shops) do
+        ---@type IsoObject
+        local storeObj = STORE_HANDLER.getStoreByID(shopID)
+        if storeObj then
+            for _,locData in pairs(storeObj.locations) do
+                local sq = getSquare(locData.x, locData.y, locData.z)
+                local roomID = sq and sq:getRoomID()
+                if roomID then
+                    local objects = sq:getObjects()
+                    for o=0, objects:size()-1 do
+                        ---@type IsoObject
+                        local container = objects:get(o)
+                        local objModData = container and container:getModData()
+                        if objModData and objModData.storeObjID then
+                            zone.def.shopMarkersInRoom[roomID] = zone.def.shopMarkersInRoom[roomID] or {}
+                            local zOffset = container:isTableTopObject() and 0.25 or 0
+                            table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=zOffset })
+                        end
+                    end
+                end
+            end
+        end
+    end
+
+    zone.setRoomsWithShopsMarkers()
+    zone.sendZoneDef()
+end
+
+
 ---@param buildingDef BuildingDef
 function zone.establishShopFront(buildingDef)
 
@@ -257,23 +323,7 @@ function zone.establishShopFront(buildingDef)
         end
     end
 
-    for roomID, shopLocations in pairs(zone.def.shopMarkersInRoom) do
-
-        if #shopLocations > 0 then
-            local avgX, avgY, avgZ = 0, 0, shopLocations[1].z
-            for s=1, #shopLocations do
-                local shop = shopLocations[s]
-                if shop then
-                    avgX = avgX + shop.x
-                    avgY = avgY + shop.y
-                end
-            end
-            avgX = avgX/#shopLocations
-            avgY = avgY/#shopLocations
-            zone.def.shopMarkersRooms[roomID] = {x=avgX, y=avgY, z=avgZ}
-        end
-    end
-
+    zone.setRoomsWithShopsMarkers()
 end
 
 
@@ -322,8 +372,9 @@ function zone.setToCurrentBuilding(player)
 
     zone.initiateLoop = true
 
-    zone.sendZoneDef()
     zone.establishShopFront(buildingDef)
+
+    zone.sendZoneDef()
 end
 
 

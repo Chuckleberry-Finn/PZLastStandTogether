@@ -1,8 +1,8 @@
 local zoneRender = {}
 
-zoneRender.shopTexture = getTexture("media/textures/highlights/shopMarker.png")
-zoneRender.shopTexture_up = getTexture("media/textures/highlights/shopMarker_up.png")
-zoneRender.shopTexture_down = getTexture("media/textures/highlights/shopMarker_down.png")
+zoneRender.shopTexture = getTexture("media/textures/ui/shopMarker.png")
+zoneRender.shopTexture_up = getTexture("media/textures/ui/shopMarker_up.png")
+zoneRender.shopTexture_down = getTexture("media/textures/ui/shopMarker_down.png")
 
 function zoneRender.drawEdge(x1, y1, x2, y2, width, color)
     local dx, dy = x2 - x1, y2 - y1

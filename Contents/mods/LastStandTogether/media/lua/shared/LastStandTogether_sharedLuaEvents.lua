@@ -13,6 +13,7 @@ if isServer() then
         if _module ~= "LastStandTogether" then return end
         if _command == "setZone" then LastStandTogether_Zone.setToCurrentBuilding(_player) end
         if _command == "requestZone" then LastStandTogether_Zone.sendZoneDef(_player) end
+        if _command == "resetShopMarkers" then LastStandTogether_Zone.resetShopMarkers() end
     end
     Events.OnClientCommand.Add(onClientCommand)--what the server gets from the client
 end
