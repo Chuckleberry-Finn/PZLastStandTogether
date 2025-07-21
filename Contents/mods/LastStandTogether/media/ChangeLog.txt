@@ -30,4 +30,5 @@ Welcome to the Last Stand!
 
 [ 7/21/25 ]
 - Added Cooldown Multiplier and Cooldown Max Sandbox options.
+- Added check for ghost/invisible/dead for spawning / attraction system.
 [ ------ ]
