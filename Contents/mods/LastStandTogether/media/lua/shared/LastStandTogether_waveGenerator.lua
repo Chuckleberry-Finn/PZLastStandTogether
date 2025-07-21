@@ -18,10 +18,11 @@ function waveGenerator.spawnZombies(numberOf)
     local player = 0
     local players = (isServer() and getOnlinePlayers())
 
-    local skippedT = 0
-    local spawnedZ = 0
+    local spawnedZombies = 0
+    local attempts = 0
+    local maxAttempts = 1000
 
-    for i=1, numberOf do
+    while spawnedZombies < numberOf and attempts < maxAttempts do
 
         local side = ZombRand(4)+1
 
@@ -42,40 +43,42 @@ function waveGenerator.spawnZombies(numberOf)
             y = y2
         end
 
-        local square = getSquare(x, y, 0)
-        if square then
-            if square:isSolidTrans() then
-                i = i-1
-                skippedT = skippedT + 1
-            else
-                local spawned = addZombiesInOutfit(x, y, 0, 1, nil, nil)
-                if spawned and spawned:size() > 0 then
-                    ---@type IsoObject|IsoMovingObject|IsoGameCharacter|IsoZombie
-                    local zombie = spawned:get(0)
-                    spawnedZ = spawnedZ + 1
-                else
-                    print("ERROR: WAVE-GEN: spawnZombie FAILED!")
-                end
+        attempts = attempts + 1
 
-                if isServer() then
-                    ---@type IsoPlayer|IsoObject|IsoGameCharacter
-                    local playerObj = players:get(player)
-                    if not playerObj:isDead() and not playerObj:isGodMod() and not playerObj:isInvisible() then
-                        AddWorldSound(players:get(player), 600, 600)
-                    end
-                    player = player + 1
-                    if player >= players:size() then player = 0 end
-                else
-                    local playerObj = getPlayer()
-                    if not playerObj:isDead() and not playerObj:isGodMod() and not playerObj:isInvisible() then
-                        AddWorldSound(playerObj, 600, 600)
-                    end
+        local square = getSquare(x, y, 0)
+        if square and not square:isSolidTrans() then
+            local spawned = addZombiesInOutfit(x, y, 0, 1, nil, nil)
+            if spawned and spawned:size() > 0 then
+                ---@type IsoObject|IsoMovingObject|IsoGameCharacter|IsoZombie
+                local zombie = spawned:get(0)
+                spawnedZombies = spawnedZombies + 1
+            else
+                print("ERROR: WAVE-GEN: spawnZombie FAILED!")
+            end
+
+            if isServer() then
+                ---@type IsoPlayer|IsoObject|IsoGameCharacter
+                local playerObj = players:get(player)
+                if not playerObj:isDead() and not playerObj:isInvisible() then
+                    AddWorldSound(players:get(player), 600, 600)
+                end
+                player = player + 1
+                if player >= players:size() then player = 0 end
+            else
+                local playerObj = getPlayer()
+                if not playerObj:isDead() and not playerObj:isInvisible() then
+                    AddWorldSound(playerObj, 600, 600)
                 end
             end
         end
+
+    end
+    
+    if attempts >= maxAttempts then
+        print("WARNING: Max attempts reached when spawning zombies, consider a different location.   spawnedZombies:",spawnedZombies, "  expected: ",numberOf)
     end
 
-    return spawnedZ
+    return spawnedZombies
 end
 
 return waveGenerator
