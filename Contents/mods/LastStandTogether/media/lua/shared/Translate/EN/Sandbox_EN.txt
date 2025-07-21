@@ -10,6 +10,12 @@ Sandbox_EN = {
     Sandbox_LastStandTogether_CoolDownBetweenWave = "Cooldown Between Waves",
     Sandbox_LastStandTogether_CoolDownBetweenWave_tooltip = "Cooldown is in minutes.",
 
+    Sandbox_LastStandTogether_CoolDownMulti = "Cooldown Multiplier (Compounds)",
+    Sandbox_LastStandTogether_CoolDownMulti_tooltip = "Cooldown is multiplied and compounds with this multiplier until the max.",
+
+    Sandbox_LastStandTogether_CoolDownMax = "Cooldown Maximum",
+    Sandbox_LastStandTogether_CoolDownMax_tooltip = "Cooldown Maximum is in minutes. If multiplier is 1 then this does nothing.",
+
     Sandbox_LastStandTogether_OutOutBoundsTick = "Out of Bounds Tick",
     Sandbox_LastStandTogether_OutOutBoundsTick_tooltip = "How many seconds between out-of-bounds damage ticks.",
 
@@ -21,8 +27,8 @@ Sandbox_EN = {
 
     Sandbox_LastStandTogether_NumberOfZombiesPerWave = "Number of Zombies per Wave",
 
-    Sandbox_LastStandTogether_WavePopMultiplier = "Wave Population Multiplier",
-    Sandbox_LastStandTogether_WavePopMultiplier_tooltip = "Multiplier applied inbetween waves.",
+    Sandbox_LastStandTogether_WavePopMultiplier = "Wave Population Multiplier (Compounds)",
+    Sandbox_LastStandTogether_WavePopMultiplier_tooltip = "Multiplier applied inbetween waves, compounding/stacking on zombie population.",
 
     Sandbox_LastStandTogether_MoneyPerKill = "Money Earned Per Kill",
 

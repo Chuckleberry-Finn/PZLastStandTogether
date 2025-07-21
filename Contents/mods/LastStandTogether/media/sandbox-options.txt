@@ -18,6 +18,18 @@ option LastStandTogether.CoolDownBetweenWave
 	page = LastStandTogether, translation = LastStandTogether_CoolDownBetweenWave,
 }
 
+option LastStandTogether.CoolDownMulti
+{
+	type = double, min = 1, max = 100, default = 1.2,
+	page = LastStandTogether, translation = LastStandTogether_CoolDownMulti,
+}
+
+option LastStandTogether.CoolDownMax
+{
+	type = double, min = 1, max = 100, default = 10,
+	page = LastStandTogether, translation = LastStandTogether_CoolDownMax,
+}
+
 option LastStandTogether.OutOutBoundsTick
 {
 	type = double, min = 0, max = 30, default = 2,

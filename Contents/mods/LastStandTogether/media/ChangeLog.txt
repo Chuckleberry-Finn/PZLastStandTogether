@@ -27,3 +27,7 @@ Welcome to the Last Stand!
 - Fix wallet UI loading + added background rectangle.
 - Floored the number of zombies.
 [ ------ ]
+
+[ 7/21/25 ]
+- Added Cooldown Multiplier and Cooldown Max Sandbox options.
+[ ------ ]

@@ -7,7 +7,7 @@ zone.def.center = false
 zone.def.center = false
 zone.def.radius = false
 zone.def.error = false
-
+zone.def.waveCooldown = false
 zone.def.wave = false
 zone.def.nextWaveTime = false
 zone.def.popMulti = false
@@ -114,8 +114,12 @@ function zone.schedulerLoop()
     end
 
     if zone.def.wave and not zone.def.nextWaveTime and zombiesLeft <= 0 then
-        local cooldown = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 5)
-        zone.def.nextWaveTime = getTimestampMs() + cooldown
+        local coolDown = (SandboxVars.LastStandTogether.CoolDownBetweenWave or 5)
+        zone.def.waveCooldown = (zone.def.waveCooldown or (60000 * coolDown))
+        local coolDownMulti = (SandboxVars.LastStandTogether.CoolDownMulti or 1.2)
+        local coolDownMax = ((SandboxVars.LastStandTogether.CoolDownMax or 10) * 60000)
+        zone.def.waveCooldown = math.min(coolDownMax, zone.def.waveCooldown * coolDownMulti)
+        zone.def.nextWaveTime = getTimestampMs() + zone.def.waveCooldown
         zone.sendZoneDef()
         return
     end
