@@ -13,6 +13,8 @@ zone.def.nextWaveTime = false
 zone.def.popMulti = false
 zone.def.zombies = 0
 
+zone.def.shopMarkers = {}
+
 zone.building = false
 
 zone.players = {}
@@ -161,6 +163,8 @@ end
 ---@param buildingDef BuildingDef
 function zone.establishShopFront(buildingDef)
 
+    zone.def.shopMarkers = {}
+
     local rooms = buildingDef:getRooms()
     local roomContainers = {} -- Maps roomID -> list of containers
     local totalContainers = 0
@@ -230,6 +234,7 @@ function zone.establishShopFront(buildingDef)
 
     local assignedShops = 0
     for shopID,shopData in pairs(shops) do
+        ---@type IsoObject
         local storeObj = STORE_HANDLER.getStoreByID(shopID)
         if storeObj then
             storeObj.locations = {}
@@ -238,6 +243,12 @@ function zone.establishShopFront(buildingDef)
             local container = allContainers[assignedShops]
             if container then
                 STORE_HANDLER.connectStoreByID(container, shopID)
+
+                local sq = container:getSquare()
+                if sq then
+                    table.insert(zone.def.shopMarkers, { x=sq:getX(), y=sq:getY() })
+                end
+
             else
                 zone.def.error = "ERROR: Not enough containers to assign all shops!"
             end
