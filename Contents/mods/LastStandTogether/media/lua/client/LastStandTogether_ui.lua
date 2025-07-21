@@ -5,10 +5,13 @@ lastStandTogetherWaveAlert = ISPanel:derive("lastStandTogetherWaveAlert")
 
 function lastStandTogetherWaveAlert.walletBalance(player)
     local wallet = getWallet(player)
-    local walletBalance = wallet and wallet.amount
+
     if wallet then
+        local walletBalance = wallet and wallet.amount
         local walletBalanceLine = _internal.numToCurrency(walletBalance)
         return walletBalanceLine
+    else
+        getOrSetWalletID(player)
     end
 end
 
@@ -61,7 +64,6 @@ function lastStandTogetherWaveAlert:prerender()
         self.textLine1 = ""
         self.textLine2 = ""
         self.textLine3 = ""
-        print("test")
         return
     end
 
@@ -145,8 +147,10 @@ function lastStandTogetherWaveAlert:render()
     if walletBalance then
         local speedControls = UIManager.getSpeedControls()
         local x = speedControls:getX() - 15 - self:getX()
-        local y = speedControls:getY() - self:getY()
-        self:drawTextRight(walletBalance, x, y, 0.9, 0.9, 0.9, 1, UIFont.Small)
+        local y = speedControls:getY() - 5 - self:getY()
+        local w = getTextManager():MeasureStringX(UIFont.Medium, walletBalance)
+        self:drawRect(x-(w*1.125), y, w*1.25, self.textMediumH, 0.4, 0, 0, 0)
+        self:drawTextRight(walletBalance, x, y, 0.9, 0.9, 0.9, 1, UIFont.Medium)
     end
 end
 
@@ -198,6 +202,7 @@ function lastStandTogetherWaveAlert:new()
     o.textTitleH = getTextManager():getFontHeight(UIFont.Title)*1.25
     o.textLargeH = getTextManager():getFontHeight(UIFont.Large)*1.25
     o.textMediumH = getTextManager():getFontHeight(UIFont.Medium)*1.25
+    o.textSmallH = getTextManager():getFontHeight(UIFont.Small)*1.25
     o.anchorLeft = true
     o.anchorRight = false
     o.anchorTop = true

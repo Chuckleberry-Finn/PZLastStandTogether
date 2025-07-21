@@ -84,6 +84,7 @@ function zone.scheduleWave()
     else
         zone.def.wave = zone.def.wave + 1
         local numberOf = zone.def.popMulti * (SandboxVars.LastStandTogether.NumberOfZombiesPerWave or 10)
+        numberOf = math.floor(numberOf)
         zone.def.zombies = numberOf
         waveGen.spawnZombies(numberOf)
         zone.def.nextWaveTime = nil

@@ -22,3 +22,8 @@ Welcome to the Last Stand!
 - Added safety check to spawn more zombies if needed.
 - Added wallet-balance to UI.
 [ ------ ]
+
+[ 7/20/25 - Hotfix 1 ]
+- Fix wallet UI loading + added background rectangle.
+- Floored the number of zombies.
+[ ------ ]
