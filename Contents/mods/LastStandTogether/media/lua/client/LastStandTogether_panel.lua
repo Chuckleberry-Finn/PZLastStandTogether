@@ -6,8 +6,8 @@ lastStandTogetherPanel = ISPanel:derive("lastStandTogetherPanel")
 
 function lastStandTogetherPanel:prerender()
     if MainScreen.instance.mainOptions:isVisible() then self:close(false) return end
-    if MainScreen.instance.scoreOption:isVisible() then self:close(false) return end
-    
+    if isClient() and MainScreen.instance.scoreOption:isVisible() then self:close(false) return end
+
     ISPanel.prerender(self)
     self:bringToTop()
 
