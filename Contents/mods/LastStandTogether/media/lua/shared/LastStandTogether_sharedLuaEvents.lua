@@ -30,7 +30,7 @@ if isClient() then
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
         if _command == "updateZoneDefPlayerDeaths" then
-            table.insert(LastStandTogether_Zone.playerDeaths, {username=_data.username, expire=getTimestampMs()+4000} )
+            table.insert(LastStandTogether_Zone.playerDeaths, {username=_data.username, expire=getTimestampMs()+LastStandTogether_Zone.deathLogFade} )
         end
         if _command == "updateZoneDefZombies" then LastStandTogether_Zone.def.zombies = _data.zombies end
         if _command == "updateZone" then

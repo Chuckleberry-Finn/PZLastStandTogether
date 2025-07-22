@@ -152,11 +152,18 @@ function lastStandTogetherWaveAlert:render()
             if expire < currentTime then
                 LastStandTogether_Zone.playerDeaths[n] = nil
             else
-                local alpha = (expire-currentTime)/4000
+                local t = math.max(0, math.min(1, (expire - currentTime) / LastStandTogether_Zone.deathLogFade))
+                local alpha = t * t
                 local name = data.username
                 local text = name.." has died."
-                self:drawTextCentre(text, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.8 * alpha, UIFont.Medium)
-                tempTextY = tempTextY + self.textMediumH
+
+                if not self.playerDeaths[name] then
+                    self.playerDeaths[name] = true
+                    self.player:playSoundLocal("lastStandTogether_survivorDied")
+                end
+
+                self:drawTextCentre(text, self.width/2, tempTextY, 0.9, 0.2, 0.2, 1 * alpha, UIFont.Large)
+                tempTextY = tempTextY + self.textLargeH
             end
         end
     end
@@ -218,7 +225,6 @@ function lastStandTogetherWaveAlert:new()
     o.textLine2 = ""
     o.textLine3 = ""
     o.playerDeaths = {}
-    o.clearPlayerDeaths = 0
     o.textY = (getCore():getScreenHeight()/8)-10
     o.textTitleH = getTextManager():getFontHeight(UIFont.Title)*1.25
     o.textLargeH = getTextManager():getFontHeight(UIFont.Large)*1.25

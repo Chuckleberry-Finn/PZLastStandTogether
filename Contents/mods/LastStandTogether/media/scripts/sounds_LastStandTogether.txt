@@ -29,4 +29,5 @@ module lastStandTogether {
     sound lastStandTogether_teen { category = lastStandTogether, clip { file = media/sound/LastStandTogether/teen.ogg, } }
     sound lastStandTogether_wave { category = lastStandTogether, clip { file = media/sound/LastStandTogether/wave.ogg, } }
     sound lastStandTogether_countDown { category = lastStandTogether, clip { file = media/sound/LastStandTogether/countdown.ogg, } }
+    sound lastStandTogether_survivorDied { category = lastStandTogether, clip { file = media/sound/LastStandTogether/survivorDied.ogg, } }
 }

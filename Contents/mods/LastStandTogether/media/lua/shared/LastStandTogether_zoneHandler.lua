@@ -21,6 +21,7 @@ zone.playerDeaths = {}
 zone.players = {}
 zone.schedulingProcess = false
 zone.initiateLoop = false
+zone.deathLogFade = 5000
 
 function zone.setSandboxForLastStand()
     local options = getSandboxOptions()
@@ -44,7 +45,9 @@ end
 
 ---@param player IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
 function zone.onPlayerDeath(player)
-    if (not isClient() and not isServer()) then table.insert(zone.playerDeaths, player:getUsername()) end
+    if (not isClient() and not isServer()) then
+        table.insert(zone.playerDeaths, {username=player:getUsername(), expire=getTimestampMs()+zone.deathLogFade} )
+    end
     if isClient() then sendClientCommand("LastStandTogether", "updateZoneDefPlayerDeaths", {}) end
     if isServer() then sendServerCommand("LastStandTogether", "updateZoneDefPlayerDeaths", { username=player:getUsername() }) end
 end
@@ -111,13 +114,15 @@ function zone.schedulerLoop()
 
     local zombiesLeft = zone.def.zombies or 0--getWorld():getCell():getZombieList():size()
 
-    local sanityCheck = getWorld():getCell():getZombieList():size()
-    if zone.def.wave and zombiesLeft > 0 and sanityCheck <= 0 then
-        local spawnedZ = waveGen.spawnZombies(1)
-        print("WARNING: HAD TO SPAWN EXTRA ZOMBIE", (spawnedZ <=0) and " - FAILED" or "")
-    end
-
     if not zone.def.wave and (not zone.def.nextWaveTime or getTimestampMs() > zone.def.nextWaveTime) then
+        ---start waves
+
+        ---Clear Zombies
+        local worldMetaGrid = getWorld():getMetaGrid()
+        local maxX = worldMetaGrid:getMaxX()
+        local maxY = worldMetaGrid:getMaxY()
+        for x=0, maxX do for y=0, maxY do zpopClearZombies(x, y) end end
+
         zone.scheduleWave()
         return
     end
@@ -131,6 +136,13 @@ function zone.schedulerLoop()
         zone.def.nextWaveTime = getTimestampMs() + zone.def.waveCooldown
         zone.sendZoneDef()
         return
+    end
+
+
+    local ZombiesInCell = getWorld():getCell():getZombieList()
+    if zone.def.wave and zombiesLeft > 0 and ZombiesInCell:size() <= 0 then
+        local spawnedZ = waveGen.spawnZombies(1)
+        print("WARNING: HAD TO SPAWN EXTRA ZOMBIE", (spawnedZ <=0) and " - FAILED" or "")
     end
 
     if zone.def.wave and zone.def.nextWaveTime and getTimestampMs() > zone.def.nextWaveTime and zombiesLeft <= 0 then
