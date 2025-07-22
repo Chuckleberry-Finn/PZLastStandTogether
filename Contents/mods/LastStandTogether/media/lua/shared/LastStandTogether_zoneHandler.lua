@@ -16,6 +16,8 @@ zone.def.buildingID = false
 zone.def.shopMarkers = {}
 zone.def.shopMarkersRooms = {}
 
+zone.playerDeaths = {}
+
 zone.players = {}
 zone.schedulingProcess = false
 zone.initiateLoop = false
@@ -37,6 +39,14 @@ function zone.setSandboxForLastStand()
     end
     if isClient then options:sendToServer() end
     options:toLua()
+end
+
+
+---@param player IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
+function zone.onPlayerDeath(player)
+    if (not isClient() and not isServer()) then table.insert(zone.playerDeaths, player:getUsername()) end
+    if isClient() then sendClientCommand("LastStandTogether", "updateZoneDefPlayerDeaths", {}) end
+    if isServer() then sendServerCommand("LastStandTogether", "updateZoneDefPlayerDeaths", { username=player:getUsername() }) end
 end
 
 
@@ -206,7 +216,7 @@ function zone.resetShopMarkers()
         if storeObj then
             for _,locData in pairs(storeObj.locations) do
                 local sq = getSquare(locData.x, locData.y, locData.z)
-                local roomID = sq and sq:getRoomID()
+                local roomID = sq and tostring(sq:getRoomID())
                 if roomID then
                     local objects = sq:getObjects()
                     for o=0, objects:size()-1 do
@@ -310,7 +320,7 @@ function zone.establishShopFront(buildingDef)
                 STORE_HANDLER.connectStoreByID(container, shopID)
                 local sq = container:getSquare()
                 if sq then
-                    local roomID = sq:getRoomID()
+                    local roomID = tostring(sq:getRoomID())
                     if roomID then
                         assignedShops = assignedShops + 1
                         zone.def.shopMarkersInRoom[roomID] = zone.def.shopMarkersInRoom[roomID] or {}
@@ -333,14 +343,6 @@ function zone.setToCurrentBuilding(player)
     zone.def = {}
 
     local building = player:getCurrentBuilding()
-    local buildingID = building and building:getID()
-
-    if building and zone.def.buildingID and zone.def.buildingID == buildingID then
-        zone.def.buildingID = nil
-        zone.sendZoneDef()
-        return
-    end
-
     if not building then
         zone.def.error = "NO BUILDING FOUND!"
         zone.sendZoneDef()
@@ -350,6 +352,14 @@ function zone.setToCurrentBuilding(player)
     local buildingDef = building and building:getDef()
     if not buildingDef then
         zone.def.error = "NO BUILDING DEFINITION FOUND!?"
+        zone.sendZoneDef()
+        return
+    end
+
+    local buildingID = buildingDef and buildingDef:getID()
+    if building and zone.def.buildingID and zone.def.buildingID == buildingID then
+        zone.def.buildingID = nil
+        zone.def.error = "CLEARED BUILDING"
         zone.sendZoneDef()
         return
     end

@@ -44,6 +44,7 @@ function zoneRender.drawZoneEffects()
     if not player then return end
 
     if not lastStandTogetherWaveAlert.instance or not lastStandTogetherWaveAlert.instance:getIsVisible() then return end
+    if player:isDead() then return end
 
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
@@ -57,10 +58,11 @@ function zoneRender.drawZoneEffects()
     local zoom = getCore():getZoom(0)
 
     local building = player:getCurrentBuilding()
-    local buildingID = building and building:getID()
+    local buildingDef = building and building:getDef()
+    local buildingID = buildingDef and buildingDef:getID()
     if buildingID == zoneDef.buildingID then
         local roomDef = player:getCurrentRoomDef()
-        local currentRoomID = roomDef and roomDef:getID()
+        local currentRoomID = roomDef and tostring(roomDef:getID())
         for roomID,coord in pairs(zoneDef.shopMarkersRooms) do
             if currentRoomID == roomID then
                 local shops = zoneDef.shopMarkersInRoom and zoneDef.shopMarkersInRoom[roomID]

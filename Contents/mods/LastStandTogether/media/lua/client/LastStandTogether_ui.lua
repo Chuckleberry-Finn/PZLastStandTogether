@@ -142,6 +142,24 @@ function lastStandTogetherWaveAlert:render()
     if self.textLine2 ~= "" then tempTextY = tempTextY + self.textLargeH end
 
     self:drawTextCentre(self.textLine3, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.7, UIFont.Medium)
+    if self.textLine3 ~= "" then tempTextY = tempTextY + self.textMediumH*1.25 end
+
+    local currentTime = getTimestampMs()
+    for n=1, #LastStandTogether_Zone.playerDeaths do
+        local data = LastStandTogether_Zone.playerDeaths[n]
+        if data then
+            local expire = data.expire
+            if expire < currentTime then
+                LastStandTogether_Zone.playerDeaths[n] = nil
+            else
+                local alpha = (expire-currentTime)/4000
+                local name = data.username
+                local text = name.." has died."
+                self:drawTextCentre(text, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.8 * alpha, UIFont.Medium)
+                tempTextY = tempTextY + self.textMediumH
+            end
+        end
+    end
 
     local walletBalance = lastStandTogetherWaveAlert.walletBalance(self.player)
     if walletBalance then
@@ -198,6 +216,9 @@ function lastStandTogetherWaveAlert:new()
     o.player = getPlayer()
     o.textLine1 = ""
     o.textLine2 = ""
+    o.textLine3 = ""
+    o.playerDeaths = {}
+    o.clearPlayerDeaths = 0
     o.textY = (getCore():getScreenHeight()/8)-10
     o.textTitleH = getTextManager():getFontHeight(UIFont.Title)*1.25
     o.textLargeH = getTextManager():getFontHeight(UIFont.Large)*1.25
