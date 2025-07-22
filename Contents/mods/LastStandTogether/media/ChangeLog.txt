@@ -38,6 +38,10 @@ Welcome to the Last Stand!
 - Raised interval for attraction on players.
 [ ------ ]
 
-[ 7/22/25 - hotfix ]
-- Fixed shop-marker z-axis.
+[ 7/22/25 ]
+- Fixed shop-marker z-axis rendering.
+- Added removal of all zombies in world when mode is started.
+- Made the death-log ease-out fade.
+- Waves will spawn 1 extra zombie (just cause).
+- Added sound for player-deaths.
 [ ------ ]
