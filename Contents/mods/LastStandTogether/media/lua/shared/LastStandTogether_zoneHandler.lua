@@ -176,12 +176,13 @@ end
 function zone.setRoomsWithShopsMarkers()
     for roomID, shopLocations in pairs(zone.def.shopMarkersInRoom) do
         if #shopLocations > 0 then
-            local avgX, avgY, avgZ = 0, 0, shopLocations[1].z
+            local avgX, avgY, avgZ = 0, 0, 0
             for s=1, #shopLocations do
                 local shop = shopLocations[s]
                 if shop then
                     avgX = avgX + shop.x
                     avgY = avgY + shop.y
+                    avgZ = avgZ + shop.z
                 end
             end
             avgX = avgX/#shopLocations
@@ -226,7 +227,7 @@ function zone.resetShopMarkers()
                         if objModData and objModData.storeObjID then
                             zone.def.shopMarkersInRoom[roomID] = zone.def.shopMarkersInRoom[roomID] or {}
                             local zOffset = container:isTableTopObject() and 0.25 or 0
-                            table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=zOffset })
+                            table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=sq:getZ()+zOffset })
                         end
                     end
                 end
