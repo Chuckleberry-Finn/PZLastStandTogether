@@ -62,7 +62,7 @@ function zoneRender.drawZoneEffects()
     local buildingID = buildingDef and buildingDef:getID()
     if buildingID == zoneDef.buildingID then
         local roomDef = player:getCurrentRoomDef()
-        local currentRoomID = roomDef and tostring(roomDef:getID())
+        local currentRoomID = roomDef and roomDef:getID()
         for roomID,coord in pairs(zoneDef.shopMarkersRooms) do
             if currentRoomID == roomID then
                 local shops = zoneDef.shopMarkersInRoom and zoneDef.shopMarkersInRoom[roomID]
@@ -75,7 +75,8 @@ function zoneRender.drawZoneEffects()
                     end
                 end
             else
-                local sx1, sy1 = ISCoordConversion.ToScreen(coord.x, coord.y, coord.z+0.33)
+
+                local sx1, sy1 = ISCoordConversion.ToScreen(coord.x, coord.y, pZ+0.33)
                 local zDiff = (coord.z > pZ and "_up") or (coord.z < pZ and "_down") or ""
 
                 local distX = math.abs(coord.x - pX)
@@ -84,7 +85,7 @@ function zoneRender.drawZoneEffects()
                 local normalized = math.min(distance / 50, 1)
                 local scale = 1 + (7 - 1) * normalized
                 local size = 24 * zoom * scale
-                getRenderer():render(zoneRender["shopTexture"..zDiff], sx1-(size/2), sy1-(size/2), size, size, 1, 1, 1, 0.05 * scale/2, nil)
+                getRenderer():render(zoneRender["shopTexture"..zDiff], sx1-(size/2), sy1-(size/2), size, size, 1, 1, 1, 0.07 * scale/2, nil)
             end
         end
     end

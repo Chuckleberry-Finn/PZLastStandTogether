@@ -180,13 +180,14 @@ function zone.setRoomsWithShopsMarkers()
             for s=1, #shopLocations do
                 local shop = shopLocations[s]
                 if shop then
-                    avgX = avgX + shop.x
-                    avgY = avgY + shop.y
-                    avgZ = avgZ + shop.z
+                    avgX = avgX + (shop.x)
+                    avgY = avgY + (shop.y)
+                    avgZ = avgZ + (shop.z)
                 end
             end
-            avgX = avgX/#shopLocations
-            avgY = avgY/#shopLocations
+            avgX = math.floor(avgX/#shopLocations)
+            avgY = math.floor(avgY/#shopLocations)
+            avgZ = math.floor(avgZ/#shopLocations)
             zone.def.shopMarkersRooms[roomID] = {x=avgX, y=avgY, z=avgZ}
         end
     end
@@ -217,7 +218,7 @@ function zone.resetShopMarkers()
         if storeObj then
             for _,locData in pairs(storeObj.locations) do
                 local sq = getSquare(locData.x, locData.y, locData.z)
-                local roomID = sq and tostring(sq:getRoomID())
+                local roomID = sq and sq:getRoomID()
                 if roomID then
                     local objects = sq:getObjects()
                     for o=0, objects:size()-1 do
@@ -227,7 +228,7 @@ function zone.resetShopMarkers()
                         if objModData and objModData.storeObjID then
                             zone.def.shopMarkersInRoom[roomID] = zone.def.shopMarkersInRoom[roomID] or {}
                             local zOffset = container:isTableTopObject() and 0.25 or 0
-                            table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=sq:getZ()+zOffset })
+                            table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=(sq:getZ()+zOffset) })
                         end
                     end
                 end
@@ -321,12 +322,12 @@ function zone.establishShopFront(buildingDef)
                 STORE_HANDLER.connectStoreByID(container, shopID)
                 local sq = container:getSquare()
                 if sq then
-                    local roomID = tostring(sq:getRoomID())
+                    local roomID = sq:getRoomID()
                     if roomID then
                         assignedShops = assignedShops + 1
                         zone.def.shopMarkersInRoom[roomID] = zone.def.shopMarkersInRoom[roomID] or {}
                         local zOffset = container:isTableTopObject() and 0.25 or 0
-                        table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=zOffset })
+                        table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=(sq:getZ()+zOffset) })
                         STORE_HANDLER.updateStore(storeObj)
                     end
                 end

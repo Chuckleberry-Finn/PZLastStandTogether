@@ -37,3 +37,7 @@ Welcome to the Last Stand!
 - Added death log as players die.
 - Raised interval for attraction on players.
 [ ------ ]
+
+[ 7/22/25 - hotfix ]
+- Fixed shop-marker z-axis.
+[ ------ ]
