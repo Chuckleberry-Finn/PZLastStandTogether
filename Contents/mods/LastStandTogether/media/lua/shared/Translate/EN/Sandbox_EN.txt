@@ -27,6 +27,10 @@ Sandbox_EN = {
 
     Sandbox_LastStandTogether_NumberOfZombiesPerWave = "Number of Zombies per Wave",
 
+    Sandbox_LastStandTogether_InWaveSpawnInterval = "In-Wave Spawn Interval",
+    Sandbox_LastStandTogether_InWaveSpawnInterval_tooltip = "How many minutes for spawn intervals. (trickle-in spawning)<br>Note: Zombies spawn in sets of 100.",
+
+
     Sandbox_LastStandTogether_WavePopMultiplier = "Wave Population Multiplier (Compounds)",
     Sandbox_LastStandTogether_WavePopMultiplier_tooltip = "Multiplier applied inbetween waves, compounding/stacking on zombie population.",
 

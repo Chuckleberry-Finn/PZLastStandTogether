@@ -32,7 +32,7 @@ if isClient() then
         if _command == "updateZoneDefPlayerDeaths" then
             table.insert(LastStandTogether_Zone.playerDeaths, {username=_data.username, expire=getTimestampMs()+LastStandTogether_Zone.deathLogFade} )
         end
-        if _command == "updateZoneDefZombies" then LastStandTogether_Zone.def.zombies = _data.zombies end
+        if _command == "updateZoneDefZombies" then LastStandTogether_Zone.sendZombieCount(_data) end
         if _command == "updateZone" then
             LastStandTogether_Zone.def = _data
             LastStandTogether_Zone.sendZoneDef()--this called on clientside sets the wave UI

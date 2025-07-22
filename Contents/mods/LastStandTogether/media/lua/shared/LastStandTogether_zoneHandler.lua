@@ -1,4 +1,5 @@
 local waveGen = require "LastStandTogether_waveGenerator.lua"
+local _internal = require "shop-shared"
 
 local zone = {}
 
@@ -6,12 +7,20 @@ zone.def = {}
 zone.def.center = false
 zone.def.center = false
 zone.def.radius = false
+
 zone.def.error = false
+
 zone.def.waveCooldown = false
 zone.def.wave = false
 zone.def.nextWaveTime = false
+
 zone.def.popMulti = false
-zone.def.zombies = 0
+
+zone.def.currentZombies = 0
+zone.def.zombiesToSpawn = 0
+zone.def.zombiesSpawned = 0
+zone.def.spawnTickTimer = 0
+
 zone.def.buildingID = false
 zone.def.shopMarkers = {}
 zone.def.shopMarkersRooms = {}
@@ -53,12 +62,31 @@ function zone.onPlayerDeath(player)
 end
 
 
+function zone.sendZombieCount(data)
+    if isClient() and data then
+        if data.spawnTickTimer then zone.def.spawnTickTimer = data.spawnTickTimer end
+        if data.zombiesToSpawn then zone.def.zombiesToSpawn = data.zombiesToSpawn end
+        if data.zombiesSpawned then zone.def.zombiesSpawned = data.zombiesSpawned end
+        if data.currentZombies then zone.def.currentZombies = data.currentZombies end
+    end
+
+    if isServer() then
+        sendServerCommand("LastStandTogether", "updateZoneDefZombies", data or {
+            spawnTickTimer = zone.def.spawnTickTimer,
+            zombiesToSpawn = zone.def.zombiesToSpawn,
+            zombiesSpawned = zone.def.zombiesSpawned,
+            currentZombies = zone.def.currentZombies,
+        })
+    end
+end
+
+
 function zone.onZombieDead(zombie)
-    --- To future Chuck, I'm sorry
-    --This is not client so it works in SP and Server only
-    if not isClient() then zone.def.zombies = (zone.def.zombies or 0) - 1 end
-    --updates the players if server
-    if isServer() then sendServerCommand("LastStandTogether", "updateZoneDefZombies", { zombies=zone.def.zombies }) end
+    if not zone.def.center then return end
+
+    if (not isClient()) then zone.def.currentZombies = math.max(0, (zone.def.currentZombies or 0) - 1) end
+    zone.sendZombieCount({ currentZombies = zone.def.currentZombies })
+
     --sends money handling for clients
     if not isServer() then
         local attacker = zombie:getAttackedBy()
@@ -85,23 +113,24 @@ function zone.scheduleWave()
     if zone.schedulingProcess then return end
     zone.schedulingProcess = true
 
-    if not zone.def.popMulti then
-        zone.def.popMulti = 1
-    else
-        zone.def.popMulti = zone.def.popMulti * (SandboxVars.LastStandTogether.WavePopMultiplier or 1.5)
-    end
+    local currentTime = getTimestampMs()
 
     if not zone.def.wave then
         zone.def.wave = 0
-        local cooldown = 60000 * (SandboxVars.LastStandTogether.SetUpGracePeriod or 10)
-        zone.def.nextWaveTime = getTimestampMs() + cooldown
+        local setupTime = 60000 * (SandboxVars.LastStandTogether.SetUpGracePeriod or 3)
+        zone.def.nextWaveTime = currentTime + setupTime
     else
+        if not zone.def.popMulti then
+            zone.def.popMulti = 1
+        else
+            zone.def.popMulti = zone.def.popMulti * (SandboxVars.LastStandTogether.WavePopMultiplier or 1.2)
+        end
+
         zone.def.wave = zone.def.wave + 1
-        local numberOf = zone.def.popMulti * (SandboxVars.LastStandTogether.NumberOfZombiesPerWave or 10)
-        numberOf = math.floor(numberOf)
-        local spawnedZ = waveGen.spawnZombies(numberOf)
-        zone.def.zombies = spawnedZ
-        zone.def.nextWaveTime = nil
+        zone.def.zombiesToSpawn = math.floor(zone.def.popMulti * (SandboxVars.LastStandTogether.NumberOfZombiesPerWave or 10))
+        zone.def.zombiesSpawned = 0
+        zone.def.spawnTickTimer = 0
+        zone.def.nextWaveTime = false
     end
 
     zone.schedulingProcess = false
@@ -110,44 +139,66 @@ end
 
 
 function zone.schedulerLoop()
-    if not zone.initiateLoop or not zone.def or not zone.def.center then return end
+    if not (zone.initiateLoop and zone.def and zone.def.center) then return end
 
-    local zombiesLeft = zone.def.zombies or 0--getWorld():getCell():getZombieList():size()
+    local currentTime = getTimestampMs()
 
-    if not zone.def.wave and (not zone.def.nextWaveTime or getTimestampMs() > zone.def.nextWaveTime) then
-        ---start waves
+    if not zone.def.wave and not zone.def.nextWaveTime then
+        local zombiesInCell = getWorld():getCell():getZombieList()
+        for z=0, zombiesInCell:size()-1 do
+            local zombie = zombiesInCell:get(z)
+            if zombie then
+                zombie:getEmitter():unregister()
+                zombie:removeFromWorld()
+                zombie:removeFromSquare()
+            end
+        end
 
-        ---Clear Zombies
-        local worldMetaGrid = getWorld():getMetaGrid()
-        local maxX = worldMetaGrid:getMaxX()
-        local maxY = worldMetaGrid:getMaxY()
-        for x=0, maxX do for y=0, maxY do zpopClearZombies(x, y) end end
-
+        local meta = getWorld():getMetaGrid()
+        for x = 0, meta:getMaxX() do
+            for y = 0, meta:getMaxY() do
+                zpopClearZombies(x, y)
+            end
+        end
         zone.scheduleWave()
         return
     end
 
-    if zone.def.wave and not zone.def.nextWaveTime and zombiesLeft <= 0 then
-        local coolDown = (SandboxVars.LastStandTogether.CoolDownBetweenWave or 5)
-        zone.def.waveCooldown = (zone.def.waveCooldown or (60000 * coolDown))
-        local coolDownMulti = (SandboxVars.LastStandTogether.CoolDownMulti or 1.01)
-        local coolDownMax = ((SandboxVars.LastStandTogether.CoolDownMax or 10) * 60000)
-        zone.def.waveCooldown = math.min(coolDownMax, zone.def.waveCooldown * coolDownMulti)
-        zone.def.nextWaveTime = getTimestampMs() + zone.def.waveCooldown
-        zone.sendZoneDef()
+    if not zone.def.wave then return end
+    local zombiesLeft = zone.def.currentZombies or 0
+    if zone.def.zombiesToSpawn and zone.def.zombiesToSpawn > 0 then
+        if not zone.def.spawnTickTimer or currentTime > zone.def.spawnTickTimer then
+            local batchSize = math.min(100, zone.def.zombiesToSpawn)
+            local spawned = waveGen.spawnZombies(batchSize)
+            zone.def.zombiesToSpawn = math.max(0,zone.def.zombiesToSpawn - spawned)
+            zone.def.spawnTickTimer = currentTime + ((SandboxVars.LastStandTogether.InWaveSpawnInterval or 2) * 60000)
+            zone.def.zombiesSpawned = (zone.def.zombiesSpawned or 0) + spawned
+            zone.def.currentZombies = (zone.def.currentZombies or 0) + spawned
+            if isServer() then zone.sendZombieCount() end
+        end
         return
     end
 
+    if not zone.def.nextWaveTime then
+        if zombiesLeft <= 0 and (zone.def.zombiesSpawned or 0) > 0 then
+            local base = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 2)
+            local multi = (SandboxVars.LastStandTogether.CoolDownMulti or 1.01)
+            local max = (SandboxVars.LastStandTogether.CoolDownMax or 10) * 60000
 
-    local ZombiesInCell = getWorld():getCell():getZombieList()
-    if zone.def.wave and zombiesLeft > 0 and ZombiesInCell:size() <= 0 then
-        local spawnedZ = waveGen.spawnZombies(1)
-        print("WARNING: HAD TO SPAWN EXTRA ZOMBIE", (spawnedZ <=0) and " - FAILED" or "")
+            zone.def.waveCooldown = math.min(max, (zone.def.waveCooldown or base) * multi)
+            zone.def.nextWaveTime = currentTime + zone.def.waveCooldown
+            zone.sendZoneDef()
+        end
+        return
     end
 
-    if zone.def.wave and zone.def.nextWaveTime and getTimestampMs() > zone.def.nextWaveTime and zombiesLeft <= 0 then
-        zone.scheduleWave()
-        return
+    if currentTime > zone.def.nextWaveTime and zombiesLeft <= 0 then zone.scheduleWave() return end
+
+    local zombiesInCell = getWorld():getCell():getZombieList():size()
+    if zombiesLeft > 0 and zombiesInCell <= 0 then
+        local need = math.max(0, zombiesLeft - zombiesInCell)
+        local spawned = (need>0) and waveGen.spawnZombies(need)
+        print("WARNING: Spawned fallback zombies. spawned:", spawned, "  needed:",need)
     end
 end
 
@@ -278,18 +329,20 @@ function zone.establishShopFront(buildingDef)
                         local obj = objects:get(o)
 
                         if obj and obj:getContainer() then
+                            local objectName = _internal.getWorldObjectDisplayName(obj)
+                            if objectName then
+                                local objModData = obj:getModData()
+                                if objModData then
+                                    objModData.storeObjID = nil
+                                    obj:transmitModData()
+                                end
 
-                            local objModData = obj:getModData()
-                            if objModData then
-                                objModData.storeObjID = nil
-                                obj:transmitModData()
-                            end
-
-                            local roomID = sq:getRoomID()
-                            if roomID >= 0 then
-                                roomContainers[roomID] = roomContainers[roomID] or {}
-                                table.insert(roomContainers[roomID], obj)
-                                totalContainers = totalContainers + 1
+                                local roomID = sq:getRoomID()
+                                if roomID >= 0 then
+                                    roomContainers[roomID] = roomContainers[roomID] or {}
+                                    table.insert(roomContainers[roomID], obj)
+                                    totalContainers = totalContainers + 1
+                                end
                             end
                         end
                     end

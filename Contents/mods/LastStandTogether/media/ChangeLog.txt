@@ -41,7 +41,9 @@ Welcome to the Last Stand!
 [ 7/22/25 ]
 - Fixed shop-marker z-axis rendering.
 - Added removal of all zombies in world when mode is started.
-- Made the death-log ease-out fade.
-- Waves will spawn 1 extra zombie (just cause).
+- Made the death-log ease-out fade slower.
 - Added sound for player-deaths.
+- Lowered the minimum of any sandbox times to 0.2 (11~ seconds)
+- Redid wave logic to allow trickle-in spawning.
+- Added extra sandbox options for trickle-in spawning.
 [ ------ ]

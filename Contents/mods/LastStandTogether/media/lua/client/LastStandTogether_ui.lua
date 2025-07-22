@@ -55,6 +55,25 @@ function lastStandTogetherWaveAlert.getWaveNumberParts(n)
 end
 
 
+function lastStandTogetherWaveAlert.timeToText(time)
+    if time < 0 then return "0" end
+    local text
+    local totalSeconds = math.floor(time / 1000)
+    local hours = math.floor(totalSeconds / 3600)
+    local minutes = math.floor((totalSeconds % 3600) / 60)
+    local seconds = totalSeconds % 60
+
+    if hours > 0 then
+        text = string.format("%d:%02d:%02d", hours, minutes, seconds)
+    elseif minutes > 0 then
+        text = string.format("%d:%02d", minutes, seconds)
+    else
+        text = string.format("%d", seconds)
+    end
+    return text
+end
+
+
 function lastStandTogetherWaveAlert:prerender()
     ISPanel.prerender(self)
     local LST_zone = LastStandTogether_Zone
@@ -67,8 +86,10 @@ function lastStandTogetherWaveAlert:prerender()
         return
     end
 
+    --- WAVE
     self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or ""
 
+    --- Announcer handler
     if self.waveAnnounceParts and self.waveAnnouncePartsSaid <= #self.waveAnnounceParts then
         local noLongerPlaying = (self.playWaveAnnouncePart and not self.player:getEmitter():isPlaying(self.playWaveAnnouncePart))
         if (not self.playWaveAnnouncePart) or noLongerPlaying then
@@ -82,23 +103,12 @@ function lastStandTogetherWaveAlert:prerender()
 
     local currentTime = getTimestampMs()
 
+    --- NEXT WAVE TIMER
     local nextText
     if zoneDef.wave and zoneDef.nextWaveTime then
         local nextWaveMs = zoneDef.nextWaveTime - currentTime
         if nextWaveMs > 0 then
-            local totalSeconds = math.floor(nextWaveMs / 1000)
-            local hours = math.floor(totalSeconds / 3600)
-            local minutes = math.floor((totalSeconds % 3600) / 60)
-            local seconds = totalSeconds % 60
-
-            if hours > 0 then
-                nextText = string.format("%d:%02d:%02d", hours, minutes, seconds)
-            elseif minutes > 0 then
-                nextText = string.format("%d:%02d", minutes, seconds)
-            else
-                nextText = string.format("%d", seconds)
-            end
-
+            nextText = lastStandTogetherWaveAlert.timeToText(nextWaveMs)
             if nextWaveMs <= 11000 then
                 if self.announced == 0 then
                     self.player:playSoundLocal("lastStandTogether_countDown")
@@ -115,36 +125,63 @@ function lastStandTogetherWaveAlert:prerender()
         end
     end
     self.textLine2 = nextText and ("Next wave: " .. nextText) or ""
-    self.zombies = zoneDef.zombies or 0--getWorld():getCell():getZombieList():size() or 0
 
-    if self.zombies > 0 and (not self.player:isDead() and not self.player:isInvisible()) then
+    --- ZOMBIES
+    self.currentZombies = (zoneDef.currentZombies or 0)
+    self.zombiesToSpawn = (zoneDef.zombiesToSpawn or 0)
+
+    if self.currentZombies > 0 and (not self.player:isDead() and not self.player:isInvisible()) then
         if (not self.lastYellOut) or (currentTime > self.lastYellOut) then
             self.lastYellOut = currentTime+10000
             AddWorldSound(self.player, 600, 600)
         end
     end
+    local fraction = self.zombiesToSpawn and (self.zombiesToSpawn > 0) and " / "..self.zombiesToSpawn or ""
+    self.textLine3 = (self.currentZombies>0 or self.zombiesToSpawn>0) and (self.currentZombies .. fraction .. " zombies left.") or ""
 
-    self.textLine3 = (self.zombies>0) and (self.zombies .. " zombies left.") or ""
+    self.spawnTickTimer = (zoneDef.spawnTickTimer or 0)
+    self.zombiesSpawned = (zoneDef.zombiesSpawned or 0)
+
+    --- ADDITIONAL ZOMBIE INFO
+    local needMoreSpawns = self.zombiesToSpawn and (self.zombiesToSpawn > 0)
+    local timer = self.spawnTickTimer and " ("..lastStandTogetherWaveAlert.timeToText((self.spawnTickTimer-currentTime))..")" or ""
+    local zombiesIncoming = math.min(100, self.zombiesToSpawn)
+
+    self.textLine4 = needMoreSpawns and zombiesIncoming.." incoming "..timer or ""
 end
 
 
 function lastStandTogetherWaveAlert:render()
     ISPanel.render(self)
     self:backMost()
-    local waveAlpha = (self.zombies and self.zombies > 0 and 0.8) or 0.5
+    local waveAlpha = (self.currentZombies and self.currentZombies > 0 and 0.8) or 0.5
 
     local tempTextY = self.textY
 
-    self:drawTextCentre(self.textLine1, self.width/2, tempTextY, 0.9, 0.2, 0.2, waveAlpha, UIFont.Title)
-    if self.textLine1 ~= "" then tempTextY = tempTextY + self.textTitleH end
-
-    self:drawTextCentre(self.textLine2, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.8, UIFont.Large)
-    if self.textLine2 ~= "" then tempTextY = tempTextY + self.textLargeH end
-
-    self:drawTextCentre(self.textLine3, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.7, UIFont.Medium)
-    if self.textLine3 ~= "" then tempTextY = tempTextY + self.textMediumH*1.25 end
-
     local currentTime = getTimestampMs()
+
+    if self.textLine1 ~= "" then
+        self:drawTextCentre(self.textLine1, self.width/2, tempTextY, 0.9, 0.2, 0.2, waveAlpha, UIFont.Title)
+        tempTextY = tempTextY + self.textTitleH
+    end
+
+    if self.textLine2 ~= "" then
+        self:drawTextCentre(self.textLine2, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.8, UIFont.Large)
+        tempTextY = tempTextY + self.textLargeH
+    end
+
+    if self.textLine3 ~= "" then
+        self:drawTextCentre(self.textLine3, self.width/2, tempTextY, 0.9, 0.2, 0.2, 0.7, UIFont.Medium)
+        tempTextY = tempTextY + self.textMediumH
+    end
+
+    if self.textLine4 ~= "" then
+        self:drawTextCentre(self.textLine4, self.width/2, tempTextY, 0.8, 0.2, 0.2, 0.7, UIFont.Medium)
+        tempTextY = tempTextY + self.textMediumH
+    end
+
+    if #LastStandTogether_Zone.playerDeaths > 0 then tempTextY = tempTextY + self.textMediumH*0.25 end
+
     for n=1, #LastStandTogether_Zone.playerDeaths do
         local data = LastStandTogether_Zone.playerDeaths[n]
         if data then
@@ -224,6 +261,7 @@ function lastStandTogetherWaveAlert:new()
     o.textLine1 = ""
     o.textLine2 = ""
     o.textLine3 = ""
+    o.textLine4 = ""
     o.playerDeaths = {}
     o.textY = (getCore():getScreenHeight()/8)-10
     o.textTitleH = getTextManager():getFontHeight(UIFont.Title)*1.25
