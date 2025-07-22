@@ -22,7 +22,7 @@ function waveGenerator.spawnZombies(numberOf)
     local attempts = 0
     local maxAttempts = 1000
 
-    while spawnedZombies < numberOf and attempts < maxAttempts do
+    while spawnedZombies <= numberOf and attempts <= maxAttempts do
 
         local side = ZombRand(4)+1
 
