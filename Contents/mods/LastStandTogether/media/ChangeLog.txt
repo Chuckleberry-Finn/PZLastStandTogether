@@ -35,5 +35,5 @@ Welcome to the Last Stand!
 - Tied zombie count directly to spawned Zs.
 - Added shop markers system. (Shops now appear marked on the map)
 - Added death log as players die.
-
+- Raised interval for attraction on players.
 [ ------ ]
