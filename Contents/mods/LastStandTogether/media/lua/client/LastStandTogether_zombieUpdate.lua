@@ -16,12 +16,12 @@ function onZombieUpdate.retarget(zombie)
         local dy = math.abs(zoneDef.center.y-zY)
 
         if ((dx) > zoneDef.radius) or ((dy) > zoneDef.radius) then
-
+            --[[
             local thumped = zombie:getThumpTarget()
             if thumped then zombie:setThumpTarget(nil) end
 
             zombie:addLineChatElement("!", 1, 1, 1, UIFont.Medium, 1000, "default")
-
+            --]]
             zombie:spotted(player, true)
         end
     end
