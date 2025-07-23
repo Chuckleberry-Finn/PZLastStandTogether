@@ -188,6 +188,7 @@ function lastStandTogetherWaveAlert:render()
             local expire = data.expire
             if expire < currentTime then
                 LastStandTogether_Zone.playerDeaths[n] = nil
+                self.playerDeaths[data.username] = nil
             else
                 local t = math.max(0, math.min(1, (expire - currentTime) / LastStandTogether_Zone.deathLogFade))
                 local alpha = t * t

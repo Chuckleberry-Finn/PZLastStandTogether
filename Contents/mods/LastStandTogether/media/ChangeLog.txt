@@ -53,3 +53,8 @@ Welcome to the Last Stand!
 - Fixed issue with zombie removal at start of the mode.
 - DEBUG: Added some debug-only test related features.
 [ ------ ]
+
+[ 7/23/25 - hotfix ]
+- Further increased death-alert time.
+- Re-added player-spotting.
+[ ------ ]
