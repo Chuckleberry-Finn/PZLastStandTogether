@@ -144,22 +144,6 @@ function zone.schedulerLoop()
     local currentTime = getTimestampMs()
 
     if not zone.def.wave and not zone.def.nextWaveTime then
-        local zombiesInCell = getWorld():getCell():getZombieList()
-        for z=0, zombiesInCell:size()-1 do
-            local zombie = zombiesInCell:get(z)
-            if zombie then
-                zombie:getEmitter():unregister()
-                zombie:removeFromWorld()
-                zombie:removeFromSquare()
-            end
-        end
-
-        local meta = getWorld():getMetaGrid()
-        for x = 0, meta:getMaxX() do
-            for y = 0, meta:getMaxY() do
-                zpopClearZombies(x, y)
-            end
-        end
         zone.scheduleWave()
         return
     end
@@ -446,6 +430,26 @@ function zone.setToCurrentBuilding(player)
     
     zone.def.radius = finalRadius
     zone.def.center = {x=centerX, y=centerY}
+
+    local zombiesInCell = getCell():getZombieList()
+    local zombiesInCellSize = zombiesInCell:size()
+    if zombiesInCellSize > 0 then
+        for z=zombiesInCellSize-1, 0, -1 do
+            local zombie = zombiesInCell:get(z)
+            if zombie then
+                zombie:getEmitter():unregister()
+                zombie:removeFromWorld()
+                zombie:removeFromSquare()
+            end
+        end
+    end
+
+    local meta = getWorld():getMetaGrid()
+    for x = 0, meta:getMaxX() do
+        for y = 0, meta:getMaxY() do
+            zpopClearZombies(x, y)
+        end
+    end
 
     zone.initiateLoop = true
 

@@ -49,6 +49,8 @@ function zoneRender.drawZoneEffects()
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
 
+    local debug = (player:isNoClip() and getDebug())
+
     local zoneDef = LST_zone.def
     if not zoneDef or not zoneDef.center or not zoneDef.radius then return end
 
@@ -93,7 +95,7 @@ function zoneRender.drawZoneEffects()
     if ((dx) > zoneDef.radius) or ((dy) > zoneDef.radius) then
 
         local fadeRate = SandboxVars.LastStandTogether.OutOfBoundsFade or 0.33
-        if fadeRate < 1 then
+        if fadeRate < 1 and (not debug) then
             local inner = zoneDef.radius
             local outer = inner * (1 + fadeRate)
             local transitionRange = outer - inner
@@ -111,22 +113,27 @@ function zoneRender.drawZoneEffects()
             zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y, zoneDef.radius*2, outerZoneColor, 5)
         end
 
-        if ((dx) > zoneDef.radius*2) or ((dy) > zoneDef.radius*2) then
-            local minX = zoneDef.center.x - (zoneDef.radius*2)
-            local maxX = zoneDef.center.x + (zoneDef.radius*2)
-            local minY = zoneDef.center.y - (zoneDef.radius*2)
-            local maxY = zoneDef.center.y + (zoneDef.radius*2)
 
-            local clampedX = math.max(minX, math.min(player:getX(), maxX))
-            local clampedY = math.max(minY, math.min(player:getY(), maxY))
+        if (not debug) then
+            if ((dx) > zoneDef.radius*2) or ((dy) > zoneDef.radius*2) then
+                local minX = zoneDef.center.x - (zoneDef.radius*2)
+                local maxX = zoneDef.center.x + (zoneDef.radius*2)
+                local minY = zoneDef.center.y - (zoneDef.radius*2)
+                local maxY = zoneDef.center.y + (zoneDef.radius*2)
 
-            if ((dx) > zoneDef.radius*2.5) or ((dy) > zoneDef.radius*2.5) then clampedX, clampedY = zoneDef.center.x, zoneDef.center.y end
+                local clampedX = math.max(minX, math.min(player:getX(), maxX))
+                local clampedY = math.max(minY, math.min(player:getY(), maxY))
 
-            player:setX(clampedX)
-            player:setY(clampedY)
-            player:setLx(clampedX)
-            player:setLy(clampedY)
-            player:setZ(0)
+                if ((dx) > zoneDef.radius*2.5) or ((dy) > zoneDef.radius*2.5) then
+                    clampedX, clampedY = zoneDef.center.x, zoneDef.center.y
+                end
+
+                player:setX(clampedX)
+                player:setY(clampedY)
+                player:setLx(clampedX)
+                player:setLy(clampedY)
+                player:setZ(0)
+            end
         end
 
         local tick = (SandboxVars.LastStandTogether.OutOutBoundsTick or 2) * 1000

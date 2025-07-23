@@ -1,5 +1,5 @@
 local zoneRender = require "LastStandTogether_zoneRender.lua"
 Events.OnPostFloorLayerDraw.Add(zoneRender.drawZoneEffects)
 
-local zombieUpdate = require "LastStandTogether_zombieUpdate.lua"
-Events.OnZombieUpdate.Add(zombieUpdate.retarget)
+local onZombie = require "LastStandTogether_onZombie.lua"
+Events.OnZombieUpdate.Add(onZombie.update)
