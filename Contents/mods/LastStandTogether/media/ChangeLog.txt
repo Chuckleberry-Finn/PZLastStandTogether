@@ -58,3 +58,10 @@ Welcome to the Last Stand!
 - Further increased death-alert time.
 - Re-added player-spotting.
 [ ------ ]
+
+[ 7/23/25 - hotfix 2 ]
+- Fixed wave fraction.
+- Re-added collide event to phasing.
+- Made phasing much more aggressive. (May be intensive)
+- Made the death-log last 30 seconds.
+[ ------ ]

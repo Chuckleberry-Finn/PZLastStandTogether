@@ -30,7 +30,7 @@ zone.playerDeaths = {}
 zone.players = {}
 zone.schedulingProcess = false
 zone.initiateLoop = false
-zone.deathLogFade = 9000
+zone.deathLogFade = 30000
 
 function zone.setSandboxForLastStand()
     local options = getSandboxOptions()

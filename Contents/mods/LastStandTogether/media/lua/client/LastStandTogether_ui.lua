@@ -129,6 +129,8 @@ function lastStandTogetherWaveAlert:prerender()
     --- ZOMBIES
     self.currentZombies = (zoneDef.currentZombies or 0)
     self.zombiesToSpawn = (zoneDef.zombiesToSpawn or 0)
+    self.spawnTickTimer = (zoneDef.spawnTickTimer or 0)
+    self.zombiesSpawned = (zoneDef.zombiesSpawned or 0)
 
     if self.currentZombies > 0 and (not self.player:isDead() and not self.player:isInvisible()) then
         if (not self.lastYellOut) or (currentTime > self.lastYellOut) then
@@ -136,11 +138,9 @@ function lastStandTogetherWaveAlert:prerender()
             AddWorldSound(self.player, 600, 600)
         end
     end
-    local fraction = self.zombiesToSpawn and (self.zombiesToSpawn > 0) and " / "..self.zombiesToSpawn or ""
-    self.textLine3 = (self.currentZombies>0 or self.zombiesToSpawn>0) and (self.currentZombies .. fraction .. " zombies left.") or ""
 
-    self.spawnTickTimer = (zoneDef.spawnTickTimer or 0)
-    self.zombiesSpawned = (zoneDef.zombiesSpawned or 0)
+    local fraction = self.zombiesToSpawn and (self.zombiesToSpawn > 0) and " / "..self.zombiesToSpawn+self.zombiesSpawned or ""
+    self.textLine3 = (self.currentZombies>0 or self.zombiesToSpawn>0) and (self.currentZombies .. fraction .. " zombies left.") or ""
 
     --- ADDITIONAL ZOMBIE INFO
     local needMoreSpawns = self.zombiesToSpawn and (self.zombiesToSpawn > 0)

@@ -16,7 +16,7 @@ function onZombie.collide(zombie, obj)
 
     local dx = zoneX - zX
     local dy = zoneY - zY
-    if math.abs(dx) > zoneDef.radius*1.5 or math.abs(dy) > zoneDef.radius*1.5 then
+    if math.abs(dx) > zoneDef.radius or math.abs(dy) > zoneDef.radius then
         local target = zombie:getTarget()
         local phaseX = (target and target:getX()-zX) or dx
         local phaseY = (target and target:getY()-zY) or dy
@@ -60,18 +60,28 @@ function onZombie.update(zombie)
     local dx = (zoneDef.center.x-zX)
     local dy = (zoneDef.center.y-zY)
 
-    if (math.abs(dx) > zoneDef.radius*1.5) or (math.abs(dy) > zoneDef.radius*1.5) then
-        if zombie:getThumpTarget() then zombie:setThumpTarget(nil) end
-        onZombie.onUpdateLocationSafety[zX.."_"..zY] = (onZombie.onUpdateLocationSafety[zX.."_"..zY] or 0) + 1
-        if onZombie.onUpdateLocationSafety[zX.."_"..zY] > 3000 then
-            onZombie.onUpdateLocationSafety[zX.."_"..zY] = nil
-            onZombie.phaseTo(zombie, dx, dy)
-        end
-        if getDebug() then zombie:addLineChatElement("!", 1, 1, 1, UIFont.Small, 1000, "default") end
+    if (math.abs(dx) > zoneDef.radius) or (math.abs(dy) > zoneDef.radius) then
 
         local player = getPlayer()
-        if zombie:getTarget() ~= player then zombie:spotted(player, true) end
+        if zombie:getTarget() ~= player then
+            zombie:spotted(player, true)
+        end
+
+        onZombie.onUpdateLocationSafety[zombie] = (onZombie.onUpdateLocationSafety[zombie]
+                and onZombie.onUpdateLocationSafety[zombie].loc==zombie:getSquare()
+                and onZombie.onUpdateLocationSafety[zombie]) or {time=0, loc=zombie:getSquare()}
+
+        onZombie.onUpdateLocationSafety[zombie].time = onZombie.onUpdateLocationSafety[zombie].time + 1
+
+        if onZombie.onUpdateLocationSafety[zombie].time > 50 then
+            onZombie.onUpdateLocationSafety[zombie] = nil
+            onZombie.phaseTo(zombie, dx, dy)
+        end
+    else
+        onZombie.onUpdateLocationSafety[zombie] = nil
     end
+
+    if getDebug() or getPlayer():isNoClip() then zombie:addLineChatElement("!", 1, 1, 1, UIFont.Small, 1000, "default") end
 end
 
 

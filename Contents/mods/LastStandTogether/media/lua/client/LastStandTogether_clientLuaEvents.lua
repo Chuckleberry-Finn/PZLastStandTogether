@@ -3,3 +3,4 @@ Events.OnPostFloorLayerDraw.Add(zoneRender.drawZoneEffects)
 
 local onZombie = require "LastStandTogether_onZombie.lua"
 Events.OnZombieUpdate.Add(onZombie.update)
+Events.OnObjectCollide.Add(onZombie.collide)
