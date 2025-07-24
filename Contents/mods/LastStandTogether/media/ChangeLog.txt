@@ -78,5 +78,5 @@ Welcome to the Last Stand!
 
 [ 7/24/25 - hotfix 1 ]
 - Made phase-check work off timestamp rather than ticks.
-  - (Now rather than "ticks", if the zombie is still for 3 seconds it phases to the zone.)
+  - (Now rather than "ticks", if the zombie is still for 5 seconds it phases to the zone.)
 [ ------ ]
