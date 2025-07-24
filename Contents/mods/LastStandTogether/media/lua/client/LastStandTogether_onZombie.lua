@@ -73,7 +73,7 @@ function onZombie.update(zombie)
 
         onZombie.onUpdateLocationSafety[zombie].time = onZombie.onUpdateLocationSafety[zombie].time + 1
 
-        if onZombie.onUpdateLocationSafety[zombie].time > 50 then
+        if onZombie.onUpdateLocationSafety[zombie].time > 100 then
             onZombie.onUpdateLocationSafety[zombie] = nil
             onZombie.phaseTo(zombie, dx, dy)
         end

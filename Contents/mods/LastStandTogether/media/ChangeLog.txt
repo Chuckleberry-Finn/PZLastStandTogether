@@ -65,3 +65,8 @@ Welcome to the Last Stand!
 - Made phasing much more aggressive. (May be intensive)
 - Made the death-log last 30 seconds.
 [ ------ ]
+
+[ 7/24/25 ]
+- Extended Phasing Requirement-Time.
+-- Zombies phase when they're on the same square for too long. (was 50ms, now 100ms)
+[ ------ ]
