@@ -70,4 +70,5 @@ Welcome to the Last Stand!
 - Extended Phasing Requirement-Time.
 -- Zombies phase when they're on the same square for too long. (was 50ms, now 100ms)
 - Death-alert minimum fade to 40% (from 0%)
+- Upped default wave-cooldown-multi to 1.05 (from 1.01)
 [ ------ ]
