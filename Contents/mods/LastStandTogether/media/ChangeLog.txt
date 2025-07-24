@@ -69,7 +69,9 @@ Welcome to the Last Stand!
 [ 7/24/25 ]
 - Extended Phasing Requirement-Time.
 -- Zombies phase when they're on the same square for too long. (was 50ms, now 100ms)
+- Fixed/Changed the zombies-remaining total. (from toSpawn+spawned to toSpawn+current)
+- Tweaked out-of-room shop-marker to be less transparent.
 - Death-alert minimum fade to 40% (from 0%)
-- Upped default wave-cooldown-multi to 1.05 (from 1.01)
-- Upped default money-per-kill to $1.5 (from $1)
+- Upped default sandbox wave-cooldown-multi to 1.05 (from 1.01)
+- Upped default sandbox money-per-kill to $1.5 (from $1)
 [ ------ ]

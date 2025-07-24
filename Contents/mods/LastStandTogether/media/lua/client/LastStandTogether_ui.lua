@@ -139,7 +139,7 @@ function lastStandTogetherWaveAlert:prerender()
         end
     end
 
-    local fraction = self.zombiesToSpawn and (self.zombiesToSpawn > 0) and " / "..self.zombiesToSpawn+self.zombiesSpawned or ""
+    local fraction = self.zombiesToSpawn and (self.zombiesToSpawn > 0) and " / "..self.zombiesToSpawn+self.currentZombies or ""
     self.textLine3 = (self.currentZombies>0 or self.zombiesToSpawn>0) and (self.currentZombies .. fraction .. " zombies left.") or ""
 
     --- ADDITIONAL ZOMBIE INFO

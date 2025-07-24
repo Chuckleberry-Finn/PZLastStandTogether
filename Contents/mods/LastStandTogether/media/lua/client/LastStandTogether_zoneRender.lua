@@ -87,7 +87,7 @@ function zoneRender.drawZoneEffects()
                 local normalized = math.min(distance / 50, 1)
                 local scale = 1 + (7 - 1) * normalized
                 local size = 24 * zoom * scale
-                getRenderer():render(zoneRender["shopTexture"..zDiff], sx1-(size/2), sy1-(size/2), size, size, 1, 1, 1, 0.07 * scale/2, nil)
+                getRenderer():render(zoneRender["shopTexture"..zDiff], sx1-(size/2), sy1-(size/2), size, size, 1, 1, 1, 0.1 * scale/2, nil)
             end
         end
     end
