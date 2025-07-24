@@ -73,7 +73,7 @@ function onZombie.update(zombie)
                 or {time=getTimestampMs()+3000, loc=zombie:getSquare()}
         --- if phase check value exists and the square is the same return back OR create new
 
-        if phaseCheck and phaseCheck.time > getTimestampMs() then
+        if phaseCheck and phaseCheck.time < getTimestampMs() then
             onZombie.onUpdateLocationSafety[zombie] = nil
             onZombie.phaseTo(zombie, dx, dy)
         end
