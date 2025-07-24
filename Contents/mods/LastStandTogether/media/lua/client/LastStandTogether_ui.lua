@@ -190,7 +190,7 @@ function lastStandTogetherWaveAlert:render()
                 LastStandTogether_Zone.playerDeaths[n] = nil
                 self.playerDeaths[data.username] = nil
             else
-                local t = math.max(0, math.min(1, (expire - currentTime) / LastStandTogether_Zone.deathLogFade))
+                local t = math.max(0.4, math.min(1, (expire - currentTime) / LastStandTogether_Zone.deathLogFade))
                 local alpha = t * t
                 local name = data.username
                 local text = name.." has died."
