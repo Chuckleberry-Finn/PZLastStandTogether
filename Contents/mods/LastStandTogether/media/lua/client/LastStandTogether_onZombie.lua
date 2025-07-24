@@ -67,13 +67,13 @@ function onZombie.update(zombie)
             zombie:spotted(player, true)
         end
 
-        onZombie.onUpdateLocationSafety[zombie] = (onZombie.onUpdateLocationSafety[zombie]
-                and onZombie.onUpdateLocationSafety[zombie].loc==zombie:getSquare()
-                and onZombie.onUpdateLocationSafety[zombie]) or {time=0, loc=zombie:getSquare()}
+        local phaseCheck = onZombie.onUpdateLocationSafety[zombie]
 
-        onZombie.onUpdateLocationSafety[zombie].time = onZombie.onUpdateLocationSafety[zombie].time + 1
+        onZombie.onUpdateLocationSafety[zombie] = (phaseCheck and phaseCheck.loc==zombie:getSquare() and phaseCheck)
+                or {time=getTimestampMs()+3000, loc=zombie:getSquare()}
+        --- if phase check value exists and the square is the same return back OR create new
 
-        if onZombie.onUpdateLocationSafety[zombie].time > 100 then
+        if phaseCheck and phaseCheck.time > getTimestampMs() then
             onZombie.onUpdateLocationSafety[zombie] = nil
             onZombie.phaseTo(zombie, dx, dy)
         end
