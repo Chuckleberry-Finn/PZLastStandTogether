@@ -68,7 +68,7 @@ option LastStandTogether.WavePopMultiplier
 
 option LastStandTogether.MoneyPerKill
 {
-	type = double, min = 0, max = 9999, default = 1,
+	type = double, min = 0, max = 9999, default = 1.5,
 	page = LastStandTogether, translation = LastStandTogether_MoneyPerKill,
 }
 
