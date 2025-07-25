@@ -1,7 +1,8 @@
 version=1
 id=3534542229
 title=Last Stand Together
-description=[h2]Make your last stand![h2]
+description=[h1]Make your last stand![h1]
+description=[h2]Laststand Together is a multiplayer readaptation of the Last Stand game mode.[/h2]
 description=[h3]Commissioned by [url=https://www.twitch.tv/djackz]Djackz[/url][/h3]
 description=
 description=[url=https://ko-fi.com/chuckleberryfinn][img]https://raw.githubusercontent.com/ChuckTheSheep/chuckImages/main/kofi.png[/img][/url][url=https://discord.gg/SReMnbV4V7][img]https://raw.githubusercontent.com/Chuckleberry-Finn/chuckImages/main/PZmodCommBanner3.png[/img][/url]
