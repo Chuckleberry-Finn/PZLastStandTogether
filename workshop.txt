@@ -1,5 +1,5 @@
 version=1
-id=3529121702
+id=3534542229
 title=Last Stand Together
 description=[h2]Make your last stand![h2]
 description=[h3]Commissioned by [url=https://www.twitch.tv/djackz]Djackz[/url][/h3]
@@ -18,4 +18,4 @@ description=
 description=
 description=[h3]Copyright 2025 Chuckleberry Finn. This item is not authorized for posting on Steam, except under the Steam account named Chuckleberry Finn.[/h3]
 tags=Build 41;Multiplayer
-visibility=unlisted
+visibility=public
