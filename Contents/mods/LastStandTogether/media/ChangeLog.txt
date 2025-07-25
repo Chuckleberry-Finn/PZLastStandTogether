@@ -80,3 +80,8 @@ Welcome to the Last Stand!
 - Made phase-check work off timestamp rather than ticks.
   - (Now rather than "ticks", if the zombie is still for 5 seconds it phases to the zone.)
 [ ------ ]
+
+[ 7/25/25 ]
+- New Art for posters, previews, and menu.
+- Fixed issue in sandbox-panel with entry.
+[ ------ ]

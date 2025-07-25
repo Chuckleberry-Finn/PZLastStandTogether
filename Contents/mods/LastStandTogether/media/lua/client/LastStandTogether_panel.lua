@@ -8,6 +8,11 @@ function lastStandTogetherPanel:prerender()
     if MainScreen and MainScreen.instance.mainOptions:isVisible() then self:close() return end
 
     ISPanel.prerender(self)
+
+    self.artOffset = self.artOffset or -260+self.StartButton.y+self.StartButton.height+5 or 0
+
+    self:drawTextureScaled(self.panelArt, 0, self.artOffset, self.width, 260, 1, 1, 1, 1)
+
     self:bringToTop()
 
     if lastStandTogetherPanel.textEntry and lastStandTogetherPanel.textEntry:isVisible() then
@@ -31,21 +36,24 @@ function lastStandTogetherPanel:prerender()
     self.resetButton:setEnable(not not zoneDef.center)
 
     if zoneDef and text then
-        self:drawTextCentre(tostring(text), self.width/2, 0-self.fontMedHeight, 0.9, 0.2, 0.2, 1, UIFont.Medium)
+        self:drawTextCentre(tostring(text), self.width/2, 0+self.fontMedHeight-260, 0.9, 0.2, 0.2, 1, UIFont.Medium)
     end
 
     for k,v in pairs(SandboxVars.LastStandTogether) do
         local button = self.sandBoxButtons[k]
         if button then
 
-            self:drawRectStatic(button.x+button.width+10, button.y, self.labelWidth, button.height, self.borderColor.a, self.borderColor.r, self.borderColor.g, self.borderColor.b)
+            self:drawRectStatic(button.x+button.width+10, button.y, self.labelWidth, button.height, self.backgroundColor.a, self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b)
             self:drawText(tostring(SandboxVars.LastStandTogether[k]), button.x+button.width+20, button.y+1, 0.9, 0.9, 0.9, 1, UIFont.Medium)
         end
     end
 end
 
 
-function lastStandTogetherPanel:render() ISPanel.render(self) end
+function lastStandTogetherPanel:render()
+    ISPanel.render(self)
+    self:drawRectBorder(0, self.artOffset, self:getWidth(), self:getHeight()-self.artOffset, 1, 0.6, 0.6, 0.6)
+end
 
 
 function lastStandTogetherPanel:instantiate()
@@ -150,6 +158,12 @@ end
 
 function lastStandTogetherPanel:close()
     if lastStandTogetherPanel.instance then
+        if lastStandTogetherPanel.instance.textEntry then
+            lastStandTogetherPanel.instance.textEntry:setVisible(false)
+            lastStandTogetherPanel.instance.textEntry:removeFromUIManager()
+            lastStandTogetherPanel.instance.textEntry = nil
+        end
+
         lastStandTogetherPanel.instance:setVisible(false)
         lastStandTogetherPanel.instance:removeFromUIManager()
         lastStandTogetherPanel.instance = nil
@@ -168,8 +182,8 @@ function lastStandTogetherPanel:new()
 
     local panelHeight = titleY + 10 + (buttonsNeeded * (10+buttonHeight) )
 
-    local width, height = getCore():getScreenWidth()/5, panelHeight
-    local x, y = (getCore():getScreenWidth()-width)/2, (getCore():getScreenHeight()-height)/2
+    local width, height = 462, panelHeight
+    local x, y = (getCore():getScreenWidth()-width)/2, (getCore():getScreenHeight()-height)/1.5
 
     o = ISPanel:new(x, y, width, height)
     setmetatable(o, self)
@@ -184,11 +198,12 @@ function lastStandTogetherPanel:new()
     o.labelWidth = (o.buttonWidth/3)+10
     o.buttonX = (width-o.buttonWidth-o.labelWidth)/2
     o.background = true
-    o.backgroundColor = {r=0, g=0, b=0, a=0.4}
-    o.borderColor = {r=0.2, g=0.2, b=0.2, a=0.9}
+    o.backgroundColor = {r=0.05, g=0.05, b=0.05, a=0.8}
+    o.borderColor = {r=0, g=0, b=0, a=0}
     o.width = width
     o.height = height
     o.text = ""
+    o.panelArt = getTexture("media/textures/laststandTogetherArt.png")
     o.sandBoxButtons = {}
     o.anchorLeft = true
     o.anchorRight = false
