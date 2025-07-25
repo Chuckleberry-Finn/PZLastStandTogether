@@ -1,9 +1,17 @@
 version=1
 id=3534542229
 title=Last Stand Together
-description=[h1]Make your last stand![h1]
+description=[h1]Make your last stand![/h1]
 description=[h2]Laststand Together is a multiplayer readaptation of the Last Stand game mode.[/h2]
+description=
+description=[b]Instructions:[/b] As admin/host (or debug mode) hit escape and view the Setup Panel. Select a building in Project Zomboid to be your base of operations.
+description=
+description=Full (and automatic) integration with Shops and Traders (see: required items). Shops arranged using Shops and Traders will automatically fill the building's most container-heavy room.
+description=
+description=Zombies wave population, intervals, and more can all be configured in the panel or in sandbox options.
+description=
 description=[h3]Commissioned by [url=https://www.twitch.tv/djackz]Djackz[/url][/h3]
+description=
 description=
 description=[url=https://ko-fi.com/chuckleberryfinn][img]https://raw.githubusercontent.com/ChuckTheSheep/chuckImages/main/kofi.png[/img][/url][url=https://discord.gg/SReMnbV4V7][img]https://raw.githubusercontent.com/Chuckleberry-Finn/chuckImages/main/PZmodCommBanner3.png[/img][/url]
 description=
