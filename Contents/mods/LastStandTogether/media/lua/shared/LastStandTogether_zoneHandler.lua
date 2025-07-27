@@ -54,6 +54,8 @@ end
 
 ---@param player IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
 function zone.onPlayerDeath(player)
+    if not zone.def.center then return end
+
     if (not isClient() and not isServer()) then
         table.insert(zone.playerDeaths, {username=player:getUsername(), expire=getTimestampMs()+zone.deathLogFade} )
     end
