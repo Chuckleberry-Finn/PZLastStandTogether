@@ -4,9 +4,20 @@ if ((not getDebug()) and (not isAdmin()) and (not isCoopHost())) then return end
 
 lastStandTogetherPanel = ISPanel:derive("lastStandTogetherPanel")
 
-function lastStandTogetherPanel:prerender()
-    if MainScreen and MainScreen.instance.mainOptions:isVisible() then self:close() return end
+function lastStandTogetherPanel:update()
+    if MainScreen and MainScreen.instance and MainScreen.instance.mainOptions and MainScreen.instance.mainOptions:isVisible() then
+        self:setVisible(false)
+    elseif InviteFriends and InviteFriends.instance and InviteFriends.instance:isVisible() then
+        self:setVisible(false)
+    elseif ISScoreboard and ISScoreboard.instance and ISScoreboard.instance:isVisible() then
+        self:setVisible(false)
+    else
+        self:setVisible(true)
+    end
+end
 
+function lastStandTogetherPanel:prerender()
+    
     ISPanel.prerender(self)
 
     self.artOffset = self.artOffset or -260+self.StartButton.y+self.StartButton.height+5 or 0

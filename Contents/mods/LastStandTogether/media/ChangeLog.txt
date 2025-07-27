@@ -85,3 +85,7 @@ Welcome to the Last Stand!
 - New Art for posters, previews, and menu.
 - Fixed issue in sandbox-panel with entry.
 [ ------ ]
+
+[ 7/26/25 ]
+- Panel now hides during menu options, scoreboard, and invite screens.
+[ ------ ]
