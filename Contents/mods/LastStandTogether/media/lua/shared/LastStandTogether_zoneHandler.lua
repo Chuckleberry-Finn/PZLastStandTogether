@@ -5,7 +5,6 @@ local zone = {}
 
 zone.def = {}
 zone.def.center = false
-zone.def.center = false
 zone.def.radius = false
 
 zone.def.error = false
