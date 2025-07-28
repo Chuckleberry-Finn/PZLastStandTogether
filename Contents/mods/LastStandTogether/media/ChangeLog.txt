@@ -92,3 +92,11 @@ Welcome to the Last Stand!
 - Check for active last stand for onPlayerDeath event.
 - Death-log duration changed to 20 seconds from 30.
 [ ------ ]
+
+[ 7/28/25 ]
+- Reworked the menu panel:
+  - Menu now can be moved.
+  - Menu auto-adjusts position to main options.
+  - Menu layout for art and buttons has been reworked.
+    - Visually it's identical, but contact me for any issues.
+[ ------ ]

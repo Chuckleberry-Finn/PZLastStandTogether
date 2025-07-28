@@ -19,11 +19,7 @@ end
 function lastStandTogetherPanel:prerender()
     
     ISPanel.prerender(self)
-
-    self.artOffset = self.artOffset or -260+self.StartButton.y+self.StartButton.height+5 or 0
-
-    self:drawTextureScaled(self.panelArt, 0, self.artOffset, self.width, 260, 1, 1, 1, 1)
-
+    self:drawTextureScaled(self.panelArt.texture, 2, 2, self.panelArt.w, self.panelArt.h, 1, 1, 1, 1)
     self:bringToTop()
 
     if lastStandTogetherPanel.textEntry and lastStandTogetherPanel.textEntry:isVisible() then
@@ -47,7 +43,7 @@ function lastStandTogetherPanel:prerender()
     self.resetButton:setEnable(not not zoneDef.center)
 
     if zoneDef and text then
-        self:drawTextCentre(tostring(text), self.width/2, 0+self.fontMedHeight-260, 0.9, 0.2, 0.2, 1, UIFont.Medium)
+        self:drawTextCentre(tostring(text), self.width/2, 0-(self.fontMedHeight*1.25), 0.9, 0.2, 0.2, 1, UIFont.Medium)
     end
 
     for k,v in pairs(SandboxVars.LastStandTogether) do
@@ -63,7 +59,6 @@ end
 
 function lastStandTogetherPanel:render()
     ISPanel.render(self)
-    self:drawRectBorder(0, self.artOffset, self:getWidth(), self:getHeight()-self.artOffset, 1, 0.6, 0.6, 0.6)
 end
 
 
@@ -127,13 +122,13 @@ function lastStandTogetherPanel:initialise()
 
     local x, y = self.buttonX, self.titleY
 
-    self.StartButton = ISButton:new(self.buttonX, 10, self.width-(self.buttonX*4)+10, self.fontMedHeight*1.5, "Start Last Stand Together", self, lastStandTogetherPanel.startWaves)
+    self.StartButton = ISButton:new(self.buttonX, y, self.width-(self.buttonX*4)+10, self.fontMedHeight*1.5, "Start Last Stand Together", self, lastStandTogetherPanel.startWaves)
     self.StartButton.font = UIFont.Medium
     self.StartButton:initialise()
     self.StartButton:instantiate()
     self:addChild(self.StartButton)
 
-    self.resetButton = ISButton:new(self.StartButton.x+self.StartButton.width+8, 10, self.width-(self.StartButton.width)-30-self.buttonX, self.fontMedHeight*1.5, "Reset", self, LastStandTogether_Zone.resetShopMarkers)
+    self.resetButton = ISButton:new(self.StartButton.x+self.StartButton.width+8, y, self.width-(self.StartButton.width)-30-self.buttonX, self.fontMedHeight*1.5, "Reset", self, LastStandTogether_Zone.resetShopMarkers)
     self.resetButton.font = UIFont.Small
     self.resetButton:setImage(getTexture("media/textures/ui/resetShopButton.png"))
     self.resetButton:initialise()
@@ -142,7 +137,7 @@ function lastStandTogetherPanel:initialise()
 
     for k,v in pairs(SandboxVars.LastStandTogether) do
         local title = getText("Sandbox_LastStandTogether_"..k)
-        local button = ISButton:new(x, y+5, self.buttonWidth, self.buttonHeight, title, self, lastStandTogetherPanel.onButton)
+        local button = ISButton:new(x, y+20+self.StartButton.height, self.buttonWidth, self.buttonHeight, title, self, lastStandTogetherPanel.onButton)
         button.sandBoxOption = k
         local tooltip = getTextOrNull("Sandbox_LastStandTogether_"..k.."_tooltip")
         if tooltip then button:setTooltip(tooltip) end
@@ -186,15 +181,24 @@ function lastStandTogetherPanel:new()
     local o = {}
 
     local fontMedHeight = getTextManager():getFontHeight(UIFont.Medium)
-    local titleY = (fontMedHeight*1.5)+20
+
     local buttonHeight = 24
     local buttonsNeeded = 0
+
+    local panelArt = getTexture("media/textures/laststandTogetherArt.png")
+    local artW, artH = panelArt:getWidth()-4, panelArt:getHeight()-4
+
+    local titleY = artH - (fontMedHeight)/2
+
     for k,v in pairs(SandboxVars.LastStandTogether) do buttonsNeeded = buttonsNeeded + 1 end
 
-    local panelHeight = titleY + 10 + (buttonsNeeded * (10+buttonHeight) )
+    local panelHeight = titleY + 40 + (fontMedHeight) + (buttonsNeeded * (10+buttonHeight) )
+    local width, height = artW+4, panelHeight+4
 
-    local width, height = 462, panelHeight
-    local x, y = (getCore():getScreenWidth()-width)/2, (getCore():getScreenHeight()-height)/1.5
+    local menu = MainScreen and MainScreen.instance and MainScreen.instance.bottomPanel
+    local menuX = menu and menu:getX()+(menu:getWidth()*1.75) or (getCore():getScreenWidth()-width)/2
+    local finalX = math.min(getCore():getScreenWidth()-width-50, menuX)
+    local x, y = finalX, (getCore():getScreenHeight()-height)/1.5
 
     o = ISPanel:new(x, y, width, height)
     setmetatable(o, self)
@@ -210,17 +214,17 @@ function lastStandTogetherPanel:new()
     o.buttonX = (width-o.buttonWidth-o.labelWidth)/2
     o.background = true
     o.backgroundColor = {r=0.05, g=0.05, b=0.05, a=0.8}
-    o.borderColor = {r=0, g=0, b=0, a=0}
+    o.borderColor = {r=0.6, g=0.6, b=0.6, a=1}
     o.width = width
     o.height = height
     o.text = ""
-    o.panelArt = getTexture("media/textures/laststandTogetherArt.png")
+    o.panelArt = {texture=panelArt, w=artW, h=artH }
     o.sandBoxButtons = {}
-    o.anchorLeft = true
+    o.anchorLeft = false
     o.anchorRight = false
-    o.anchorTop = true
+    o.anchorTop = false
     o.anchorBottom = false
-    o.moveWithMouse = false
+    o.moveWithMouse = true
     o.font = UIFont.Large
     return o
 end
