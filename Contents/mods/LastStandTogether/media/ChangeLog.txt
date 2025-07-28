@@ -90,4 +90,5 @@ Welcome to the Last Stand!
 - Panel now hides during menu options, scoreboard, and invite screens.
 - Check for active last stand for onPlayerDeath event.
 - Death-log duration changed to 20 seconds from 30.
+- Panel can be activated in Single-Player without debug.
 [ ------ ]
