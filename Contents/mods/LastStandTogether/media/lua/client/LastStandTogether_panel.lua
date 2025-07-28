@@ -1,6 +1,6 @@
 require "ISUI/ISPanel"
 
-if ((not getDebug()) and (not isAdmin()) and (not isCoopHost())) then return end
+if (isClient()) and ((not getDebug()) and (not isAdmin()) and (not isCoopHost())) then return end
 
 lastStandTogetherPanel = ISPanel:derive("lastStandTogetherPanel")
 
