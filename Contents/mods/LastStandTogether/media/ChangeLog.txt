@@ -100,3 +100,7 @@ Welcome to the Last Stand!
   - Menu layout for art and buttons has been reworked.
     - Visually it's identical, but contact me for any issues.
 [ ------ ]
+
+[ 7/29/25 ]
+- Tweak: Lowered death-log fade % to 20% (from 40%)
+[ ------ ]
