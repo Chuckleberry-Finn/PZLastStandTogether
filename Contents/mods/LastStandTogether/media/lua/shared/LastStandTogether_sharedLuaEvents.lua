@@ -26,13 +26,12 @@ end
 Events.OnInitWorld.Add(LastStandTogether_Zone.setSandboxForLastStand)
 
 if isClient() then
-    Events.OnScoreboardUpdate.Add(LastStandTogether_Zone.highscore.onlinePlayerSet)
     Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
 
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
 
-        if _command == "updateHighScore" then LastStandTogether_Zone.highscore.update(_data.player, _data.type) end
+        if _command == "updateHighScore" then LastStandTogether_Zone.highscore.update(nil, _data.type, _data.username) end
         if _command == "receiveHighScore" then LastStandTogether_Zone.highscore.receiveHighScore(_data) end
 
         if _command == "updateZoneDefPlayerDeaths" then

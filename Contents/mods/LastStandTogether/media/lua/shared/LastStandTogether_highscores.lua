@@ -150,19 +150,21 @@ function highscore.reCrown()
     for i = 4, #blended do blended[i] = nil end
 
     highscore.crowned.topKills = blended
+    highscore.sendHighScore()
 end
 
 
 ---@param player IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
-function highscore.update(player, type)
+function highscore.update(player, type, username)
+
+    username = username or player:getUsername()
+
     if isServer() then
-        sendServerCommand("LastStandTogether", "updateHighScore", { player=player, type=type })
+        sendServerCommand("LastStandTogether", "updateHighScore", { username=username, type=type })
         return
     end
 
-    local username = player:getUsername()
-
-    if not highscore.currentPlayers[username] then return end
+    if not highscore.currentPlayers or not highscore.currentPlayers[username] then return end
 
     if type == "login" then
         highscore.currentPlayers[username].kills = 0
@@ -183,14 +185,18 @@ end
 
 
 function highscore.receiveHighScore(allData)
-    if isServer() then return end
     highscore.currentPlayers = allData
 end
 
 
 function highscore.sendHighScore(player)
-    if isClient() then return end
-    sendServerCommand(player, "LastStandTogether", "receiveHighScore", highscore.currentPlayers)
+    if isServer() then
+        if player then
+            sendServerCommand(player, "LastStandTogether", "receiveHighScore", highscore.currentPlayers)
+        else
+            sendServerCommand("LastStandTogether", "receiveHighScore", highscore.currentPlayers)
+        end
+    end
 end
 
 
@@ -207,25 +213,26 @@ function highscore.singlePlayerSet(player)
     highscore.reCrown()
 end
 
+--[[
+function highscore.fetchOnlinePlayers()
+    local players = getOnlinePlayers()
+    for i=0, players:size()-1 do
+        ---@type IsoPlayer|IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
+        local player = players:get(i)
+        local username = player:getUsername()
+        local steam = {}
+        if getSteamModeActive() then
+            steam.ID = player:getSteamID()
+            steam.profileName = getSteamProfileNameFromSteamID(steam.ID)
+        end
 
----@param usernames ArrayList
----@param displayNames ArrayList
----@param steamIDs ArrayList
-function highscore.onlinePlayerSet(usernames, displayNames, steamIDs)
-    local numberOfPlayers = usernames:size()
-    for i = 0,numberOfPlayers-1 do
-        local username = usernames:get(i)
-        if not highscore.currentPlayers[username] then
-            local steam = {}
-            if getSteamModeActive() then
-                steam.ID = steamIDs:get(i)
-                steam.profileName = getSteamProfileNameFromSteamID(steam.ID)
-            end
+        if player then
             highscore.currentPlayers[username] = {steam=steam}
         end
     end
+    highscore.reCrown()
 end
-
+--]]
 
 function highscore.fetchPlayerObject(username)
     if isClient() or isServer() then

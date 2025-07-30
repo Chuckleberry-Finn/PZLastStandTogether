@@ -111,13 +111,7 @@ function lastStandTogetherWaveAlert:prerender()
     ISPanel.prerender(self)
     local LST_zone = LastStandTogether_Zone
     local zoneDef = LST_zone and LST_zone.def
-
-    if not zoneDef or not zoneDef.center then
-        self.textLine1 = ""
-        self.textLine2 = ""
-        self.textLine3 = ""
-        return
-    end
+    if not zoneDef or not zoneDef.center then return end
 
     --- WAVE
     self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or ""
@@ -187,6 +181,10 @@ end
 function lastStandTogetherWaveAlert:render()
     ISPanel.render(self)
     self:backMost()
+    local LST_zone = LastStandTogether_Zone
+    local zoneDef = LST_zone and LST_zone.def
+    if not zoneDef or not zoneDef.center then return end
+    
     local waveAlpha = (self.currentZombies and self.currentZombies > 0 and 0.8) or 0.5
 
     local tempTextY = self.textY

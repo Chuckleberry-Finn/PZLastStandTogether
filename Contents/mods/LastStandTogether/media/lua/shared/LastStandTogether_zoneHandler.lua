@@ -480,6 +480,7 @@ function zone.setToCurrentBuilding(player)
     zone.initiateLoop = true
 
     zone.highscore.load()
+    zone.highscore.reset()
 
     zone.establishShopFront(buildingDef)
 
