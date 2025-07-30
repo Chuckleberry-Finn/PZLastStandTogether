@@ -103,5 +103,5 @@ Welcome to the Last Stand!
 
 [ 7/29/25 ]
 - Tweak: Lowered death-log fade % to 20% (from 40%)
-- Added player highscores!
+- Added player highscores with top scores!
 [ ------ ]

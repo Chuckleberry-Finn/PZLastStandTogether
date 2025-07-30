@@ -204,12 +204,8 @@ zone.clientSideLoginCheck = 2
 function zone.onLogin(playerObj)
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
-
-        zone.highscore.update(playerObj, "login")
-
         sendClientCommand(getPlayer(),"LastStandTogether", "requestZone", {})
-        sendClientCommand(getPlayer(),"LastStandTogether", "requestHighscores", {})
-
+        sendClientCommand(getPlayer(),"LastStandTogether", "requestHighscores", {login=true})
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
 end
@@ -473,18 +469,12 @@ function zone.setToCurrentBuilding(player)
 
     if not isClient() then zone.highscore.load() end
 
-    if not isClient() and not isServer() then
-        zone.highscore.singlePlayerSet(player)
-    end
-
     zone.initiateLoop = true
+    zone.establishShopFront(buildingDef)
+    zone.sendZoneDef()
 
     zone.highscore.load()
-    zone.highscore.reset()
-
-    zone.establishShopFront(buildingDef)
-
-    zone.sendZoneDef()
+    zone.highscore.sendHighScore()
 end
 
 

@@ -62,7 +62,7 @@ function zoneRender.drawZoneEffects()
     local building = player:getCurrentBuilding()
     local buildingDef = building and building:getDef()
     local buildingID = buildingDef and buildingDef:getID()
-    if buildingID == zoneDef.buildingID then
+    if buildingID == zoneDef.buildingID and zoneDef.shopMarkersRooms then
         local roomDef = player:getCurrentRoomDef()
         local currentRoomID = roomDef and roomDef:getID()
         for roomID,coord in pairs(zoneDef.shopMarkersRooms) do
