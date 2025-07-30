@@ -31,6 +31,8 @@ zone.schedulingProcess = false
 zone.initiateLoop = false
 zone.deathLogFade = 20000
 
+zone.highscore = require "LastStandTogether_highScores.lua"
+
 function zone.setSandboxForLastStand()
     local options = getSandboxOptions()
     local optionsToValues = {
@@ -58,6 +60,8 @@ function zone.onPlayerDeath(player)
     if (not isClient() and not isServer()) then
         table.insert(zone.playerDeaths, {username=player:getUsername(), expire=getTimestampMs()+zone.deathLogFade} )
     end
+    if not isClient() then zone.highscore.update(player, "died") end
+    
     if isClient() then sendClientCommand("LastStandTogether", "updateZoneDefPlayerDeaths", {}) end
     if isServer() then sendServerCommand("LastStandTogether", "updateZoneDefPlayerDeaths", { username=player:getUsername() }) end
 end
@@ -85,7 +89,12 @@ end
 function zone.onZombieDead(zombie)
     if not zone.def.center then return end
 
-    if (not isClient()) then zone.def.currentZombies = math.max(0, (zone.def.currentZombies or 0) - 1) end
+    if (not isClient()) then
+        local attacker = zombie:getAttackedBy()
+        if attacker then zone.highscore.update(attacker, "zombieKill") end
+
+        zone.def.currentZombies = math.max(0, (zone.def.currentZombies or 0) - 1)
+    end
     zone.sendZombieCount({ currentZombies = zone.def.currentZombies })
 
     --sends money handling for clients
@@ -172,6 +181,9 @@ function zone.schedulerLoop()
 
             zone.def.waveCooldown = math.min(max, (zone.def.waveCooldown or base) * multi)
             zone.def.nextWaveTime = currentTime + zone.def.waveCooldown
+
+            if zone.def.wave > 0 then zone.highscore.checkTopWave(zone.def.wave) end
+
             zone.sendZoneDef()
         end
         return
@@ -189,10 +201,15 @@ end
 
 
 zone.clientSideLoginCheck = 2
-function zone.onLogin()
+function zone.onLogin(playerObj)
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
+
+        zone.highscore.update(playerObj, "login")
+
         sendClientCommand(getPlayer(),"LastStandTogether", "requestZone", {})
+        sendClientCommand(getPlayer(),"LastStandTogether", "requestHighscores", {})
+
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
 end
@@ -354,8 +371,10 @@ function zone.establishShopFront(buildingDef)
     table.sort(sortedRooms, function(a, b) return #a.containers > #b.containers end)
 
     local allContainers = {}
-    for _, roomData in ipairs(sortedRooms) do
-        for _, container in ipairs(roomData.containers) do
+    for r=1, #sortedRooms do
+        local roomData = sortedRooms[r]
+        for c=1, #roomData.containers do
+            local container = roomData.containers[c]
             table.insert(allContainers, container)
         end
     end
@@ -452,7 +471,15 @@ function zone.setToCurrentBuilding(player)
         end
     end
 
+    if not isClient() then zone.highscore.load() end
+
+    if not isClient() and not isServer() then
+        zone.highscore.singlePlayerSet(player)
+    end
+
     zone.initiateLoop = true
+
+    zone.highscore.load()
 
     zone.establishShopFront(buildingDef)
 

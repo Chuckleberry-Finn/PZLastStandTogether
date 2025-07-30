@@ -16,6 +16,39 @@ function lastStandTogetherWaveAlert.walletBalance(player)
 end
 
 
+function lastStandTogetherWaveAlert:onMouseMoveOutside(dx, dy)
+    local showTopWaveTooltip = false
+    if self.showHighScore and self.waveToolTipZone then
+        local x, y = self:getMouseX(), self:getMouseY()
+
+        local uiX = self.waveToolTipZone.x
+        local uiY = self.waveToolTipZone.y
+        local uiX2 = self.waveToolTipZone.x+self.waveToolTipZone.w
+        local uiY2 = self.waveToolTipZone.y+self.waveToolTipZone.h
+
+        if (x > uiX and x < uiX2 and y > uiY and y < uiY2) then
+            showTopWaveTooltip = true
+        end
+    end
+    self.showTopWaveTooltip = showTopWaveTooltip
+    return ISPanel.onMouseMoveOutside(self, dx, dy)
+end
+
+function lastStandTogetherWaveAlert:onMouseUpOutside(x, y)
+    if self.highScoreZone then
+        local uiX = self.highScoreZone.x
+        local uiY = self.highScoreZone.y
+        local uiX2 = self.highScoreZone.x+self.highScoreZone.w
+        local uiY2 = self.highScoreZone.y+self.highScoreZone.h
+        if (x > uiX and x < uiX2 and y > uiY and y < uiY2) then
+            self.showHighScore = not self.showHighScore
+            return
+        end
+    end
+    return ISPanel.onMouseUpOutside(self, x, y)
+end
+
+
 function lastStandTogetherWaveAlert.getWaveNumberParts(n)
     local parts = {"wave"}
 
@@ -206,21 +239,26 @@ function lastStandTogetherWaveAlert:render()
         end
     end
 
+    local speedControls = UIManager.getSpeedControls()
+    local x = speedControls:getX() - 15 - self:getX()
+    local y = speedControls:getY() - 5 - self:getY()
+    local w = 0
+
     local walletBalance = lastStandTogetherWaveAlert.walletBalance(self.player)
     if walletBalance then
-        local speedControls = UIManager.getSpeedControls()
-        local x = speedControls:getX() - 15 - self:getX()
-        local y = speedControls:getY() - 5 - self:getY()
-        local w = getTextManager():MeasureStringX(UIFont.Medium, walletBalance)
+        w = getTextManager():MeasureStringX(UIFont.Medium, walletBalance)
         self:drawRect(x-(w*1.125), y, w*1.25, self.textMediumH, 0.4, 0, 0, 0)
         self:drawTextRight(walletBalance, x, y, 0.9, 0.9, 0.9, 1, UIFont.Medium)
     end
+
+    local highScore = LastStandTogether_Zone.highscore
+    if highScore then highScore.render(self, x-96, y+36) end
 end
 
 
 function lastStandTogetherWaveAlert:instantiate()
     ISPanel.instantiate(self)
-    self.javaObject:setConsumeMouseEvents(false)
+    --self.javaObject:setConsumeMouseEvents(false)
 end
 
 

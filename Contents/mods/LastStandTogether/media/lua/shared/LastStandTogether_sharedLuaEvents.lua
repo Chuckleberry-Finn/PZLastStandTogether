@@ -14,21 +14,27 @@ if isServer() then
         if _module ~= "LastStandTogether" then return end
         if _command == "setZone" then LastStandTogether_Zone.setToCurrentBuilding(_player) end
         if _command == "requestZone" then LastStandTogether_Zone.sendZoneDef(_player) end
+        if _command == "requestHighscores" then LastStandTogether_Zone.highScore.sendHighScore(_player) end
         if _command == "resetShopMarkers" then LastStandTogether_Zone.resetShopMarkers() end
         if _command == "updateZoneDefPlayerDeaths" then LastStandTogether_Zone.onPlayerDeath(_player) end
     end
     Events.OnClientCommand.Add(onClientCommand)--what the server gets from the client
+
+    Events.OnSave.Add(LastStandTogether_Zone.highscore.save)
 end
 
 Events.OnInitWorld.Add(LastStandTogether_Zone.setSandboxForLastStand)
 
-
 if isClient() then
-
+    Events.OnScoreboardUpdate.Add(LastStandTogether_Zone.highscore.onlinePlayerSet)
     Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
 
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
+
+        if _command == "updateHighScore" then LastStandTogether_Zone.highScore.update(_data.player, _data.type) end
+        if _command == "receiveHighScore" then LastStandTogether_Zone.highScore.receiveHighScore(_data) end
+
         if _command == "updateZoneDefPlayerDeaths" then
             table.insert(LastStandTogether_Zone.playerDeaths, {username=_data.username, expire=getTimestampMs()+LastStandTogether_Zone.deathLogFade} )
         end
