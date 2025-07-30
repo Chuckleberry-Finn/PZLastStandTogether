@@ -35,11 +35,11 @@ function lastStandTogetherWaveAlert:onMouseMoveOutside(dx, dy)
 end
 
 function lastStandTogetherWaveAlert:onMouseUpOutside(x, y)
-    if self.highScoreZone then
-        local uiX = self.highScoreZone.x
-        local uiY = self.highScoreZone.y
-        local uiX2 = self.highScoreZone.x+self.highScoreZone.w
-        local uiY2 = self.highScoreZone.y+self.highScoreZone.h
+    if self.highscoreZone then
+        local uiX = self.highscoreZone.x
+        local uiY = self.highscoreZone.y
+        local uiX2 = self.highscoreZone.x+self.highscoreZone.w
+        local uiY2 = self.highscoreZone.y+self.highscoreZone.h
         if (x > uiX and x < uiX2 and y > uiY and y < uiY2) then
             self.showHighScore = not self.showHighScore
             return
@@ -251,8 +251,8 @@ function lastStandTogetherWaveAlert:render()
         self:drawTextRight(walletBalance, x, y, 0.9, 0.9, 0.9, 1, UIFont.Medium)
     end
 
-    local highScore = LastStandTogether_Zone.highscore
-    if highScore then highScore.render(self, x-96, y+36) end
+    local highscore = LastStandTogether_Zone.highscore
+    if highscore then highscore.render(self, x-96, y+36) end
 end
 
 

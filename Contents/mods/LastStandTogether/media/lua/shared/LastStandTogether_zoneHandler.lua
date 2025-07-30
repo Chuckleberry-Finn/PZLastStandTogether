@@ -31,7 +31,7 @@ zone.schedulingProcess = false
 zone.initiateLoop = false
 zone.deathLogFade = 20000
 
-zone.highscore = require "LastStandTogether_highScores.lua"
+zone.highscore = require "LastStandTogether_highscores.lua"
 
 function zone.setSandboxForLastStand()
     local options = getSandboxOptions()
@@ -61,7 +61,7 @@ function zone.onPlayerDeath(player)
         table.insert(zone.playerDeaths, {username=player:getUsername(), expire=getTimestampMs()+zone.deathLogFade} )
     end
     if not isClient() then zone.highscore.update(player, "died") end
-    
+
     if isClient() then sendClientCommand("LastStandTogether", "updateZoneDefPlayerDeaths", {}) end
     if isServer() then sendServerCommand("LastStandTogether", "updateZoneDefPlayerDeaths", { username=player:getUsername() }) end
 end
