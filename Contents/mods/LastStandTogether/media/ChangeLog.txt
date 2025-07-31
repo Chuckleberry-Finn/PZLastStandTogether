@@ -109,4 +109,5 @@ Welcome to the Last Stand!
 [ 7/31/25 ]
 - Tweak: Invisible players won't show up on the leaderboard. (For observing admins)
 - Tweak: Highscore Skull now opens its mouth during display.
+- Added warning when max radius is reached during placement.
 [ ------ ]

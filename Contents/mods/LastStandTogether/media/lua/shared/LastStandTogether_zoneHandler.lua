@@ -442,7 +442,13 @@ function zone.setToCurrentBuilding(player)
     local largestSize = math.max(buildingDefW,buildingDefH)
     local bufferSize = (SandboxVars.LastStandTogether.BufferSize or 4)
 
-    local finalRadius = math.min(50, math.max(1, largestSize+bufferSize))
+    local preFinalRadius = math.max(1, largestSize+bufferSize)
+
+    if preFinalRadius > 50 then
+        zone.def.error = "ZONE REACHED MAXIMUM OF 100 X 100!"
+    end
+
+    local finalRadius = math.min(50, preFinalRadius)
     
     zone.def.radius = finalRadius
     zone.def.center = {x=centerX, y=centerY}
