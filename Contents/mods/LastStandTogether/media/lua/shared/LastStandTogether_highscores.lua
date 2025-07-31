@@ -6,6 +6,7 @@ highscore.crowned = {}
 
 highscore.textures = {
     blood = getTexture("media/textures/ui/bloodCrown.png"),
+    bloodTrail = getTexture("media/textures/ui/bloodTrail.png"),
     skull = getTexture("media/textures/ui/lastStandSkull.png"),
     skullOpen = getTexture("media/textures/ui/lastStandSkullOpen.png"),
     metal = {
@@ -57,11 +58,17 @@ function highscore.render(UI, x, y)
 
     if highscore.crowned.topWave and highscore.crowned.topWave.wave then
         local tooltipZone = highscore.drawTextBoxed(UI, "TOP WAVE: "..highscore.crowned.topWave.wave, x, y)
-        UI:drawTextureScaled(highscore.textures.blood, x-32, y-8, 32, 32, 1, 1, 1, 1)
+        local showTooltip = UI.showTopWaveTooltip
+
+        if showTooltip then
+            UI:drawTextureScaled(highscore.textures.bloodTrail, x-96, y-8, 96, 32, 1, 1, 1, 1)
+        end
+
+        UI:drawTextureScaled(highscore.textures.blood, x-32 + (showTooltip and -64 or 0), y-8, 32, 32, 1, 1, 1, 1)
         UI.waveToolTipZone = tooltipZone
         y = y + UI.textSmallH*2
 
-        if UI.showTopWaveTooltip then
+        if showTooltip then
             local tempY = y
             for i=1, #highscore.crowned.topWave.players do
                 local playerName = highscore.crowned.topWave.players[i]
