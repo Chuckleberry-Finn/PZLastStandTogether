@@ -180,24 +180,51 @@ function highscore.update(player, type, username)
         highscore.reCrown()
         highscore.save()
     end
-    if isServer() then highscore.sendHighScore() end
+    if isServer() then
+        local dataToSend = {
+            [username]=highscore.currentPlayers[username],
+            topKills = highscore.crowned.topKills,
+        }
+        highscore.sendHighScore(nil, {currentPlayers=dataToSend})
+    end
 end
 
 
 function highscore.receiveHighScore(data)
-    highscore.currentPlayers = (data.currentPlayers)
-    highscore.crowned = (data.crowned)
+
+    if data.all then
+        highscore.currentPlayers = (data.currentPlayers)
+        highscore.crowned = (data.crowned)
+    else
+        if data.currentPlayers then
+            for username,pData in pairs(data.currentPlayers) do
+                highscore.currentPlayers[username] = pData
+            end
+        end
+        --- if not data.all then skip 'crowned' in key nesting
+        if data.topWave then highscore.crowned.topWave = data.topWave end
+        if data.topKills then highscore.crowned.topKills = data.topKills end
+    end
+
     highscore.reCrown()
 end
 
 
-function highscore.sendHighScore(player)
+function highscore.sendHighScore(player, data)
     if not isClient() then highscore.setAllPlayers() end
     if isServer() then
-        local data = {
-            currentPlayers = highscore.currentPlayers,
-            crowned = highscore.crowned,
-        }
+
+        ----  highscore.crowned.topKills = {
+        ----    { displayName = "Player1", kills = 45 },
+        ----    { displayName = "Player2", kills = 32 },
+        ----    { displayName = "Player3", kills = 30 },
+        ----  },
+        ----  highscore.crowned.topWave = {
+        ----    wave = 12,
+        ----    players = { "Player1", "Player2", "Player3", },
+        ----  },
+
+        data = data or { all=true, currentPlayers = highscore.currentPlayers, crowned = highscore.crowned, }
 
         if player then
             sendServerCommand(player, "LastStandTogether", "receiveHighScore", data)
@@ -263,6 +290,9 @@ function highscore.checkTopWave(wave)
                 table.insert(highscore.crowned.topWave.players, displayName)
             end
         end
+
+        local dataToSend = {topWave=highscore.crowned.topWave}
+        highscore.sendHighScore(nil, dataToSend)
         highscore.save()
     end
 end
