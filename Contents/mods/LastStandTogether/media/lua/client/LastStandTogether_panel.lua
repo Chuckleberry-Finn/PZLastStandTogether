@@ -106,14 +106,22 @@ function lastStandTogetherPanel:onButton(button)
 end
 
 
-function lastStandTogetherPanel:startWaves(button)
+function lastStandTogetherPanel:startGame(button, random)
     if not button then return end
 
     if isClient() then
-        sendClientCommand("LastStandTogether", "setZone", {})
+        local command = "LastStandTogether" .. (random and "Random" or "")
+        sendClientCommand(command, "setZone", {})
     else
-        LastStandTogether_Zone.setToCurrentBuilding(getPlayer())
+        local func = random and "setToBuildingRandom" or "setToCurrentBuilding"
+        LastStandTogether_Zone[func](getPlayer())
     end
+end
+
+
+function lastStandTogetherPanel:startGameRandom(button)
+    if not button then return end
+    lastStandTogetherPanel:startGame(button, true)
 end
 
 
@@ -122,13 +130,19 @@ function lastStandTogetherPanel:initialise()
 
     local x, y = self.buttonX, self.titleY
 
-    self.StartButton = ISButton:new(self.buttonX, y, self.width-(self.buttonX*4)+10, self.fontMedHeight*1.5, "Start Last Stand Together", self, lastStandTogetherPanel.startWaves)
+    self.StartButton = ISButton:new(self.buttonX, y, (self.width*0.5)-27, self.fontMedHeight*1.5, "Start Last Stand Together", self, lastStandTogetherPanel.startGame)
     self.StartButton.font = UIFont.Medium
     self.StartButton:initialise()
     self.StartButton:instantiate()
     self:addChild(self.StartButton)
 
-    self.resetButton = ISButton:new(self.StartButton.x+self.StartButton.width+8, y, self.width-(self.StartButton.width)-30-self.buttonX, self.fontMedHeight*1.5, "Reset", self, LastStandTogether_Zone.resetShopMarkers)
+    self.StartButtonRandom = ISButton:new(self.StartButton.x+self.StartButton.width+8, y, (self.width*0.3)-27, self.fontMedHeight*1.5, "Random", self, lastStandTogetherPanel.startGameRandom)
+    self.StartButtonRandom.font = UIFont.Medium
+    self.StartButtonRandom:initialise()
+    self.StartButtonRandom:instantiate()
+    self:addChild(self.StartButtonRandom)
+
+    self.resetButton = ISButton:new(self.StartButtonRandom.x+self.StartButtonRandom.width+8, y, (self.width*0.2)-27, self.fontMedHeight*1.5, "Reset", self, LastStandTogether_Zone.resetShopMarkers)
     self.resetButton.font = UIFont.Small
     self.resetButton:setImage(getTexture("media/textures/ui/resetShopButton.png"))
     self.resetButton:initialise()

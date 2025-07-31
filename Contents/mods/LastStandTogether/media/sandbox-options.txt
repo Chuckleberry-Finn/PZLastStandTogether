@@ -1,5 +1,11 @@
 VERSION = 1,
 
+option LastStandTogether.AutoSelectBuildingSizeMinimum
+{
+	type = integer, min = 1, max = 100, default = 20,
+	page = LastStandTogether, translation = LastStandTogether_AutoSelectBuildingSizeMinimum,
+}
+
 option LastStandTogether.BufferSize
 {
 	type = integer, min = -25, max = 25, default = 4,

@@ -1,6 +1,9 @@
 Sandbox_EN = {
     Sandbox_LastStandTogether = "Last Stand Together",
 
+    Sandbox_LastStandTogether_AutoSelectBuildingSizeMinimum = "Building Size Minimum (AutoSelect)",
+    Sandbox_LastStandTogether_AutoSelectBuildingSizeMinimum_tooltip = "If auto-select is active buildings will have to be at least this size in both width and length.",
+
     Sandbox_LastStandTogether_BufferSize = "Buffer Size",
     Sandbox_LastStandTogether_BufferSize_tooltip = "How many tiles ON TOP of the building's size should the zone be.",
 

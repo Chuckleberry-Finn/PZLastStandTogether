@@ -423,14 +423,38 @@ function zone.setToCurrentBuilding(player)
         return
     end
 
-    local buildingID = buildingDef and buildingDef:getID()
-    if building and zone.def.buildingID and zone.def.buildingID == buildingID then
-        zone.def.buildingID = nil
-        zone.def.error = "CLEARED BUILDING"
-        zone.sendZoneDef()
-        return
+    zone.setToBuilding(buildingDef)
+end
+
+
+function zone.clearZombies()
+    local zombiesInCell = getCell():getZombieList()
+    local zombiesInCellSize = zombiesInCell:size()
+    if zombiesInCellSize > 0 then
+        for z=zombiesInCellSize-1, 0, -1 do
+            local zombie = zombiesInCell:get(z)
+            if zombie then
+                zombie:getEmitter():unregister()
+                zombie:removeFromWorld()
+                zombie:removeFromSquare()
+            end
+        end
     end
 
+    local meta = getWorld():getMetaGrid()
+    for x = 0, meta:getMaxX() do
+        for y = 0, meta:getMaxY() do
+            zpopClearZombies(x, y)
+        end
+    end
+end
+
+
+---@param buildingDef BuildingDef
+function zone.setToBuilding(buildingDef)
+    if not buildingDef then print("ERROR: setToBuilding has invalid buildingDef!") return end
+
+    local buildingID = buildingDef and buildingDef:getID()
     zone.def.buildingID = buildingID
 
     local buildingDefW = buildingDef:getW()
@@ -453,34 +477,69 @@ function zone.setToCurrentBuilding(player)
     zone.def.radius = finalRadius
     zone.def.center = {x=centerX, y=centerY}
 
-    local zombiesInCell = getCell():getZombieList()
-    local zombiesInCellSize = zombiesInCell:size()
-    if zombiesInCellSize > 0 then
-        for z=zombiesInCellSize-1, 0, -1 do
-            local zombie = zombiesInCell:get(z)
-            if zombie then
-                zombie:getEmitter():unregister()
-                zombie:removeFromWorld()
-                zombie:removeFromSquare()
-            end
-        end
-    end
-
-    local meta = getWorld():getMetaGrid()
-    for x = 0, meta:getMaxX() do
-        for y = 0, meta:getMaxY() do
-            zpopClearZombies(x, y)
-        end
-    end
-
     if not isClient() then zone.highscore.load() end
 
-    zone.initiateLoop = true
+    zone.clearZombies()
     zone.establishShopFront(buildingDef)
+
+    zone.initiateLoop = true
     zone.sendZoneDef()
 
     zone.highscore.load()
     zone.highscore.sendHighScore()
+end
+
+
+function zone.setToBuildingRandom()
+    ---@type BuildingDef
+    local buildingDef = zone.seekNewBuilding()
+    zone.setToBuilding(buildingDef)
+end
+
+
+zone.IsoMetaGridBuildingsField = false
+---@return ArrayList BuildingDef
+---`getBuildings` is now a thing in B42.
+function zone.IsoMetaGridGetBuildings(metaGrid)
+    if not metaGrid then return false end
+
+    if zone.IsoMetaGridBuildingsField then
+        return getClassFieldVal(metaGrid, zone.IsoMetaGridBuildingsField)
+    end
+
+    local fieldStr = "public final java.util.ArrayList zombie.iso.IsoMetaGrid.Buildings"
+    local fieldCount = getNumClassFields(metaGrid)
+    for i = 0, fieldCount - 1 do
+        local field = getClassField(metaGrid, i)
+        if field and tostring(field) == fieldStr then
+            zone.IsoMetaGridBuildingsField = field
+            return getClassFieldVal(metaGrid, field)
+        end
+    end
+
+    return false
+end
+
+
+function zone.seekNewBuilding()
+    local metaGrid = getWorld():getMetaGrid()
+    local buildings = zone.IsoMetaGridGetBuildings(metaGrid)
+    if not buildings then print("ERROR: NO ISOMETAGRID BUILDINGS LIST FOUND") return end
+    local buildingPool = {}
+    local buildingSizeMinimum = SandboxVars.LastStandTogether.AutoSelectBuildingSizeMinimum or 20
+
+    for i=0, buildings:size()-1 do
+        ---@type BuildingDef
+        local building = buildings:get(i)
+        if building then
+            if (building:getW() > buildingSizeMinimum) and (building:getH() > buildingSizeMinimum) then
+                table.insert(buildingPool, building)
+            end
+        end
+    end
+
+    local buildingSelection = buildingPool[ZombRand(#buildingPool)+1]
+    return buildingSelection
 end
 
 

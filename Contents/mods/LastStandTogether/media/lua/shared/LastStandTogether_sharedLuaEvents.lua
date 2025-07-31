@@ -13,6 +13,7 @@ if isServer() then
     local function onClientCommand(_module, _command, _player, _data)
         if _module ~= "LastStandTogether" then return end
         if _command == "setZone" then LastStandTogether_Zone.setToCurrentBuilding(_player) end
+        if _command == "setZoneRandom" then LastStandTogether_Zone.setToRandomBuilding() end
         if _command == "requestZone" then LastStandTogether_Zone.sendZoneDef(_player) end
         if _command == "requestHighscores" then
             local player = not _data.login and _player or nil
