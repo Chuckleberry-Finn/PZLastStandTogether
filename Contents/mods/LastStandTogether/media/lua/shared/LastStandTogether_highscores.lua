@@ -193,34 +193,11 @@ function highscore.update(player, type, username)
 end
 
 
-local function printTable(tbl, indent)
-    indent = indent or 0
-    local padding = string.rep("   ", indent) -- 3 spaces per level
-
-    for key, value in pairs(tbl) do
-        local keyStr = tostring(key)
-        if type(value) == "table" then
-            print(padding .. keyStr .. " = {")
-            printTable(value, indent + 1)
-            print(padding .. "}")
-        else
-            print(padding .. keyStr .. " = " .. tostring(value))
-        end
-    end
-end
-
-
 function highscore.receiveHighScore(data)
-    print("receiveHighScore!")
-    printTable(data)
-
     if data.all then
-        print(" - data.all!")
-
         highscore.currentPlayers = (data.currentPlayers)
         highscore.crowned = (data.crowned)
     else
-        print(" - selective data!")
         if data.currentPlayers then
             for username,pData in pairs(data.currentPlayers) do
                 highscore.currentPlayers[username] = pData
@@ -231,7 +208,6 @@ function highscore.receiveHighScore(data)
         if data.topWave then highscore.crowned.topWave = data.topWave end
         if data.topKills then highscore.crowned.topKills = data.topKills end
     end
-
     highscore.reCrown()
 end
 
