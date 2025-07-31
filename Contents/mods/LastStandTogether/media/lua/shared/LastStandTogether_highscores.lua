@@ -7,6 +7,7 @@ highscore.crowned = {}
 highscore.textures = {
     blood = getTexture("media/textures/ui/bloodCrown.png"),
     skull = getTexture("media/textures/ui/lastStandSkull.png"),
+    skullOpen = getTexture("media/textures/ui/lastStandSkullOpen.png"),
     metal = {
         getTexture("media/textures/ui/goldCrown.png"),
         getTexture("media/textures/ui/silverCrown.png"),
@@ -117,7 +118,9 @@ function highscore.reCrown()
         if playerObj and (not playerObj:isDead()) then
             dead = false
         end
-        table.insert(highscore.currentPlayersSort, { displayName = displayName, kills = data.kills, username=username, dead=dead })
+        if not playerObj:isInvisible() then
+            table.insert(highscore.currentPlayersSort, { displayName = displayName, kills = data.kills, username=username, dead=dead })
+        end
     end
 
     table.sort(highscore.currentPlayersSort, function(a, b) return a.kills > b.kills end)
