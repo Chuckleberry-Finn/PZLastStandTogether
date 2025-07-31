@@ -120,12 +120,13 @@ function highscore.reCrown()
     highscore.currentPlayersSort = {}
     for username, data in pairs(highscore.currentPlayers) do
         local displayName = data.steam and data.steam.profileName or username
-        local dead = true
+        local dead, hide = true, false
         local playerObj = highscore.fetchPlayerObject(username)
-        if playerObj and (not playerObj:isDead()) then
-            dead = false
+        if playerObj then
+            dead = playerObj:isDead()
+            hide = playerObj:isInvisible()
         end
-        if not playerObj:isInvisible() then
+        if not hide then
             table.insert(highscore.currentPlayersSort, { displayName = displayName, kills = data.kills, username=username, dead=dead })
         end
     end
@@ -181,26 +182,51 @@ function highscore.update(player, type, username)
         highscore.save()
     end
     if isServer() then
-        local dataToSend = {
-            [username]=highscore.currentPlayers[username],
+        local playerData = highscore.currentPlayers[username]
+        local dataToSend = {---populate a skeleton table with just the user's data
+            currentPlayers={[username]=playerData},
+            ---send all the top-kill data as it's only 3 people
             topKills = highscore.crowned.topKills,
         }
-        highscore.sendHighScore(nil, {currentPlayers=dataToSend})
+        highscore.sendHighScore(nil, dataToSend)
+    end
+end
+
+
+local function printTable(tbl, indent)
+    indent = indent or 0
+    local padding = string.rep("   ", indent) -- 3 spaces per level
+
+    for key, value in pairs(tbl) do
+        local keyStr = tostring(key)
+        if type(value) == "table" then
+            print(padding .. keyStr .. " = {")
+            printTable(value, indent + 1)
+            print(padding .. "}")
+        else
+            print(padding .. keyStr .. " = " .. tostring(value))
+        end
     end
 end
 
 
 function highscore.receiveHighScore(data)
+    print("receiveHighScore!")
+    printTable(data)
 
     if data.all then
+        print(" - data.all!")
+
         highscore.currentPlayers = (data.currentPlayers)
         highscore.crowned = (data.crowned)
     else
+        print(" - selective data!")
         if data.currentPlayers then
             for username,pData in pairs(data.currentPlayers) do
                 highscore.currentPlayers[username] = pData
             end
         end
+        if data.crowned then highscore.crowned = data.crowned end
         --- if not data.all then skip 'crowned' in key nesting
         if data.topWave then highscore.crowned.topWave = data.topWave end
         if data.topKills then highscore.crowned.topKills = data.topKills end
