@@ -44,9 +44,13 @@ end
 
 function highscore.render(UI, x, y)
     UI.highscoreZone = {x=x, y=y, w=32, h=32}
-    UI:drawTextureScaled(highscore.textures.skull, UI.highscoreZone.x, UI.highscoreZone.y, UI.highscoreZone.w, UI.highscoreZone.h, 1, 1, 1, 1)
 
-    if not UI.showHighScore then return end
+    if UI.showHighScore then
+        UI:drawTextureScaled(highscore.textures.skullOpen, UI.highscoreZone.x, UI.highscoreZone.y, UI.highscoreZone.w, UI.highscoreZone.h, 1, 1, 1, 1)
+    else
+        UI:drawTextureScaled(highscore.textures.skull, UI.highscoreZone.x, UI.highscoreZone.y, UI.highscoreZone.w, UI.highscoreZone.h, 1, 1, 1, 1)
+        return
+    end
 
     y = y + 32 + UI.textSmallH*2
 
