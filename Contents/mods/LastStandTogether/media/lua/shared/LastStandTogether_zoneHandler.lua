@@ -175,7 +175,6 @@ function zone.scheduleWave()
 
     if not zone.def.wave then
         zone.def.wave = 0
-        zone.clearZombies()
         local setupTime = 60000 * (SandboxVars.LastStandTogether.SetUpGracePeriod or 3)
         zone.def.nextWaveTime = currentTime + setupTime
     else
@@ -205,7 +204,6 @@ function zone.schedulerLoop()
     if (not zone.def.wave) and ((not players) or zone.allPlayersDead(players)) then
         if not zone.warningNoPlayers then
             zone.warningNoPlayers = true
-            zone.clearZombies()
             zone.def.error = "WAITING FOR PLAYERS"
             zone.sendZoneDef()
         end
@@ -507,16 +505,27 @@ end
 
 function zone.clearZombies()
 
-    local zombiesInCell = getCell():getZombieList()
-    local zombiesInCellSize = zombiesInCell:size()
+    local cell = getCell()
+    local x1 = cell:getMinX()
+    local y1 = cell:getMinY()
 
-    if zombiesInCellSize > 0 then
-        for z=zombiesInCellSize-1, 0, -1 do
-            local zombie = zombiesInCell:get(z)
-            if zombie then
-                zombie:getEmitter():unregister()
-                zombie:removeFromWorld()
-                zombie:removeFromSquare()
+    local x2 = cell:getMaxX()
+    local y2 = cell:getMaxY()
+    local z2 = cell:getMaxZ()
+
+    for z=0, z2 do
+        for x=x1, x2 do
+            for y=y1, y2 do
+                local sq = cell:getGridSquare(x,y,z)
+                if sq then
+                    for i=sq:getMovingObjects():size(),1,-1 do
+                        local testZed = sq:getMovingObjects():get(i-1)
+                        if instanceof(testZed, "IsoZombie") then
+                            testZed:removeFromWorld()
+                            testZed:removeFromSquare()
+                        end
+                    end
+                end
             end
         end
     end
@@ -527,6 +536,7 @@ function zone.clearZombies()
             zpopClearZombies(x, y)
         end
     end
+
 end
 
 
@@ -562,8 +572,6 @@ function zone.setToBuilding(buildingDef)
     zone.def.center = {x=centerX, y=centerY}
     zone.initiateLoop = true
     zone.highscore.load()
-
-    zone.clearZombies()
 
     zone.finalSteps = 5
     Events.OnTick.Add(zone.scheduledFinalSetup)
@@ -604,15 +612,6 @@ end
 
 
 function zone.allPlayersHaveDied()
-
-    local random = (SandboxVars.LastStandTogether.AutoSelectRandomBuilding or false)
-    if not random then
-        zone.def = {}
-        zone.def.error = "GAME ENDED!"
-        zone.clearZombies()
-        zone.sendZoneDef()
-        return
-    end
 
     local now = getTimestampMs()
     if not zone.def.resetCooldown then
