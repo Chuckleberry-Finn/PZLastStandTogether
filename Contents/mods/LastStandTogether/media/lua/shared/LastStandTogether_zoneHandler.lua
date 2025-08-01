@@ -86,6 +86,23 @@ function zone.sendZombieCount(data)
 end
 
 
+function zone.teleportPlayersToCenter()
+    if (not zone.def or not zone.def.center) then return end
+    local players = (isClient() or isServer()) and getOnlinePlayers() or IsoPlayer.getPlayers()
+    for i=0, players:size()-1 do
+        ---@type IsoPlayer|IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
+        local player = players:get(i)
+        if player then
+            player:setX(zone.def.center.x)
+            player:setY(zone.def.center.y)
+            player:setLx(zone.def.center.x)
+            player:setLy(zone.def.center.y)
+            player:setZ(0)
+        end
+    end
+end
+
+
 function zone.onZombieDead(zombie)
     if not zone.def.center then return end
 
