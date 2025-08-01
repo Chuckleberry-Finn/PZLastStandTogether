@@ -205,6 +205,9 @@ function zone.schedulerLoop()
     if (not zone.def.wave) and ((not players) or zone.allPlayersDead(players)) then
         if not zone.warningNoPlayers then
             zone.warningNoPlayers = true
+            zone.clearZombies()
+            zone.def.error = "WAITING FOR PLAYERS"
+            zone.sendZoneDef()
         end
         return
     end

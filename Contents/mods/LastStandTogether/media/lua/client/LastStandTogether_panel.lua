@@ -97,7 +97,7 @@ function lastStandTogetherPanel:onButton(button)
     if button.boolean then
         local value = not SandboxVars.LastStandTogether[button.sandBoxOption]
         SandboxVars.LastStandTogether[button.sandBoxOption] = value
-        self:setSandBoxValue(self.sandBoxOption, value)
+        self:setSandBoxValue(button.sandBoxOption, value)
         return
     end
 
