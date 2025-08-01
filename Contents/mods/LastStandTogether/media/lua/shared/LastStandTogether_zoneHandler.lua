@@ -175,6 +175,7 @@ function zone.scheduleWave()
 
     if not zone.def.wave then
         zone.def.wave = 0
+        zone.clearZombies()
         local setupTime = 60000 * (SandboxVars.LastStandTogether.SetUpGracePeriod or 3)
         zone.def.nextWaveTime = currentTime + setupTime
     else
@@ -204,6 +205,7 @@ function zone.schedulerLoop()
     if (not zone.def.wave) and ((not players) or zone.allPlayersDead(players)) then
         if not zone.warningNoPlayers then
             zone.warningNoPlayers = true
+            zone.clearZombies()
             zone.def.error = "WAITING FOR PLAYERS"
             zone.sendZoneDef()
         end
@@ -506,6 +508,22 @@ end
 function zone.clearZombies()
 
     local cell = getCell()
+
+    ---method 1
+    local zombiesInCell = cell:getZombieList()
+    local zombiesInCellSize = zombiesInCell:size()
+    if zombiesInCellSize > 0 then
+        for z=zombiesInCellSize-1, 0, -1 do
+            local zombie = zombiesInCell:get(z)
+            if zombie then
+                zombie:getEmitter():unregister()
+                zombie:removeFromWorld()
+                zombie:removeFromSquare()
+            end
+        end
+    end
+
+    ---method 2
     local x1 = cell:getMinX()
     local y1 = cell:getMinY()
 
@@ -513,23 +531,20 @@ function zone.clearZombies()
     local y2 = cell:getMaxY()
     local z2 = cell:getMaxZ()
 
-    for z=0, z2 do
-        for x=x1, x2 do
-            for y=y1, y2 do
-                local sq = cell:getGridSquare(x,y,z)
-                if sq then
-                    for i=sq:getMovingObjects():size(),1,-1 do
-                        local testZed = sq:getMovingObjects():get(i-1)
-                        if instanceof(testZed, "IsoZombie") then
-                            testZed:removeFromWorld()
-                            testZed:removeFromSquare()
-                        end
-                    end
+    for z=0, z2 do for x=x1, x2 do for y=y1, y2 do
+        local sq = cell:getGridSquare(x,y,z)
+        if sq then
+            for i=sq:getMovingObjects():size(),1,-1 do
+                local testZed = sq:getMovingObjects():get(i-1)
+                if instanceof(testZed, "IsoZombie") then
+                    testZed:removeFromWorld()
+                    testZed:removeFromSquare()
                 end
             end
         end
-    end
+    end end end
 
+    ---whole world
     local meta = getWorld():getMetaGrid()
     for x = 0, meta:getMaxX() do
         for y = 0, meta:getMaxY() do
@@ -594,15 +609,22 @@ function zone.scheduledFinalSetup()
     elseif zone.finalSteps == 2 then
         local x = zone.def.center.x
         local y = zone.def.center.y
+
         local sq = getSquare(x, y, 0)
         if not sq then return end
-        local buildingDef = sq:getBuilding():getDef()
+
+        local buildingDef = getWorld():getMetaGrid():getBuildingAtRelax(x, y)
         if not buildingDef then return end
+
         zone.establishShopFront(buildingDef)
 
     elseif zone.finalSteps == 1 then
+        local x = zone.def.center.x
+        local y = zone.def.center.y
+        local sq = getSquare(x, y, 0)
+        if not sq then return end
         zone.clearZombies()
-    end
+        end
 
     zone.finalSteps = zone.finalSteps - 1
     if zone.finalSteps <= 0 then
