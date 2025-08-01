@@ -6,6 +6,12 @@ option LastStandTogether.AutoSelectBuildingSizeMinimum
 	page = LastStandTogether, translation = LastStandTogether_AutoSelectBuildingSizeMinimum,
 }
 
+option LastStandTogether.AutoSelectRandomBuilding
+{
+	type = boolean, default = false,
+	page = LastStandTogether, translation = LastStandTogether_AutoSelectRandomBuilding,
+}
+
 option LastStandTogether.BufferSize
 {
 	type = integer, min = -25, max = 25, default = 4,

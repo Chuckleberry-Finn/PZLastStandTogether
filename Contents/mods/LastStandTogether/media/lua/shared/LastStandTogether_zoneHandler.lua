@@ -601,6 +601,16 @@ end
 
 
 function zone.allPlayersHaveDied()
+
+    local random = (SandboxVars.LastStandTogether.AutoSelectRandomBuilding or false)
+    if not random then
+        zone.def = {}
+        zone.def.error = "GAME ENDED!"
+        zone.clearZombies()
+        zone.sendZoneDef()
+        return
+    end
+
     local now = getTimestampMs()
     if not zone.def.resetCooldown then
         zone.def.resetCooldown = now+zone.resetCooldown

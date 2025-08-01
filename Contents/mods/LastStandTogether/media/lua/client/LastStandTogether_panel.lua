@@ -68,18 +68,22 @@ function lastStandTogetherPanel:instantiate()
 end
 
 
+function lastStandTogetherPanel:setSandBoxValue(optionName, value)
+    local options = getSandboxOptions()
+    local option = options and options:getOptionByName("LastStandTogether."..optionName)
+    if option then
+        option:setValue(value)
+        if isClient() then options:sendToServer() end
+        options:toLua()
+    end
+end
+
+
 function lastStandTogetherPanel:onTextEntryEntered()
     ---self = text entry
     local value = tonumber(self:getText())
     if value then
-        local options = getSandboxOptions()
-
-        local option = options and options:getOptionByName("LastStandTogether."..self.sandBoxOption)
-        if option then
-            option:setValue(value)
-            if isClient() then options:sendToServer() end
-            options:toLua()
-        end
+        self:setSandBoxValue(self.sandBoxOption, value)
     end
     lastStandTogetherPanel.instance.textEntry = nil
     self:setVisible(false)
@@ -89,6 +93,14 @@ end
 
 function lastStandTogetherPanel:onButton(button)
     if not button then return end
+
+    if button.boolean then
+        local value = not SandboxVars.LastStandTogether[button.sandBoxOption]
+        SandboxVars.LastStandTogether[button.sandBoxOption] = value
+        self:setSandBoxValue(self.sandBoxOption, value)
+        return
+    end
+
     if lastStandTogetherPanel.textEntry and lastStandTogetherPanel.textEntry:isVisible() then
         lastStandTogetherPanel.textEntry:bringToTop()
         return
@@ -153,6 +165,7 @@ function lastStandTogetherPanel:initialise()
         local title = getText("Sandbox_LastStandTogether_"..k)
         local button = ISButton:new(x, y+20+self.StartButton.height, self.buttonWidth, self.buttonHeight, title, self, lastStandTogetherPanel.onButton)
         button.sandBoxOption = k
+        button.boolean = (v == true or v == false)
         local tooltip = getTextOrNull("Sandbox_LastStandTogether_"..k.."_tooltip")
         if tooltip then button:setTooltip(tooltip) end
         button:initialise()
