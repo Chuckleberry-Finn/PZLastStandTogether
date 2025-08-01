@@ -21,7 +21,7 @@ function lastStandTogetherWaveAlert:onMouseMoveOutside(dx, dy)
     if self.showHighScore and self.waveToolTipZone then
         local x, y = self:getMouseX(), self:getMouseY()
 
-        local uiX = self.waveToolTipZone.x
+        local uiX = self.waveToolTipZone.x-32
         local uiY = self.waveToolTipZone.y
         local uiX2 = self.waveToolTipZone.x+self.waveToolTipZone.w
         local uiY2 = self.waveToolTipZone.y+self.waveToolTipZone.h
