@@ -20,10 +20,13 @@ zone.def.zombiesToSpawn = 0
 zone.def.zombiesSpawned = 0
 zone.def.spawnTickTimer = 0
 
+zone.def.resetCooldown = false
+
 zone.def.buildingID = false
 zone.def.shopMarkers = {}
 zone.def.shopMarkersRooms = {}
 
+zone.resetCooldown = 35000
 zone.playerDeaths = {}
 
 zone.players = {}
@@ -86,20 +89,48 @@ function zone.sendZombieCount(data)
 end
 
 
-function zone.teleportPlayersToCenter()
+function zone.getAllPlayers()
     if (not zone.def or not zone.def.center) then return end
     local players = (isClient() or isServer()) and getOnlinePlayers() or IsoPlayer.getPlayers()
+    if players:size() <= 0 then return false end
+    return players
+end
+
+
+function zone.allPlayersDead(players)
+    if (not zone.def or not zone.def.center) then return end
+    if not players then return false end
+    for i=0, players:size()-1 do
+        ---@type IsoPlayer|IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
+        local player = players:get(i)
+        if player and (not player:isDead()) and (not player:isInvisible()) then
+            return false
+        end
+    end
+    return true
+end
+
+
+function zone.teleportPlayersToZone(players)
+    if (not zone.def or not zone.def.center) then return end
+    if not players then return false end
     for i=0, players:size()-1 do
         ---@type IsoPlayer|IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
         local player = players:get(i)
         if player then
-            player:setX(zone.def.center.x)
-            player:setY(zone.def.center.y)
-            player:setLx(zone.def.center.x)
-            player:setLy(zone.def.center.y)
-            player:setZ(0)
+            local pX, pY, pZ = player:getX(), player:getY(), player:getZ()
+            local dx = math.abs(zone.def.center.x-pX)
+            local dy = math.abs(zone.def.center.y-pY)
+            if ((dx) > zone.def.radius*2.5) or ((dy) > zone.def.radius*2.5) then
+                player:setX(zone.def.center.x)
+                player:setY(zone.def.center.y)
+                player:setLx(zone.def.center.x)
+                player:setLy(zone.def.center.y)
+                player:setZ(0)
+            end
         end
     end
+    return true
 end
 
 
@@ -144,6 +175,7 @@ function zone.scheduleWave()
 
     if not zone.def.wave then
         zone.def.wave = 0
+        zone.clearZombies()
         local setupTime = 60000 * (SandboxVars.LastStandTogether.SetUpGracePeriod or 3)
         zone.def.nextWaveTime = currentTime + setupTime
     else
@@ -165,8 +197,19 @@ function zone.scheduleWave()
 end
 
 
+zone.warningNoPlayers = false
 function zone.schedulerLoop()
     if not (zone.initiateLoop and zone.def and zone.def.center) then return end
+
+    local players = zone.getAllPlayers()
+    if (not zone.def.wave) and ((not players) or zone.allPlayersDead(players)) then
+        if not zone.warningNoPlayers then
+            zone.warningNoPlayers = true
+        end
+        return
+    end
+
+    zone.warningNoPlayers = false
 
     local currentTime = getTimestampMs()
 
@@ -175,8 +218,12 @@ function zone.schedulerLoop()
         return
     end
 
-    if not zone.def.wave then return end
-    local zombiesLeft = zone.def.currentZombies or 0
+    if zone.def.wave and ((not players) or zone.allPlayersDead(players)) then
+        zone.allPlayersHaveDied()
+        return
+    end
+
+    --- zombies left to spawn
     if zone.def.zombiesToSpawn and zone.def.zombiesToSpawn > 0 then
         if not zone.def.spawnTickTimer or currentTime > zone.def.spawnTickTimer then
             local batchSize = math.min(100, zone.def.zombiesToSpawn)
@@ -190,19 +237,20 @@ function zone.schedulerLoop()
         return
     end
 
-    if not zone.def.nextWaveTime then
-        if zombiesLeft <= 0 and (zone.def.zombiesSpawned or 0) > 0 then
-            local base = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 2)
-            local multi = (SandboxVars.LastStandTogether.CoolDownMulti or 1.01)
-            local max = (SandboxVars.LastStandTogether.CoolDownMax or 10) * 60000
+    local zombiesLeft = zone.def.currentZombies or 0
+    if not zone.def.nextWaveTime then --- set wave timer for next wave when all zombies are dead
+    if zombiesLeft <= 0 and (zone.def.zombiesSpawned or 0) > 0 then
+        local base = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 2)
+        local multi = (SandboxVars.LastStandTogether.CoolDownMulti or 1.01)
+        local max = (SandboxVars.LastStandTogether.CoolDownMax or 10) * 60000
 
-            zone.def.waveCooldown = math.min(max, (zone.def.waveCooldown or base) * multi)
-            zone.def.nextWaveTime = currentTime + zone.def.waveCooldown
+        zone.def.waveCooldown = math.min(max, (zone.def.waveCooldown or base) * multi)
+        zone.def.nextWaveTime = currentTime + zone.def.waveCooldown
 
-            if zone.def.wave > 0 then zone.highscore.checkTopWave(zone.def.wave) end
+        if zone.def.wave > 0 then zone.highscore.checkTopWave(zone.def.wave) end
 
-            zone.sendZoneDef()
-        end
+        zone.sendZoneDef()
+    end
         return
     end
 
@@ -392,14 +440,15 @@ function zone.establishShopFront(buildingDef)
         end
     end
 
-    local assignedShops = 1
+    local assignedShops = 0
+    print("LastsStand Together: allContainers for shops: ", #allContainers)
     for shopID,_ in pairs(shops) do
         ---@type IsoObject
         local storeObj = STORE_HANDLER.getStoreByID(shopID)
         if storeObj then
             storeObj.locations = {}
             ---@type IsoObject
-            local container = allContainers[assignedShops]
+            local container = allContainers[assignedShops+1]
             if container then
                 STORE_HANDLER.connectStoreByID(container, shopID)
                 local sq = container:getSquare()
@@ -416,6 +465,7 @@ function zone.establishShopFront(buildingDef)
             end
         end
     end
+    print("LastsStand Together: assigned shops: ", assignedShops)
 
     zone.setRoomsWithShopsMarkers()
 end
@@ -424,10 +474,9 @@ end
 ---@param player IsoObject|IsoMovingObject|IsoGameCharacter|IsoPlayer
 function zone.setToCurrentBuilding(player)
 
-    zone.def = {}
-
     local building = player:getCurrentBuilding()
     if not building then
+        zone.def = {}
         zone.def.error = "NO BUILDING FOUND!"
         zone.sendZoneDef()
         return
@@ -435,7 +484,16 @@ function zone.setToCurrentBuilding(player)
 
     local buildingDef = building and building:getDef()
     if not buildingDef then
+        zone.def = {}
         zone.def.error = "NO BUILDING DEFINITION FOUND!?"
+        zone.sendZoneDef()
+        return
+    end
+
+    local buildingID = buildingDef and buildingDef:getID()
+    if building and zone.def.buildingID and zone.def.buildingID == buildingID then
+        zone.def = {}
+        zone.def.error = "CLEARED BUILDING"
         zone.sendZoneDef()
         return
     end
@@ -445,8 +503,10 @@ end
 
 
 function zone.clearZombies()
+
     local zombiesInCell = getCell():getZombieList()
     local zombiesInCellSize = zombiesInCell:size()
+
     if zombiesInCellSize > 0 then
         for z=zombiesInCellSize-1, 0, -1 do
             local zombie = zombiesInCell:get(z)
@@ -471,6 +531,10 @@ end
 function zone.setToBuilding(buildingDef)
     if not buildingDef then print("ERROR: setToBuilding has invalid buildingDef!") return end
 
+    zone.def = {}
+
+    buildingDef:setAlarmed(false) ---lol
+
     local buildingID = buildingDef and buildingDef:getID()
     zone.def.buildingID = buildingID
 
@@ -493,17 +557,59 @@ function zone.setToBuilding(buildingDef)
     
     zone.def.radius = finalRadius
     zone.def.center = {x=centerX, y=centerY}
-
-    if not isClient() then zone.highscore.load() end
+    zone.initiateLoop = true
+    zone.highscore.load()
 
     zone.clearZombies()
-    zone.establishShopFront(buildingDef)
 
-    zone.initiateLoop = true
-    zone.sendZoneDef()
+    zone.finalSteps = 5
+    Events.OnTick.Add(zone.scheduledFinalSetup)
+end
 
-    zone.highscore.load()
-    zone.highscore.sendHighScore()
+
+zone.finalSteps = false
+function zone.scheduledFinalSetup()
+
+    local players = zone.getAllPlayers()
+    if not players then return end
+
+    if zone.finalSteps == 4 then
+        zone.sendZoneDef()
+        zone.highscore.sendHighScore()
+
+    elseif zone.finalSteps == 3 then
+        zone.teleportPlayersToZone(players)
+
+    elseif zone.finalSteps == 2 then
+        local x = zone.def.center.x
+        local y = zone.def.center.y
+        local sq = getSquare(x, y, 0)
+        if not sq then return end
+        local buildingDef = sq:getBuilding():getDef()
+        if not buildingDef then return end
+        zone.establishShopFront(buildingDef)
+
+    elseif zone.finalSteps == 1 then
+        zone.clearZombies()
+    end
+
+    zone.finalSteps = zone.finalSteps - 1
+    if zone.finalSteps <= 0 then
+        Events.OnTick.Remove(zone.scheduledFinalSetup)
+    end
+end
+
+
+function zone.allPlayersHaveDied()
+    local now = getTimestampMs()
+    if not zone.def.resetCooldown then
+        zone.def.resetCooldown = now+zone.resetCooldown
+        zone.sendZoneDef()
+    else
+        if now > zone.def.resetCooldown then
+            zone.setToBuildingRandom()
+        end
+    end
 end
 
 
@@ -540,8 +646,8 @@ end
 
 function zone.seekNewBuilding()
     local metaGrid = getWorld():getMetaGrid()
-    local buildings = zone.IsoMetaGridGetBuildings(metaGrid)
-    if not buildings then print("ERROR: NO ISOMETAGRID BUILDINGS LIST FOUND") return end
+    local buildings = metaGrid and zone.IsoMetaGridGetBuildings(metaGrid)
+    if not buildings then return end
     local buildingPool = {}
     local buildingSizeMinimum = SandboxVars.LastStandTogether.AutoSelectBuildingSizeMinimum or 20
 

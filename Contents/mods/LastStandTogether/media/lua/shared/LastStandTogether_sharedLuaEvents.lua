@@ -2,12 +2,20 @@ LastStandTogether_Zone = LastStandTogether_Zone or require "LastStandTogether_zo
 
 if not isClient() then --SP and Server Only
     if LastStandTogether_Zone then
+
+        if isServer() then
+            Events.OnGameBoot.Add(LastStandTogether_Zone.setToBuildingRandom)
+        else
+            Events.OnLoad.Add(LastStandTogether_Zone.setToBuildingRandom)
+        end
+
         Events.OnTick.Add(LastStandTogether_Zone.schedulerLoop)
     end
 end
 
 Events.OnZombieDead.Add(LastStandTogether_Zone.onZombieDead)
 Events.OnPlayerDeath.Add(LastStandTogether_Zone.onPlayerDeath)
+
 
 if isServer() then
     local function onClientCommand(_module, _command, _player, _data)
@@ -23,7 +31,6 @@ if isServer() then
         if _command == "updateZoneDefPlayerDeaths" then LastStandTogether_Zone.onPlayerDeath(_player) end
     end
     Events.OnClientCommand.Add(onClientCommand)--what the server gets from the client
-
     Events.OnSave.Add(LastStandTogether_Zone.highscore.save)
 end
 

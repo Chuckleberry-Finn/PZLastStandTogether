@@ -114,7 +114,7 @@ function lastStandTogetherWaveAlert:prerender()
     if not zoneDef or not zoneDef.center then return end
 
     --- WAVE
-    self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or ""
+    self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or "The Horde Approaches"
 
     --- Announcer handler
     if self.waveAnnounceParts and self.waveAnnouncePartsSaid <= #self.waveAnnounceParts then
@@ -129,6 +129,26 @@ function lastStandTogetherWaveAlert:prerender()
     end
 
     local currentTime = getTimestampMs()
+
+
+    ---All Survivors Have Fallen
+    if zoneDef.resetCooldown then
+        local resetText
+        local resetMs = zoneDef.resetCooldown - currentTime
+        if resetMs > 0 then
+            resetText = lastStandTogetherWaveAlert.timeToText(resetMs)
+        end
+
+        self.textLine1 = "All Survivors Have Fallen"
+        self.textLine2 = resetText and ("Reset In: " .. resetText) or ""
+
+        if self.announced ~= 3 and resetMs < (LastStandTogether_Zone.resetCooldown * 0.95) then
+            self.player:playSoundLocal("lastStandTogether_allSurvivorsHaveFallen")
+            self.announced = 3
+        end
+        return
+    end
+
 
     --- NEXT WAVE TIMER
     local nextText
@@ -186,9 +206,7 @@ function lastStandTogetherWaveAlert:render()
     if not zoneDef or not zoneDef.center then return end
     
     local waveAlpha = (self.currentZombies and self.currentZombies > 0 and 0.8) or 0.5
-
     local tempTextY = self.textY
-
     local currentTime = getTimestampMs()
 
     if self.textLine1 ~= "" then
