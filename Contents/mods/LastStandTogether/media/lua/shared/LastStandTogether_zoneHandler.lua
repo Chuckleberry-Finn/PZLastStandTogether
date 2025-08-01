@@ -444,7 +444,7 @@ function zone.establishShopFront(buildingDef)
     end
 
     local assignedShops = 0
-    print("LastsStand Together: allContainers for shops: ", #allContainers)
+    print("Lasts Stand Together: allContainers for shops: ", #allContainers)
     for shopID,_ in pairs(shops) do
         ---@type IsoObject
         local storeObj = STORE_HANDLER.getStoreByID(shopID)
@@ -468,7 +468,7 @@ function zone.establishShopFront(buildingDef)
             end
         end
     end
-    print("LastsStand Together: assigned shops: ", assignedShops)
+    print("Lasts Stand Together: assigned shops: ", assignedShops)
 
     zone.setRoomsWithShopsMarkers()
 end
@@ -506,12 +506,10 @@ end
 
 
 function zone.clearZombies()
-
     local cell = getCell()
-
-    ---method 1
     local zombiesInCell = cell:getZombieList()
     local zombiesInCellSize = zombiesInCell:size()
+
     if zombiesInCellSize > 0 then
         for z=zombiesInCellSize-1, 0, -1 do
             local zombie = zombiesInCell:get(z)
@@ -523,28 +521,6 @@ function zone.clearZombies()
         end
     end
 
-    ---method 2
-    local x1 = cell:getMinX()
-    local y1 = cell:getMinY()
-
-    local x2 = cell:getMaxX()
-    local y2 = cell:getMaxY()
-    local z2 = cell:getMaxZ()
-
-    for z=0, z2 do for x=x1, x2 do for y=y1, y2 do
-        local sq = cell:getGridSquare(x,y,z)
-        if sq then
-            for i=sq:getMovingObjects():size(),1,-1 do
-                local testZed = sq:getMovingObjects():get(i-1)
-                if instanceof(testZed, "IsoZombie") then
-                    testZed:removeFromWorld()
-                    testZed:removeFromSquare()
-                end
-            end
-        end
-    end end end
-
-    ---whole world
     local meta = getWorld():getMetaGrid()
     for x = 0, meta:getMaxX() do
         for y = 0, meta:getMaxY() do
@@ -588,46 +564,64 @@ function zone.setToBuilding(buildingDef)
     zone.initiateLoop = true
     zone.highscore.load()
 
-    zone.finalSteps = 5
+    zone.finalSteps = false
     Events.OnTick.Add(zone.scheduledFinalSetup)
 end
 
 
-zone.finalSteps = false
 function zone.scheduledFinalSetup()
 
     local players = zone.getAllPlayers()
     if not players then return end
 
-    if zone.finalSteps == 4 then
-        zone.sendZoneDef()
-        zone.highscore.sendHighScore()
+    if not zone.finalSteps then
+        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefScore"}
+        zone.finalStepsTime = getTimestampMs() + 100
+        return
+    end
 
-    elseif zone.finalSteps == 3 then
-        zone.teleportPlayersToZone(players)
+    if zone.finalStepsTime > getTimestampMs() then return end
 
-    elseif zone.finalSteps == 2 then
-        local x = zone.def.center.x
-        local y = zone.def.center.y
+    if #zone.finalSteps > 0 then
+        local step = zone.finalSteps[#zone.finalSteps]
 
-        local sq = getSquare(x, y, 0)
-        if not sq then return end
+        if step == "sendDefScore" then
+            zone.sendZoneDef()
+            zone.highscore.sendHighScore()
+            zone.finalSteps[#zone.finalSteps] = nil
+            zone.finalStepsTime = getTimestampMs() + 100
 
-        local buildingDef = getWorld():getMetaGrid():getBuildingAtRelax(x, y)
-        if not buildingDef then return end
+        elseif step == "teleport" then
+            zone.teleportPlayersToZone(players)
+            zone.finalSteps[#zone.finalSteps] = nil
+            zone.finalStepsTime = getTimestampMs() + 400
 
-        zone.establishShopFront(buildingDef)
+        elseif step == "establishShops" then
+            local x = zone.def.center.x
+            local y = zone.def.center.y
+            local sq = getSquare(x, y, 0)
+            local buildingDef = getWorld():getMetaGrid():getBuildingAtRelax(x, y)
+            if sq and  buildingDef then
+                zone.establishShopFront(buildingDef)
+                zone.finalSteps[#zone.finalSteps] = nil
+            end
+            zone.finalStepsTime = getTimestampMs() + 200
 
-    elseif zone.finalSteps == 1 then
-        local x = zone.def.center.x
-        local y = zone.def.center.y
-        local sq = getSquare(x, y, 0)
-        if not sq then return end
-        zone.clearZombies()
+        elseif step == "clearZombies" then
+            local x = zone.def.center.x
+            local y = zone.def.center.y
+
+            local sq = getSquare(x, y, 0)
+            if sq then
+                zone.clearZombies()
+                zone.finalSteps[#zone.finalSteps] = nil
+            end
+            zone.finalStepsTime = getTimestampMs() + 500
         end
+        return
+    end
 
-    zone.finalSteps = zone.finalSteps - 1
-    if zone.finalSteps <= 0 then
+    if #zone.finalSteps <= 0 then
         Events.OnTick.Remove(zone.scheduledFinalSetup)
     end
 end
