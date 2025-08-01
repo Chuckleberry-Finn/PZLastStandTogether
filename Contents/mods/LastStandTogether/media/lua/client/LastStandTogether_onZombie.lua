@@ -8,7 +8,7 @@ function onZombie.collide(zombie, obj)
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
     local zoneDef = LST_zone.def
-    if not zoneDef or not zoneDef.center or not zoneDef.radius then return end
+    if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
 
     local zX, zY = zombie:getX(), zombie:getY()
 
@@ -16,7 +16,7 @@ function onZombie.collide(zombie, obj)
 
     local dx = zoneX - zX
     local dy = zoneY - zY
-    if math.abs(dx) > zoneDef.radius or math.abs(dy) > zoneDef.radius then
+    if math.abs(dx) > zoneDef.dimensions.w or math.abs(dy) > zoneDef.dimensions.h then
         local target = zombie:getTarget()
         local phaseX = (target and target:getX()-zX) or dx
         local phaseY = (target and target:getY()-zY) or dy
@@ -29,7 +29,7 @@ function onZombie.phaseTo(zombie, x, y)
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
     local zoneDef = LST_zone.def
-    if not zoneDef or not zoneDef.center or not zoneDef.radius then return end
+    if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
 
     local zX, zY = zombie:getX(), zombie:getY()
 
@@ -54,13 +54,13 @@ function onZombie.update(zombie)
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
     local zoneDef = LST_zone.def
-    if not zoneDef or not zoneDef.center or not zoneDef.radius then return end
+    if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
 
     local zX, zY = math.floor(zombie:getX()), math.floor(zombie:getY())
     local dx = (zoneDef.center.x-zX)
     local dy = (zoneDef.center.y-zY)
 
-    if (math.abs(dx) > zoneDef.radius) or (math.abs(dy) > zoneDef.radius) then
+    if (math.abs(dx) > zoneDef.dimensions.w) or (math.abs(dy) > zoneDef.dimensions.h) then
 
         local player = getPlayer()
         if zombie:getTarget() ~= player then

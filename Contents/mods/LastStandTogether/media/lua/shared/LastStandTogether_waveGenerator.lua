@@ -6,7 +6,7 @@ function waveGenerator.spawnZombies(numberOf)
     if not LST_zone then print("ERROR: spawnZombies FAILED! - NO LST_zone!") return end
 
     local zoneDef = LST_zone.def
-    if not zoneDef or not zoneDef.center or not zoneDef.radius then print("ERROR: spawnZombies FAILED! - zoneDef invalid!") return end
+    if not zoneDef or not zoneDef.center or not zoneDef.dimensions then print("ERROR: spawnZombies FAILED! - zoneDef invalid!") return end
 
     local x1 = zoneDef.center.x-50
     local y1 = zoneDef.center.y-50

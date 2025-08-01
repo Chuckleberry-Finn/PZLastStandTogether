@@ -20,12 +20,12 @@ function zoneRender.drawEdge(x1, y1, x2, y2, width, color)
 end
 
 
-function zoneRender.drawSquare(centerX, centerY, radius, color, thickness)
+function zoneRender.drawSquare(centerX, centerY, dimensionsW, dimensionsH, color, thickness)
 
-    local x1 = centerX - radius
-    local y1 = centerY - radius
-    local x2 = centerX + radius
-    local y2 = centerY + radius
+    local x1 = centerX - dimensionsW
+    local y1 = centerY - dimensionsH
+    local x2 = centerX + dimensionsW
+    local y2 = centerY + dimensionsH
 
     local sx1, sy1 = ISCoordConversion.ToScreen(x1, y1, 0)-- Top-left
     local sx2, sy2 = ISCoordConversion.ToScreen(x2, y1, 0) -- Top-right
@@ -52,7 +52,7 @@ function zoneRender.drawZoneEffects()
     local debug = (player:isNoClip() and getDebug())
 
     local zoneDef = LST_zone.def
-    if not zoneDef or not zoneDef.center or not zoneDef.radius then return end
+    if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
 
     local pX, pY, pZ = player:getX(), player:getY(), player:getZ()
     local dx = math.abs(zoneDef.center.x-pX)
@@ -92,39 +92,55 @@ function zoneRender.drawZoneEffects()
         end
     end
 
-    if ((dx) > zoneDef.radius) or ((dy) > zoneDef.radius) then
+    if ((dx) > zoneDef.dimensions.w) or ((dy) > zoneDef.dimensions.h) then
 
         local fadeRate = SandboxVars.LastStandTogether.OutOfBoundsFade or 0.33
         if fadeRate < 1 and (not debug) then
-            local inner = zoneDef.radius
-            local outer = inner * (1 + fadeRate)
-            local transitionRange = outer - inner
-            local maxFadeDistSquared = transitionRange * transitionRange * 2
-            local excessX = dx > inner and (dx - inner) or 0
-            local excessY = dy > inner and (dy - inner) or 0
+            local innerW = zoneDef.dimensions.w
+            local innerH = zoneDef.dimensions.h
+
+            local outerW = innerW * (1 + fadeRate)
+            local outerH = innerH * (1 + fadeRate)
+
+            local transitionRangeX = outerW - innerW
+            local transitionRangeY = outerH - innerH
+
+            local maxFadeDistSquared = transitionRangeX * transitionRangeX + transitionRangeY * transitionRangeY
+
+            local excessX = math.max(0, math.abs(dx) - innerW)
+            local excessY = math.max(0, math.abs(dy) - innerH)
+
             local fadeDistSq = excessX * excessX + excessY * excessY
             local fade = fadeDistSq > 0 and math.min(1, fadeDistSq / maxFadeDistSquared) or 0
+
             fade = fade * fade * (3 - 2 * fade)
-            getRenderer():renderRect(0, 0, getCore():getScreenWidth()*zoom, getCore():getScreenHeight()*zoom, 0.1, 0.1, 0.1, fade)
+            getRenderer():renderRect(
+                    0, 0,
+                    getCore():getScreenWidth() * zoom,
+                    getCore():getScreenHeight() * zoom,
+                    0.1, 0.1, 0.1, fade
+            )
         end
 
-        if ((dx) > zoneDef.radius*1.75) or ((dy) > zoneDef.radius*1.76) then
+        if ((dx) > zoneDef.dimensions.w*1.75) or ((dy) > zoneDef.dimensions.h*1.76) then
             local outerZoneColor = {r=0.854901961, g=0.125490196 , b=0.125490196, a=0.9}
-            zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y, zoneDef.radius*2, outerZoneColor, 5)
+            zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y,
+                    zoneDef.dimensions.w*2, zoneDef.dimensions.h*2,
+                    outerZoneColor, 5)
         end
 
 
         if (not debug) then
-            if ((dx) > zoneDef.radius*2) or ((dy) > zoneDef.radius*2) then
-                local minX = zoneDef.center.x - (zoneDef.radius*2)
-                local maxX = zoneDef.center.x + (zoneDef.radius*2)
-                local minY = zoneDef.center.y - (zoneDef.radius*2)
-                local maxY = zoneDef.center.y + (zoneDef.radius*2)
+            if ((dx) > zoneDef.dimensions.w*2) or ((dy) > zoneDef.dimensions.h*2) then
+                local minX = zoneDef.center.x - (zoneDef.dimensions.w*2)
+                local maxX = zoneDef.center.x + (zoneDef.dimensions.w*2)
+                local minY = zoneDef.center.y - (zoneDef.dimensions.h*2)
+                local maxY = zoneDef.center.y + (zoneDef.dimensions.h*2)
 
                 local clampedX = math.max(minX, math.min(player:getX(), maxX))
                 local clampedY = math.max(minY, math.min(player:getY(), maxY))
 
-                if ((dx) > zoneDef.radius*2.5) or ((dy) > zoneDef.radius*2.5) then
+                if ((dx) > zoneDef.dimensions.w*2.5) or ((dy) > zoneDef.dimensions.h*2.5) then
                     clampedX, clampedY = zoneDef.center.x, zoneDef.center.y
                 end
 
@@ -162,7 +178,7 @@ function zoneRender.drawZoneEffects()
     end
 
     local zoneColor = {r=0.854901961, g=0.64705882352 , b=0.125490196, a=0.5}
-    zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y, zoneDef.radius, zoneColor, 3)
+    zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y, zoneDef.dimensions.w, zoneDef.dimensions.h, zoneColor, 3)
 end
 
 

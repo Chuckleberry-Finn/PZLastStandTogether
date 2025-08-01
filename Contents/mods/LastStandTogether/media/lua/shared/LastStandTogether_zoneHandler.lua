@@ -5,7 +5,7 @@ local zone = {}
 
 zone.def = {}
 zone.def.center = false
-zone.def.radius = false
+zone.def.dimensions = false
 
 zone.def.error = false
 
@@ -121,7 +121,8 @@ function zone.teleportPlayersToZone(players)
             local pX, pY, pZ = player:getX(), player:getY(), player:getZ()
             local dx = math.abs(zone.def.center.x-pX)
             local dy = math.abs(zone.def.center.y-pY)
-            if ((dx) > zone.def.radius*2.5) or ((dy) > zone.def.radius*2.5) then
+
+            if ((dx) > zone.def.dimensions.w*2.5) or ((dy) > zone.def.dimensions.h*2.5) then
                 player:setX(zone.def.center.x)
                 player:setY(zone.def.center.y)
                 player:setLx(zone.def.center.x)
@@ -548,12 +549,11 @@ function zone.setToBuilding(buildingDef)
     local centerX = (buildingDef:getX()+(buildingDefW/2))
     local centerY = (buildingDef:getY()+(buildingDefH/2))
 
-    local largestSize = math.max(buildingDefW,buildingDefH)
     local bufferSize = (SandboxVars.LastStandTogether.BufferSize or 4)
-    local preFinalRadius = math.max(1, largestSize+bufferSize)
-    local finalRadius = math.min(50, preFinalRadius)
-    
-    zone.def.radius = finalRadius
+    local zoneWidth = math.min(50, math.max(1, buildingDefW + bufferSize))
+    local zoneHeight = math.min(50, math.max(1, buildingDefH + bufferSize))
+
+    zone.def.dimensions = {w=zoneWidth, h=zoneHeight}
     zone.def.center = {x=centerX, y=centerY}
     zone.initiateLoop = true
     zone.highscore.load()

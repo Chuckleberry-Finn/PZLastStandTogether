@@ -109,7 +109,10 @@ Welcome to the Last Stand!
 [ 7/31/25 ]
 - Tweak: Invisible players won't show up on the leaderboard. (For observing admins)
 - Tweak: Highscore Skull now opens its mouth during display.
-- Added warning when max radius is reached during placement.
 - Refactored: Highscore data only sends necessary data for syncing.
    (Rather than the entire top-wave, top-kills, and current players.)
+- Refactored the zone boundary system to wrap to the building.
+  - Rather than square it off by the largest side.
+- Added select random building button to the setup panel.
+- Added automated random-select system with sandbox options.
 [ ------ ]
