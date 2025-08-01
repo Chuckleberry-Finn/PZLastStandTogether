@@ -558,6 +558,21 @@ function zone.setToBuilding(buildingDef)
     zone.initiateLoop = true
     zone.highscore.load()
 
+    if LivesToLive then
+        ---Workshop ID: 3296856214
+        ---Mod ID: BB_LivesToLiveRedux
+        ---Compat Patch
+        for i=1, #LivesToLive.playerList do
+            local playerData = LivesToLive.playerList[i]
+            if playerData then playerData.currentLives = SandboxVars.LivesToLive.StartAmount end
+        end
+        local onlinePlayers = getOnlinePlayers()
+        for i = 0, onlinePlayers:size()-1 do
+            local player = onlinePlayers:get(i)
+            if player then sendServerCommand(player, "LivesToLive", "Refresh", {}) end
+        end
+    end
+
     zone.finalSteps = false
     Events.OnTick.Add(zone.scheduledFinalSetup)
 end

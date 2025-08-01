@@ -106,7 +106,7 @@ Welcome to the Last Stand!
 - Added player highscores with top scores!
 [ ------ ]
 
-[ 7/31/25 ]
+[ 8/1/25 ]
 - Tweak: Invisible players won't show up on the leaderboard. (For observing admins)
 - Tweak: Highscore Skull now opens its mouth during display.
 - Refactored: Highscore data only sends necessary data for syncing.
@@ -115,4 +115,8 @@ Welcome to the Last Stand!
   - Rather than square it off by the largest side.
 - Added select random building button to the setup panel.
 - Added automated random-select system with sandbox options.
+[ ------ ]
+
+[ 8/1/25 - hotfix ]
+- BB_LivesToLiveRedux Compat Patch to reset Lives.
 [ ------ ]
