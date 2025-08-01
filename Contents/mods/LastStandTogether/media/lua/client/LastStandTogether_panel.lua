@@ -73,8 +73,8 @@ function lastStandTogetherPanel:setSandBoxValue(optionName, value)
     local option = options and options:getOptionByName("LastStandTogether."..optionName)
     if option then
         option:setValue(value)
-        if isClient() then options:sendToServer() end
         options:toLua()
+        if isClient() then options:sendToServer() end
     end
 end
 
@@ -83,7 +83,7 @@ function lastStandTogetherPanel:onTextEntryEntered()
     ---self = text entry
     local value = tonumber(self:getText())
     if value then
-        self:setSandBoxValue(self.sandBoxOption, value)
+        self.parent:setSandBoxValue(self.sandBoxOption, value)
     end
     lastStandTogetherPanel.instance.textEntry = nil
     self:setVisible(false)
