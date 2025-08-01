@@ -31,7 +31,8 @@ highscore.textures = {
 function highscore.drawTextBoxed(UI, text, x, y, a, right, crossed)
     local r, g, b, font, height = 0.9, 0.2, 0.2, UIFont.Small, UI.textSmallH
     local w = getTextManager():MeasureStringX(font, text)
-    UI:drawRect(x-4, y-1, w+8, height+1, 0.4, 0, 0, 0)
+
+    UI:drawRect(x-4-(right and w or 0), y-1, w+8, height+1, 0.4, 0, 0, 0)
 
     local style = right and "drawTextRight" or "drawText"
     UI[style](UI, text, x, y, r, g, b, (a or 1), font)
