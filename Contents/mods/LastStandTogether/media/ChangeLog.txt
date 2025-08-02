@@ -120,3 +120,7 @@ Welcome to the Last Stand!
 [ 8/1/25 - hotfix ]
 - BB_LivesToLiveRedux Compat Patch to reset Lives.
 [ ------ ]
+
+[ 8/1/25 - hotfix 2 ]
+- New rounds resets current kills.
+[ ------ ]

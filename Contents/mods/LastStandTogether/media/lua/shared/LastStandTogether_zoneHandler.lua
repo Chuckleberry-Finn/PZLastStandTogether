@@ -573,6 +573,7 @@ function zone.setToBuilding(buildingDef)
         end
     end
 
+    zone.highscore.reset()
     zone.finalSteps = false
     Events.OnTick.Add(zone.scheduledFinalSetup)
 end
@@ -584,7 +585,7 @@ function zone.scheduledFinalSetup()
     if not players then return end
 
     if not zone.finalSteps then
-        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefScore"}
+        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefAndScores"}
         zone.finalStepsTime = getTimestampMs() + 100
         return
     end
@@ -594,7 +595,7 @@ function zone.scheduledFinalSetup()
     if #zone.finalSteps > 0 then
         local step = zone.finalSteps[#zone.finalSteps]
 
-        if step == "sendDefScore" then
+        if step == "sendDefAndScores" then
             zone.sendZoneDef()
             zone.highscore.sendHighScore()
             zone.finalSteps[#zone.finalSteps] = nil

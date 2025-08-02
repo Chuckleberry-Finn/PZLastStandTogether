@@ -194,6 +194,13 @@ function highscore.update(player, type, username)
 end
 
 
+function highscore.reset()
+    for username, data in pairs(highscore.currentPlayers) do
+        data.kills = 0
+    end
+end
+
+
 function highscore.receiveHighScore(data)
     if data.all then
         highscore.currentPlayers = (data.currentPlayers)
