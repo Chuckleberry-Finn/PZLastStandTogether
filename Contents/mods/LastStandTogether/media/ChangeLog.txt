@@ -128,6 +128,4 @@ Welcome to the Last Stand!
 [ 8/4/25 ]
 - Tweak: Added sanity-checks for wallet handling. (Other mods were causing bugs.)
 - Fix: Added sanity checks for zombie kills. (Other mods were causing bugs.)
-
-- NOTE: For those having issues with Food items being stale/rotten, set the age to 0, and lastAge to -1.
 [ ------ ]
