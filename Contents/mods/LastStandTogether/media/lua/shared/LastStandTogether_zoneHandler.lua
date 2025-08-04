@@ -138,27 +138,33 @@ end
 function zone.onZombieDead(zombie)
     if not zone.def.center then return end
 
+    local attacker = zombie:getAttackedBy()
+    local attackerPlayer = attacker and instanceof(attacker,"IsoPlayer") and attacker or false
+
     if (not isClient()) then
-        local attacker = zombie:getAttackedBy()
-        if attacker then zone.highscore.update(attacker, "zombieKill") end
+        if attackerPlayer then
+            zone.highscore.update(attackerPlayer, "zombieKill")
+        end
 
         zone.def.currentZombies = math.max(0, (zone.def.currentZombies or 0) - 1)
     end
-    zone.sendZombieCount({ currentZombies = zone.def.currentZombies })
+
+    if isServer() then
+        zone.sendZombieCount({ currentZombies = zone.def.currentZombies })
+    end
 
     --sends money handling for clients
     if not isServer() then
-        local attacker = zombie:getAttackedBy()
-        if attacker then
+        if attackerPlayer then
             local value = SandboxVars.LastStandTogether.MoneyPerKill
-            local walletID = getOrSetWalletID(attacker)
+            local walletID = getOrSetWalletID(attackerPlayer)
             if not walletID then
                 local moneyTypes = _internal.getMoneyTypes()
                 local type = moneyTypes[ZombRand(#moneyTypes)+1]
                 local money = InventoryItemFactory.CreateItem(type)
                 if money then
                     generateMoneyValue(money, value, true)
-                    attacker:getInventory():AddItem(money)
+                    attackerPlayer:getInventory():AddItem(money)
                 end
                 return
             end
@@ -273,8 +279,8 @@ zone.clientSideLoginCheck = 2
 function zone.onLogin(playerObj)
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
-        sendClientCommand(getPlayer(),"LastStandTogether", "requestZone", {})
-        sendClientCommand(getPlayer(),"LastStandTogether", "requestHighscores", {login=true})
+        sendClientCommand(playerObj,"LastStandTogether", "requestZone", {})
+        sendClientCommand(playerObj,"LastStandTogether", "requestHighscores", {login=true})
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
 end
