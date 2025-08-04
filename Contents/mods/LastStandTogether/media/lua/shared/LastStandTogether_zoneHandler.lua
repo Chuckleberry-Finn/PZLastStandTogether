@@ -276,11 +276,20 @@ end
 
 
 zone.clientSideLoginCheck = 2
+
+function zone.onPlayerCreate(playerID)
+    zone.clientSideLoginCheck = 2
+    Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
+end
+
 function zone.onLogin(playerObj)
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
-        sendClientCommand(playerObj,"LastStandTogether", "requestZone", {})
-        sendClientCommand(playerObj,"LastStandTogether", "requestHighscores", {login=true})
+        lastStandTogetherWaveAlert:setToScreen()
+        if isClient() then
+            sendClientCommand(playerObj,"LastStandTogether", "requestZone", {})
+            sendClientCommand(playerObj,"LastStandTogether", "requestHighscores", {login=true})
+        end
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
 end
@@ -292,10 +301,6 @@ function zone.sendZoneDef(player)
             sendServerCommand(player, "LastStandTogether", "updateZone", zone.def)
         else
             sendServerCommand("LastStandTogether", "updateZone", zone.def)
-        end
-    else
-        if not lastStandTogetherWaveAlert.instance then
-            lastStandTogetherWaveAlert:setToScreen()
         end
     end
 end

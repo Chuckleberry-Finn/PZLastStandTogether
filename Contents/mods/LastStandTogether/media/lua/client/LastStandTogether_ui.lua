@@ -113,6 +113,8 @@ function lastStandTogetherWaveAlert:prerender()
     local zoneDef = LST_zone and LST_zone.def
     if not zoneDef or not zoneDef.center then return end
 
+    if self.player and self.player ~= getPlayer() then self.player = getPlayer() end
+
     --- WAVE
     self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or "The Horde Approaches"
 

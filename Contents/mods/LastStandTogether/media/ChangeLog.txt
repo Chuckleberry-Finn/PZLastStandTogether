@@ -129,3 +129,8 @@ Welcome to the Last Stand!
 - Tweak: Added sanity-checks for wallet handling. (Other mods were causing bugs.)
 - Fix: Added sanity checks for zombie kills. (Other mods were causing bugs.)
 [ ------ ]
+
+[  ]
+- Tweak/Fix: UI reset issue on respawn.
+- Refactored login setup.
+[ ------ ]

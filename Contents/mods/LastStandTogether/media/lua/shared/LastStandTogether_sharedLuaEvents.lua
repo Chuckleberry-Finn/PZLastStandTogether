@@ -39,8 +39,11 @@ end
 
 Events.OnInitWorld.Add(LastStandTogether_Zone.setSandboxForLastStand)
 
+if not isServer() then
+    Events.OnCreatePlayer.Add(LastStandTogether_Zone.onPlayerCreate)
+end
+
 if isClient() then
-    Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
 
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
