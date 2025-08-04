@@ -332,9 +332,11 @@ function highscore.save()
         table.insert(lines, string.format("    wave = %d,", highscore.crowned.topWave.wave or 0))
         table.insert(lines, "    players = {")
 
-        for i=1, #highscore.crowned.topWave.players do
-            local name = highscore.crowned.topWave.players[i]
-            table.insert(lines, string.format("      %q,", name))
+        if highscore.crowned.topWave.players then
+            for i=1, #highscore.crowned.topWave.players do
+                local name = highscore.crowned.topWave.players[i]
+                table.insert(lines, string.format("      %q,", name))
+            end
         end
 
         table.insert(lines, "    },")
