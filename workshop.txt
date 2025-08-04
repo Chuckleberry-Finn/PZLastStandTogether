@@ -4,9 +4,11 @@ title=Last Stand Together
 description=[h1]Make your last stand![/h1]
 description=[h2]Laststand Together is a multiplayer readaptation of the Last Stand game mode.[/h2]
 description=
-description=[b]Instructions:[/b] As admin/host (or debug mode) hit escape and view the Setup Panel. Select a building in Project Zomboid to be your base of operations.
+description=[b]Instructions:[/b] In Singplayer or in MP as admin/host (or debug mode) hit escape and view the Setup Panel. Select a building in Project Zomboid to be your base of operations.
 description=
-description=Full (and automatic) integration with Shops and Traders (see: required items). Shops arranged using Shops and Traders will automatically fill the building's most container-heavy room.
+description=Full (and automatic) integration with [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2853615523]Shops and Traders[/url] (see: required items). Shops arranged using Shops and Traders will automatically fill the building's most container-heavy room.
+description=
+description=Supports: [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3296856214]7 Lives To Live Redux[/url] by [url=https://steamcommunity.com/id/BitBraven]BitBraven[/url]. For those interested in limited lives per round - lives are refreshed per round/game (not wave.)
 description=
 description=Zombies wave population, intervals, and more can all be configured in the panel or in sandbox options.
 description=
