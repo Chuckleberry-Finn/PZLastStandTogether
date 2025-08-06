@@ -121,12 +121,15 @@ function highscore.reCrown()
     highscore.currentPlayersSort = {}
     for username, data in pairs(highscore.currentPlayers) do
         local displayName = data.steam and data.steam.profileName or username
-        local dead, hide = true, false
+        local dead, hide, spectating = true, false, false
         local playerObj = highscore.fetchPlayerObject(username)
         if playerObj then
-            dead = playerObj:isDead()
-            hide = playerObj:isInvisible()
+            spectating = Spectate and Spectate.isSpectating(playerObj) or false
+            if spectating then playerObj:setZombiesDontAttack(true) end
+            dead = playerObj:isDead() or spectating or false
+            hide = playerObj:isInvisible() and not spectating
         end
+
         if not hide then
             table.insert(highscore.currentPlayersSort, { displayName = displayName, kills = data.kills, username=username, dead=dead })
         end
@@ -195,9 +198,8 @@ end
 
 
 function highscore.reset()
-    for username, data in pairs(highscore.currentPlayers) do
-        data.kills = 0
-    end
+    highscore.currentPlayers = {}
+    highscore.setAllPlayers()
 end
 
 

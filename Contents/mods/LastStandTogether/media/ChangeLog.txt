@@ -131,6 +131,11 @@ Welcome to the Last Stand!
 [ ------ ]
 
 [  ]
-- Tweak/Fix: UI reset issue on respawn.
-- Refactored login setup.
+- Fix: UI resets on respawn.
+- Added: Warning on UI when waiting for players.
+- Tweak: Increased delay to 'all survivors have died' message.
+- Reworked Single-Player experience to be smoother when dying/respawning.
+- Refactored 'player login' code to better handle edge-cases.
+- Refactored fall-back spawner logic.
+   (Should help with zombie depop at higher populations/cell-edge depop.)
 [ ------ ]

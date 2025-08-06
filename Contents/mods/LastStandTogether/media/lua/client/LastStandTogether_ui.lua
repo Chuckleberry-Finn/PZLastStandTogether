@@ -118,6 +118,11 @@ function lastStandTogetherWaveAlert:prerender()
     --- WAVE
     self.textLine1 = (zoneDef and zoneDef.wave and (zoneDef.wave > 0) and ("Wave " .. zoneDef.wave)) or "The Horde Approaches"
 
+    if zoneDef.warningNoPlayers then
+        self.textLine2 = "Waiting For Players..."
+        return
+    end
+
     --- Announcer handler
     if self.waveAnnounceParts and self.waveAnnouncePartsSaid <= #self.waveAnnounceParts then
         local noLongerPlaying = (self.playWaveAnnouncePart and not self.player:getEmitter():isPlaying(self.playWaveAnnouncePart))
@@ -144,7 +149,7 @@ function lastStandTogetherWaveAlert:prerender()
         self.textLine1 = "All Survivors Have Fallen"
         self.textLine2 = resetText and ("Reset In: " .. resetText) or ""
 
-        if self.announced ~= 3 and resetMs < (LastStandTogether_Zone.resetCooldown * 0.95) then
+        if self.announced ~= 3 and resetMs < (LastStandTogether_Zone.resetCooldown * 0.80) then
             self.player:playSoundLocal("lastStandTogether_allSurvivorsHaveFallen")
             self.announced = 3
         end

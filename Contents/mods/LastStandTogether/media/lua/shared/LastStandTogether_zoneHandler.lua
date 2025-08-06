@@ -21,6 +21,7 @@ zone.def.zombiesSpawned = 0
 zone.def.spawnTickTimer = 0
 
 zone.def.resetCooldown = false
+zone.def.warningNoPlayers = false
 
 zone.def.buildingID = false
 zone.def.shopMarkers = {}
@@ -94,6 +95,20 @@ function zone.getAllPlayers()
     local players = (isClient() or isServer()) and getOnlinePlayers() or IsoPlayer.getPlayers()
     if players:size() <= 0 then return false end
     return players
+end
+
+
+function zone.killSpectators(players)
+    if not players then return false end
+    if not Spectate then return end
+    for i=0, players:size()-1 do
+        ---@type IsoPlayer|IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
+        local player = players:get(i)
+        if player and Spectate.isSpectating(player) then
+            player:Kill()
+        end
+    end
+    return true
 end
 
 
@@ -204,14 +219,13 @@ function zone.scheduleWave()
 end
 
 
-zone.warningNoPlayers = false
 function zone.schedulerLoop()
     if not (zone.initiateLoop and zone.def and zone.def.center) then return end
 
     local players = zone.getAllPlayers()
     if (not zone.def.wave) and ((not players) or zone.allPlayersDead(players)) then
-        if not zone.warningNoPlayers then
-            zone.warningNoPlayers = true
+        if not zone.def.warningNoPlayers then
+            zone.def.warningNoPlayers = true
             zone.clearZombies()
             zone.def.error = "WAITING FOR PLAYERS"
             zone.sendZoneDef()
@@ -219,7 +233,8 @@ function zone.schedulerLoop()
         return
     end
 
-    zone.warningNoPlayers = false
+    zone.def.error = ""
+    zone.def.warningNoPlayers = false
 
     local currentTime = getTimestampMs()
 
@@ -247,48 +262,65 @@ function zone.schedulerLoop()
         return
     end
 
-    local zombiesLeft = zone.def.currentZombies or 0
-    if not zone.def.nextWaveTime then --- set wave timer for next wave when all zombies are dead
-    if zombiesLeft <= 0 and (zone.def.zombiesSpawned or 0) > 0 then
-        local base = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 2)
-        local multi = (SandboxVars.LastStandTogether.CoolDownMulti or 1.01)
-        local max = (SandboxVars.LastStandTogether.CoolDownMax or 10) * 60000
-
-        zone.def.waveCooldown = math.min(max, (zone.def.waveCooldown or base) * multi)
-        zone.def.nextWaveTime = currentTime + zone.def.waveCooldown
-
-        if zone.def.wave > 0 then zone.highscore.checkTopWave(zone.def.wave) end
-
-        zone.sendZoneDef()
-    end
-        return
-    end
-
-    if currentTime > zone.def.nextWaveTime and zombiesLeft <= 0 then zone.scheduleWave() return end
+    local zombiesLeft = (zone.def.currentZombies or 0) + (zone.def.zombiesToSpawn or 0)
 
     local zombiesInCell = getWorld():getCell():getZombieList():size()
     if zombiesLeft > 0 and zombiesInCell <= 0 then
         local need = math.max(0, zombiesLeft - zombiesInCell)
         local spawned = (need>0) and waveGen.spawnZombies(need)
         print("WARNING: Spawned fallback zombies. spawned:", spawned, "  needed:",need)
+        zone.def.error = "WARNING: Fall-back spawner spawned "..spawned.." zombies."
+        zone.sendZoneDef()
     end
+
+    if not zone.def.nextWaveTime then --- set wave timer for next wave when all zombies are dead
+        if zombiesLeft <= 0 and (zone.def.zombiesSpawned or 0) > 0 then
+            local base = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 2)
+            local multi = (SandboxVars.LastStandTogether.CoolDownMulti or 1.01)
+            local max = (SandboxVars.LastStandTogether.CoolDownMax or 10) * 60000
+
+            zone.def.waveCooldown = math.min(max, (zone.def.waveCooldown or base) * multi)
+            zone.def.nextWaveTime = currentTime + zone.def.waveCooldown
+
+            if zone.def.wave > 0 then zone.highscore.checkTopWave(zone.def.wave) end
+
+            zone.sendZoneDef()
+        end
+        return
+    end
+
+    if currentTime > zone.def.nextWaveTime and zombiesLeft <= 0 then zone.scheduleWave() return end
+
 end
 
 
 zone.clientSideLoginCheck = 2
-
 function zone.onPlayerCreate(playerID)
+    if Spectate and Spectate.isSpectating(getSpecificPlayer(playerID)) then return end
     zone.clientSideLoginCheck = 2
     Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
 end
 
+
 function zone.onLogin(playerObj)
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
+
+        if Spectate then
+            local record = zone.highscore.currentPlayers and zone.highscore.currentPlayers[playerObj:getUsername()]
+            if not record and Spectate.isSpectating(playerObj) then
+                Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
+                playerObj:Kill()
+                return
+            end
+        end
+
         lastStandTogetherWaveAlert:setToScreen()
         if isClient() then
             sendClientCommand(playerObj,"LastStandTogether", "requestZone", {})
             sendClientCommand(playerObj,"LastStandTogether", "requestHighscores", {login=true})
+        else
+            zone.highscore.setAllPlayers()
         end
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
@@ -596,7 +628,7 @@ function zone.scheduledFinalSetup()
     if not players then return end
 
     if not zone.finalSteps then
-        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefAndScores"}
+        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefAndScores", "killSpectators"}
         zone.finalStepsTime = getTimestampMs() + 100
         return
     end
@@ -606,7 +638,12 @@ function zone.scheduledFinalSetup()
     if #zone.finalSteps > 0 then
         local step = zone.finalSteps[#zone.finalSteps]
 
-        if step == "sendDefAndScores" then
+        if step == "killSpectators" then
+            if Spectate then zone.killSpectators(players) end
+            zone.finalSteps[#zone.finalSteps] = nil
+            zone.finalStepsTime = getTimestampMs() + 50
+
+        elseif step == "sendDefAndScores" then
             zone.sendZoneDef()
             zone.highscore.sendHighScore()
             zone.finalSteps[#zone.finalSteps] = nil
