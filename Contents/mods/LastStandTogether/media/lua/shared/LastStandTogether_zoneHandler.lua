@@ -97,7 +97,7 @@ function zone.getAllPlayers()
     return players
 end
 
-
+--[[
 function zone.killSpectators(players)
     if not players then return false end
     if not Spectate then return end
@@ -110,7 +110,7 @@ function zone.killSpectators(players)
     end
     return true
 end
-
+--]]
 
 function zone.allPlayersDead(players)
     if (not zone.def or not zone.def.center) then return end
@@ -296,12 +296,12 @@ end
 
 zone.clientSideLoginCheck = 2
 function zone.onPlayerCreate(playerID)
-    if Spectate and Spectate.isSpectating(getSpecificPlayer(playerID)) then return end
+    --if Spectate and Spectate.isSpectating(getSpecificPlayer(playerID)) then return end
     zone.clientSideLoginCheck = 2
     Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
 end
 
-
+--[[
 function zone.respawnPlayer()
     if MainScreen.instance:isReallyVisible() then return end
     setGameSpeed(1)
@@ -313,12 +313,13 @@ function zone.respawnPlayer()
         CoopCharacterCreation:newPlayerMouse()
     end
 end
-
+--]]
 
 function zone.onLogin(playerObj)
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
 
+        --[[
         if Spectate then
             local record = zone.highscore.currentPlayers and zone.highscore.currentPlayers[playerObj:getUsername()]
             if not record and Spectate.isSpectating(playerObj) then
@@ -327,6 +328,7 @@ function zone.onLogin(playerObj)
                 return
             end
         end
+        --]]
 
         lastStandTogetherWaveAlert:setToScreen()
         if isClient() then
@@ -641,7 +643,7 @@ function zone.scheduledFinalSetup()
     if not players then return end
 
     if not zone.finalSteps then
-        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefAndScores", "killSpectators"}
+        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefAndScores"}--, "killSpectators"}
         zone.finalStepsTime = getTimestampMs() + 100
         return
     end
@@ -651,12 +653,16 @@ function zone.scheduledFinalSetup()
     if #zone.finalSteps > 0 then
         local step = zone.finalSteps[#zone.finalSteps]
 
+        --[[
         if step == "killSpectators" then
             if Spectate then zone.killSpectators(players) end
             zone.finalSteps[#zone.finalSteps] = nil
             zone.finalStepsTime = getTimestampMs() + 50
 
-        elseif step == "sendDefAndScores" then
+        else
+        --]]
+
+        if step == "sendDefAndScores" then
             zone.sendZoneDef()
             zone.highscore.sendHighScore()
             zone.finalSteps[#zone.finalSteps] = nil

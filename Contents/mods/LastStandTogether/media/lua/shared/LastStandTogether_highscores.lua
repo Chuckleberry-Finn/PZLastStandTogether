@@ -124,10 +124,10 @@ function highscore.reCrown()
         local dead, hide, spectating = true, false, false
         local playerObj = highscore.fetchPlayerObject(username)
         if playerObj then
-            spectating = Spectate and Spectate.isSpectating(playerObj) or false
-            if spectating then playerObj:setZombiesDontAttack(true) end
-            dead = playerObj:isDead() or spectating or false
-            hide = playerObj:isInvisible() and not spectating
+            --spectating = Spectate and Spectate.isSpectating(playerObj) or false
+            --if spectating then playerObj:setZombiesDontAttack(true) end
+            dead = playerObj:isDead() --or spectating or false
+            hide = playerObj:isInvisible() --and not spectating
         end
 
         if not hide then

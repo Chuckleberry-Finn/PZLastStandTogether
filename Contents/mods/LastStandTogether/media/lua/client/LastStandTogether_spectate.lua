@@ -1,6 +1,7 @@
 ---CREDIT: TchernoLib B41: https://steamcommunity.com/sharedfiles/filedetails/?id=2986578314
 -- and Battle Royal also by Tchernobill https://steamcommunity.com/sharedfiles/filedetails/?id=2970134188
 
+--[[
 if not getActivatedMods():contains("TchernoLib") then return end
 
 require "Spectate/Spectate.lua"
@@ -88,12 +89,10 @@ end
 function ISPostDeathUI:onClickSpectate()
     --removes post death UI
 
-    --[[
-    if ISPostDeathUI.instance[0] then
-        ISPostDeathUI.instance[0]:removeFromUIManager()
-        ISPostDeathUI.instance[0] = nil
-    end
-    --]]
-
+    --if ISPostDeathUI.instance[0] then
+    --    ISPostDeathUI.instance[0]:removeFromUIManager()
+    --    ISPostDeathUI.instance[0] = nil
+    --end
     Spectate.onSpectateStart()
 end
+--]]
