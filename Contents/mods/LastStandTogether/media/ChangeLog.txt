@@ -130,7 +130,7 @@ Welcome to the Last Stand!
 - Fix: Added sanity checks for zombie kills. (Other mods were causing bugs.)
 [ ------ ]
 
-[  ]
+[ 8/6/25 ]
 - Fix: UI resets on respawn.
 - Added: Warning on UI when waiting for players.
 - Tweak: Increased delay to 'all survivors have died' message.
