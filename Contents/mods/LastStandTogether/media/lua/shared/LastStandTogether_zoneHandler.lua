@@ -302,6 +302,19 @@ function zone.onPlayerCreate(playerID)
 end
 
 
+function zone.respawnPlayer()
+    if MainScreen.instance:isReallyVisible() then return end
+    setGameSpeed(1)
+    ISPostDeathUI:setVisible(false)
+    local joypadData = JoypadState.players[ISPostDeathUI.playerIndex+1]
+    if joypadData then
+        CoopCharacterCreation.newPlayer(joypadData.id, joypadData)
+    else
+        CoopCharacterCreation:newPlayerMouse()
+    end
+end
+
+
 function zone.onLogin(playerObj)
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
@@ -310,7 +323,7 @@ function zone.onLogin(playerObj)
             local record = zone.highscore.currentPlayers and zone.highscore.currentPlayers[playerObj:getUsername()]
             if not record and Spectate.isSpectating(playerObj) then
                 Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
-                playerObj:Kill()
+                sendServerCommand(playerObj, "LastStandTogether", "respawn", {})
                 return
             end
         end

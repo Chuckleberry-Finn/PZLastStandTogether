@@ -75,29 +75,25 @@ end
 local orig_ISPostDeathUI_prerender = ISPostDeathUI.prerender
 function ISPostDeathUI:prerender()
     orig_ISPostDeathUI_prerender(self)
-    self.buttonRespawn:setVisible(false)
+
+    local LST_zone = LastStandTogether_Zone
+    local zoneDef = LST_zone and LST_zone.def
+
+    local isZone = (zoneDef and zoneDef.center and zoneDef.center ~= nil) or false
+    self.buttonSpectate:setVisible(isZone)
+    self.buttonRespawn:setVisible(not isZone)
 end
 
 
 function ISPostDeathUI:onClickSpectate()
     --removes post death UI
+
+    --[[
     if ISPostDeathUI.instance[0] then
         ISPostDeathUI.instance[0]:removeFromUIManager()
         ISPostDeathUI.instance[0] = nil
     end
-
-    local players = LastStandTogether_Zone.getAllPlayers()
-    if not players then return end
-    for i=0, players:size()-1 do
-        ---@type IsoPlayer|IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
-        local player = players:get(i)
-        if player and not player:isDead() then
-            IsoCamera.SetCharacterToFollow(player)
-            UIManager.getMoodleUI(player:getPlayerNum()):setCharacter(player)
-            IsoCamera.cameras[getPlayer():getPlayerNum()]:update()
-            return
-        end
-    end
+    --]]
 
     Spectate.onSpectateStart()
 end

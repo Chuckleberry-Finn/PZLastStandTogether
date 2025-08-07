@@ -48,6 +48,8 @@ if isClient() then
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
 
+        if _command == "respawn" then LastStandTogether_Zone.respawnPlayer() end
+
         if _command == "receiveHighScore" then LastStandTogether_Zone.highscore.receiveHighScore(_data) end
 
         if _command == "updateZoneDefPlayerDeaths" then
