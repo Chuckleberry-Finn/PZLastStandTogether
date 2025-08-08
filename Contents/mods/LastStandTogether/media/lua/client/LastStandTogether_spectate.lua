@@ -113,7 +113,23 @@ local function CameraMove()
         local zoneDef = LST_zone.def
         if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
 
+        player:setCanSeeAll(true)
+        player:setCanHearAll(true)
+
         local x, y, z = nil, nil, player:getZ()
+
+        local building = player:getBuilding()
+        if building then
+            if isKeyDown(Keyboard.KEY_UP) then
+                z = (z+1)
+            end
+
+            if isKeyDown(Keyboard.KEY_DOWN) then
+                z = math.max(0, (z-1))
+            end
+        else
+            z = 0
+        end
 
         if isKeyDown(Keyboard.KEY_A) then
             x = (x or player:getX())-0.2

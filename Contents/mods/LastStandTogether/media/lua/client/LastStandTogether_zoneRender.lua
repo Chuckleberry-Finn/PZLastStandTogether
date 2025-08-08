@@ -60,7 +60,7 @@ function zoneRender.drawZoneEffects()
     local zoom = getCore():getZoom(0)
 
     if player:isDead() then
-        local sx1, sy1 = ISCoordConversion.ToScreen(pX, pY, pZ+0.25)
+        local sx1, sy1 = ISCoordConversion.ToScreen(pX, pY, pZ)
         local size = 8 * zoom
         getRenderer():render(zoneRender.spectateDot, sx1-(size/2), sy1-(size/2), size, size, 1, 1, 1, 0.7, nil)
     end

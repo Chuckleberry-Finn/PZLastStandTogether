@@ -139,3 +139,9 @@ Welcome to the Last Stand!
 - Refactored fall-back spawner logic.
    (Should help with zombie depop at higher populations/cell-edge depop.)
 [ ------ ]
+
+[ 8/7/25 ]
+- Fix: Auto-Select-Random-Building not working.
+- Fix: Select-Random-Building in MP not working.
+- Added: Janky Spectator Mode. (WASD for movement, up/down for Z +/-)
+[ ------ ]
