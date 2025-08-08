@@ -132,10 +132,10 @@ local function CameraMove()
 
         if x and y then
 
-            local minX = zoneDef.center.x - (zoneDef.dimensions.w*2)
-            local maxX = zoneDef.center.x + (zoneDef.dimensions.w*2)
-            local minY = zoneDef.center.y - (zoneDef.dimensions.h*2)
-            local maxY = zoneDef.center.y + (zoneDef.dimensions.h*2)
+            local minX = zoneDef.center.x - (zoneDef.dimensions.w*0.95)
+            local maxX = zoneDef.center.x + (zoneDef.dimensions.w*0.95)
+            local minY = zoneDef.center.y - (zoneDef.dimensions.h*0.95)
+            local maxY = zoneDef.center.y + (zoneDef.dimensions.h*0.95)
 
             local clampedX = math.max(minX, math.min(x, maxX))
             local clampedY = math.max(minY, math.min(y, maxY))
