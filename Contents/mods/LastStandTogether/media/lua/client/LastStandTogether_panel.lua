@@ -122,8 +122,8 @@ function lastStandTogetherPanel:startGame(button, random)
     if not button then return end
 
     if isClient() then
-        local command = "LastStandTogether" .. (random and "Random" or "")
-        sendClientCommand(command, "setZone", {})
+        local command = "setZone" .. (random and "Random" or "")
+        sendClientCommand("LastStandTogether", command, {})
     else
         local func = random and "setToBuildingRandom" or "setToCurrentBuilding"
         LastStandTogether_Zone[func](getPlayer())
