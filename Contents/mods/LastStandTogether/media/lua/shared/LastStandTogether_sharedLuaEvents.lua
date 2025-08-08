@@ -2,16 +2,6 @@ LastStandTogether_Zone = LastStandTogether_Zone or require "LastStandTogether_zo
 
 if not isClient() then --SP and Server Only
     if LastStandTogether_Zone then
-
-        local random = (SandboxVars.LastStandTogether.AutoSelectRandomBuilding or false)
-        if random then
-            if isServer() then
-                Events.OnGameBoot.Add(LastStandTogether_Zone.setToBuildingRandom)
-            else
-                Events.OnLoad.Add(LastStandTogether_Zone.setToBuildingRandom)
-            end
-        end
-
         Events.OnTick.Add(LastStandTogether_Zone.schedulerLoop)
     end
 end

@@ -220,7 +220,11 @@ end
 
 
 function zone.schedulerLoop()
-    if not (zone.initiateLoop and zone.def and zone.def.center) then return end
+    if not (zone.initiateLoop and zone.def and zone.def.center) then
+        local random = (SandboxVars.LastStandTogether.AutoSelectRandomBuilding or false)
+        if random then zone.setToBuildingRandom() end
+        return
+    end
 
     local players = zone.getAllPlayers()
     if (not zone.def.wave) and ((not players) or zone.allPlayersDead(players)) then
@@ -720,6 +724,7 @@ end
 
 function zone.setToBuildingRandom()
     ---@type BuildingDef
+    print("Last Stand Together: setToBuildingRandom!")
     local buildingDef = zone.seekNewBuilding()
     zone.setToBuilding(buildingDef)
 end
@@ -751,8 +756,17 @@ end
 
 function zone.seekNewBuilding()
     local metaGrid = getWorld():getMetaGrid()
+    if not metaGrid then
+        print("Last Stand Together: No Meta Grid Found")
+        return
+    end
+
     local buildings = metaGrid and zone.IsoMetaGridGetBuildings(metaGrid)
-    if not buildings then return end
+    if not buildings then
+        print("Last Stand Together: No Buildings Found")
+        return
+    end
+
     local buildingPool = {}
     local buildingSizeMinimum = SandboxVars.LastStandTogether.AutoSelectBuildingSizeMinimum or 20
 
