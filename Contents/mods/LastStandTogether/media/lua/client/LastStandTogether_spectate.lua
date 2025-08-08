@@ -46,7 +46,6 @@ function lastStandTogetherSpectate(targetFunc, button, userName)
     end
 end
 
-
 local orig_ISPostDeathUI_createChildren = ISPostDeathUI.createChildren
 function ISPostDeathUI:createChildren()
     orig_ISPostDeathUI_createChildren(self)
@@ -71,7 +70,7 @@ function ISPostDeathUI:createChildren()
     self:setX(self.screenX + (self.screenWidth - buttonWid) / 2)
     self:setY(self.screenY + (self.screenHeight - 40 - self.totalHgt))
 end
-
+--]]
 
 local orig_ISPostDeathUI_prerender = ISPostDeathUI.prerender
 function ISPostDeathUI:prerender()
@@ -79,13 +78,15 @@ function ISPostDeathUI:prerender()
 
     local LST_zone = LastStandTogether_Zone
     local zoneDef = LST_zone and LST_zone.def
-
     local isZone = (zoneDef and zoneDef.center and zoneDef.center ~= nil) or false
-    self.buttonSpectate:setVisible(isZone)
+    --self.buttonSpectate:setVisible(isZone)
     self.buttonRespawn:setVisible(not isZone)
+
+    self.buttonQuit:setVisible(true)
+    self.buttonExit:setVisible(true)
 end
 
-
+--[[
 function ISPostDeathUI:onClickSpectate()
     --removes post death UI
 
@@ -96,3 +97,60 @@ function ISPostDeathUI:onClickSpectate()
     Spectate.onSpectateStart()
 end
 --]]
+
+
+local function CameraMove()
+    local player = getPlayer()
+
+    if player and player:isDead() then
+
+        local LST_zone = LastStandTogether_Zone
+        if not LST_zone then return end
+
+        local zoneDef = LST_zone.def
+        if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
+
+        local x, y, z = nil, nil, player:getZ()
+
+        if isKeyDown(Keyboard.KEY_A) then
+            x = (x or player:getX())-0.2
+            y = (y or player:getY())+0.2
+        end
+        if isKeyDown(Keyboard.KEY_D) then
+            x = (x or player:getX())+0.2
+            y = (y or player:getY())-0.2
+        end
+        if isKeyDown(Keyboard.KEY_W) then
+            x = (x or player:getX())-0.2
+            y = (y or player:getY())-0.2
+
+        end
+        if isKeyDown(Keyboard.KEY_S) then
+            x = (x or player:getX())+0.2
+            y = (y or player:getY())+0.2
+        end
+
+        if x and y then
+
+            local minX = zoneDef.center.x - (zoneDef.dimensions.w*2)
+            local maxX = zoneDef.center.x + (zoneDef.dimensions.w*2)
+            local minY = zoneDef.center.y - (zoneDef.dimensions.h*2)
+            local maxY = zoneDef.center.y + (zoneDef.dimensions.h*2)
+
+            local clampedX = math.max(minX, math.min(x, maxX))
+            local clampedY = math.max(minY, math.min(y, maxY))
+
+            player:setX(clampedX)
+            player:setLx(clampedX)
+
+            player:setY(clampedY)
+            player:setLy(clampedY)
+
+            player:setZ(z)
+
+            player:setJustMoved(true)
+            player:setMoveDelta(1)
+        end
+    end
+end
+Events.OnTick.Add(CameraMove)
