@@ -72,6 +72,8 @@ function ISPostDeathUI:createChildren()
 end
 --]]
 
+
+--[[
 local orig_ISPostDeathUI_prerender = ISPostDeathUI.prerender
 function ISPostDeathUI:prerender()
     orig_ISPostDeathUI_prerender(self)
@@ -81,10 +83,11 @@ function ISPostDeathUI:prerender()
     local isZone = (zoneDef and zoneDef.center and zoneDef.center ~= nil) or false
     --self.buttonSpectate:setVisible(isZone)
     self.buttonRespawn:setVisible(not isZone)
-
     self.buttonQuit:setVisible(true)
     self.buttonExit:setVisible(true)
 end
+--]]
+
 
 --[[
 function ISPostDeathUI:onClickSpectate()
