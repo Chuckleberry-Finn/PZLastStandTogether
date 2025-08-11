@@ -140,7 +140,7 @@ Welcome to the Last Stand!
    (Should help with zombie depop at higher populations/cell-edge depop.)
 [ ------ ]
 
-[ 8/_/25 ]
+[ 8/11/25 ]
 - Fix: Auto-Select-Random-Building not working.
 - Fix: Select-Random-Building in MP not working.
 - Fix: Panel prevents non-admin hosts from modifying options. (now with a warning)
