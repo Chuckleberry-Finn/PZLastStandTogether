@@ -101,7 +101,7 @@ function zoneRender.drawZoneEffects()
     if ((dx) > zoneDef.dimensions.w) or ((dy) > zoneDef.dimensions.h) then
 
         local fadeRate = SandboxVars.LastStandTogether.OutOfBoundsFade or 0.33
-        if fadeRate < 1 and (not debug) then
+        if fadeRate > 0 and (not debug) then
             local innerW = zoneDef.dimensions.w
             local innerH = zoneDef.dimensions.h
 
