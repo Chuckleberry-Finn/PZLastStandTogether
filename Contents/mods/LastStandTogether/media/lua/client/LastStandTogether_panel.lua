@@ -59,7 +59,6 @@ function lastStandTogetherPanel:prerender()
             local font = UIFont.Medium
             local value = SandboxVars.LastStandTogether[k]
             if button.typeOf == "enum" then
-                print("ENUM!")
                 local option = getSandboxOptions():getOptionByName("LastStandTogether."..k)
                 value = option:getValueTranslationByIndex(value)
                 font = UIFont.Small
