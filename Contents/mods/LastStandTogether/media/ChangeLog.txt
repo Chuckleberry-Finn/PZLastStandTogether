@@ -154,4 +154,5 @@ Welcome to the Last Stand!
    Jank: Sometimes the camera will refuse to utilize the cutaways for buildings (can't see inside).
 - Tweak: Sandbox 'ZombieLore.Transmission' value set to 4 (None) - for spectator mode to work better.
 - Tweak: Resetting shops now restocks them too.
+- Refactor: End-game process to avoid edge cases.
 [ ------ ]

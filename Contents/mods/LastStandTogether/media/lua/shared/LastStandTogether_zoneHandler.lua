@@ -655,7 +655,8 @@ function zone.scheduledFinalSetup()
             zone.finalStepsTime = getTimestampMs() + 100
 
         elseif step == "teleport" then
-            zone.teleportPlayersToZone(players)
+            local tpPlayers = zone.getAllPlayers()
+            zone.teleportPlayersToZone(tpPlayers)
             zone.finalSteps[#zone.finalSteps] = nil
             zone.finalStepsTime = getTimestampMs() + 400
 
