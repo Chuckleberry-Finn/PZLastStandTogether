@@ -41,4 +41,11 @@ Sandbox_EN = {
 
     Sandbox_LastStandTogether_MoneyPerKill = "Money Earned Per Kill",
 
+    Sandbox_LastStandTogether_PlayerRespawn = "Players Can Respawn",
+    Sandbox_LastStandTogether_PlayerRespawn_tooltip = "When players can respawn.",
+
+    Sandbox_LastStandTogether_RespawnPolicy_option1 = "Last-Stand Start",
+    Sandbox_LastStandTogether_RespawnPolicy_option2 = "Each Wave",
+    Sandbox_LastStandTogether_RespawnPolicy_option3 = "Whenever",
+
 }

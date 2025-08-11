@@ -1,109 +1,39 @@
----CREDIT: TchernoLib B41: https://steamcommunity.com/sharedfiles/filedetails/?id=2986578314
--- and Battle Royal also by Tchernobill https://steamcommunity.com/sharedfiles/filedetails/?id=2970134188
+local spectateKeys = {
+    fontHeight = getTextManager():MeasureFont(UIFont.Small)/2,
+    keys = {
+        { name=Keyboard.getKeyName(Keyboard.KEY_W), x=2, y=0 },
+        { name=Keyboard.getKeyName(Keyboard.KEY_A), x=1, y=1 },
+        { name=Keyboard.getKeyName(Keyboard.KEY_S), x=2, y=1 },
+        { name=Keyboard.getKeyName(Keyboard.KEY_D), x=3, y=1 },
+        { name=Keyboard.getKeyName(Keyboard.KEY_UP), x=5, y=0 },
+        { name=Keyboard.getKeyName(Keyboard.KEY_DOWN), x=5, y=1 },
+    },
 
---[[
-if not getActivatedMods():contains("TchernoLib") then return end
-
-require "Spectate/Spectate.lua"
-
-function lastStandTogetherSpectate(targetFunc, button, userName)
-
-    if not userName then return end
-
-    local player = getPlayer()
-    if not player then return end
-
-    if userName == player:getUsername() then
-        if not Spectate.isSpectating(player) and getDebug() then
-            player:Kill(nil)
-        end
-    else
-        if not (Spectate.isSpectating(player) or player:isAccessLevel("Admin")) then return end
-        local onlineUsers = getOnlinePlayers()
-        if onlineUsers then
-
-            for i=0, onlineUsers:size()-1 do
-                local targetPlayer = onlineUsers:get(i)
-                if targetPlayer and targetPlayer:getUsername() == userName then
-
-                    local x = targetPlayer:getX()
-                    local y = targetPlayer:getY()
-                    local z = targetPlayer:getZ()
-
-                    if isClient() then
-                        SendCommandToServer("/teleportto " .. x .. "," .. y .. "," .. z)
-                    else
-                        player:setX(x)
-                        player:setY(y)
-                        player:setZ(z)
-                        player:setLx(x)
-                        player:setLy(y)
-                        player:setLz(z)
-                    end
-                end
-            end
-        end
-    end
-end
-
-local orig_ISPostDeathUI_createChildren = ISPostDeathUI.createChildren
-function ISPostDeathUI:createChildren()
-    orig_ISPostDeathUI_createChildren(self)
-
-    local buttonWid = 250
-    local buttonHgt = 40
-    local buttonGapY = 12
-    local buttonX = 0
-    if not self.bottomButtonY then self.bottomButtonY = self.buttonQuit:getY() end
-    if not self.totalHgt then self.totalHgt = (buttonHgt * 3) + (buttonGapY * 2) end
-
-    self.bottomButtonY = self.bottomButtonY + buttonHgt + buttonGapY
-    local button = ISButton:new(buttonX, self.bottomButtonY, buttonWid, buttonHgt, getText("IGUI_PostDeath_Spectate"), self, ISPostDeathUI.onClickSpectate)
-    self:configButton(button)
-    self:addChild(button)
-    self.buttonSpectate = button
-    self.totalHgt = self.totalHgt + buttonGapY + buttonHgt
-
-    --self:setWidth(buttonWid)
-    self:setHeight(self.totalHgt)
-    -- must set these after setWidth/setHeight or getKeepOnScreen will mess them up
-    self:setX(self.screenX + (self.screenWidth - buttonWid) / 2)
-    self:setY(self.screenY + (self.screenHeight - 40 - self.totalHgt))
-end
---]]
+}
 
 
---[[
-local orig_ISPostDeathUI_prerender = ISPostDeathUI.prerender
-function ISPostDeathUI:prerender()
-    orig_ISPostDeathUI_prerender(self)
+local orig_CoopCharacterCreation_accept = CoopCharacterCreation.accept
+function CoopCharacterCreation:accept()
+    local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
 
     local LST_zone = LastStandTogether_Zone
-    local zoneDef = LST_zone and LST_zone.def
-    local isZone = (zoneDef and zoneDef.center and zoneDef.center ~= nil) or false
-    --self.buttonSpectate:setVisible(isZone)
-    self.buttonRespawn:setVisible(not isZone)
-    self.buttonQuit:setVisible(true)
-    self.buttonExit:setVisible(true)
+    local currentScore = LST_zone.highscore.currentPlayers[getPlayer():getUsername()]
+
+    if currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and LST_zone.def.wave == currentScore.dead)) then
+        self:cancel()
+        return
+    end
+
+    orig_CoopCharacterCreation_accept(self)
 end
---]]
 
-
---[[
-function ISPostDeathUI:onClickSpectate()
-    --removes post death UI
-
-    --if ISPostDeathUI.instance[0] then
-    --    ISPostDeathUI.instance[0]:removeFromUIManager()
-    --    ISPostDeathUI.instance[0] = nil
-    --end
-    Spectate.onSpectateStart()
-end
---]]
 
 
 local function CameraMove()
     local player = getPlayer()
+
+    if not ISPostDeathUI or not ISPostDeathUI.instance then return end
+    if getTimestampMs() < ISPostDeathUI.waitTimeForSpectate then return end
 
     if player and player:isDead() then
 
@@ -121,11 +51,17 @@ local function CameraMove()
         local building = player:getBuilding()
         if building then
             if isKeyDown(Keyboard.KEY_UP) then
-                z = (z+1)
+                local newZ = z+1
+                if getSquare(player:getX(), player:getY(), newZ) then
+                    z = newZ
+                end
             end
 
             if isKeyDown(Keyboard.KEY_DOWN) then
-                z = math.max(0, (z-1))
+                local newZ = math.max(0, (z-1))
+                if newZ~=z and getSquare(player:getX(), player:getY(), newZ) then
+                    z = newZ
+                end
             end
         else
             z = 0
@@ -172,4 +108,50 @@ local function CameraMove()
         end
     end
 end
-Events.OnTick.Add(CameraMove)
+
+
+local orig_ISPostDeathUI_prerender = ISPostDeathUI.prerender
+function ISPostDeathUI:prerender()
+    orig_ISPostDeathUI_prerender(self)
+
+    local LST_zone = LastStandTogether_Zone
+    local zoneDef = LST_zone and LST_zone.def
+    local isZone = (zoneDef and zoneDef.center and zoneDef.center ~= nil) or false
+
+    local player = getPlayer()
+    if isZone then
+        if player:isDead() then
+            local kX, kY = -self.x+getCore():getScreenWidth()-(6.5*48), -self.y+(getCore():getScreenHeight()-(2.5*48))
+
+            self:drawText("Movement", kX+(3*48)+8, kY+9+spectateKeys.fontHeight, 0.9, 0.9, 0.9, 0.6, UIFont.AutoNormSmall)
+
+            self:drawTextCentre("Z Level", kX+(5*48)+21, kY-8-(spectateKeys.fontHeight*2), 0.9, 0.9, 0.9, 0.6, UIFont.AutoNormSmall)
+
+            for i=1, #spectateKeys.keys do
+                local k = spectateKeys.keys[i]
+                if k then
+                    if not k.w then k.w = getTextManager():MeasureStringX(UIFont.Small, k.name) end
+                    self:drawRectBorder(kX+(k.x*48), kY+(k.y*48), 43, 43, 0.9, 0.9, 0.9, 1)
+                    self:drawTextCentre(k.name, kX+(k.x*48)+21, kY+(k.y*48)+9+spectateKeys.fontHeight, 0.9, 0.9, 0.9, 1, UIFont.AutoNormSmall)
+                end
+            end
+
+            if not ISPostDeathUI.waitTimeForSpectate then
+                ISPostDeathUI.waitTimeForSpectate = getTimestampMs() + 500
+                Events.OnTick.Add(CameraMove)
+            end
+        end
+
+
+        local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
+        local currentScore = LST_zone.highscore.currentPlayers[getPlayer():getUsername()]
+        local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and LST_zone.def.wave == currentScore.dead))
+        local respawnAvailable = (not cannotRespawn)
+
+        if not respawnAvailable then
+            self:drawTextCentre("Respawn Not Available", self.buttonRespawn.x+(self.buttonRespawn.width/2), self.buttonRespawn.y+(self.buttonRespawn.height/2), 1, 0.2, 0.2, 1, UIFont.Medium)
+        end
+
+        self.buttonRespawn:setVisible(respawnAvailable)
+    end
+end

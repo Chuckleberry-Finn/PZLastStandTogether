@@ -46,12 +46,27 @@ function lastStandTogetherPanel:prerender()
         self:drawTextCentre(tostring(text), self.width/2, 0-(self.fontMedHeight*1.25), 0.9, 0.2, 0.2, 1, UIFont.Medium)
     end
 
+    if isClient() and not isAdmin() then
+        self:drawTextCentre("Warning: Must be an admin to apply sandbox settings.", self.width/2, self.height-(self.fontMedHeight), 0.9, 0.2, 0.2, 1, UIFont.Small)
+    end
+
     for k,v in pairs(SandboxVars.LastStandTogether) do
         local button = self.sandBoxButtons[k]
         if button then
 
             self:drawRectStatic(button.x+button.width+10, button.y, self.labelWidth, button.height, self.backgroundColor.a, self.backgroundColor.r, self.backgroundColor.g, self.backgroundColor.b)
-            self:drawText(tostring(SandboxVars.LastStandTogether[k]), button.x+button.width+20, button.y+1, 0.9, 0.9, 0.9, 1, UIFont.Medium)
+
+            local font = UIFont.Medium
+            local value = SandboxVars.LastStandTogether[k]
+            if button.typeOf == "enum" then
+                print("ENUM!")
+                local option = getSandboxOptions():getOptionByName("LastStandTogether."..k)
+                value = option:getValueTranslationByIndex(value)
+                font = UIFont.Small
+            end
+
+            self:drawText(tostring(value), button.x+button.width+20, button.y+1, 0.9, 0.9, 0.9, 1, font)
+
         end
     end
 end
@@ -94,8 +109,16 @@ end
 function lastStandTogetherPanel:onButton(button)
     if not button then return end
 
-    if button.boolean then
+    if button.typeOf == "boolean" then
         local value = not SandboxVars.LastStandTogether[button.sandBoxOption]
+        SandboxVars.LastStandTogether[button.sandBoxOption] = value
+        self:setSandBoxValue(button.sandBoxOption, value)
+        return
+    end
+
+    if button.typeOf == "enum" then
+        local value = SandboxVars.LastStandTogether[button.sandBoxOption]+1
+        if value > button.valueOptions then value = 1 end
         SandboxVars.LastStandTogether[button.sandBoxOption] = value
         self:setSandBoxValue(button.sandBoxOption, value)
         return
@@ -162,14 +185,26 @@ function lastStandTogetherPanel:initialise()
     self:addChild(self.resetButton)
 
     for k,v in pairs(SandboxVars.LastStandTogether) do
+
+        local option = getSandboxOptions():getOptionByName("LastStandTogether."..k)
+        local optionType = option:asConfigOption():getType()
+        --getValueTranslationByIndex
+
         local title = getText("Sandbox_LastStandTogether_"..k)
         local button = ISButton:new(x, y+20+self.StartButton.height, self.buttonWidth, self.buttonHeight, title, self, lastStandTogetherPanel.onButton)
         button.sandBoxOption = k
-        button.boolean = (v == true or v == false)
+        button.typeOf = optionType
+        if optionType == "enum" then
+            button.valueOptions = option:getNumValues()
+        end
+
         local tooltip = getTextOrNull("Sandbox_LastStandTogether_"..k.."_tooltip")
         if tooltip then button:setTooltip(tooltip) end
         button:initialise()
         button:instantiate()
+
+        if isClient() and not isAdmin() then button:setEnable(false) end
+
         self.sandBoxButtons[k] = button
         self:addChild(button)
 

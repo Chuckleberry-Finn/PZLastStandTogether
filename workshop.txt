@@ -8,8 +8,6 @@ description=[b]Instructions:[/b] In Singplayer or in MP as admin/host (or debug 
 description=
 description=Full (and automatic) integration with [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2853615523]Shops and Traders[/url] (see: required items). Shops arranged using Shops and Traders will automatically fill the building's most container-heavy room.
 description=
-description=Supports: [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3296856214]7 Lives To Live Redux[/url] by [url=https://steamcommunity.com/id/BitBraven]BitBraven[/url]. For those interested in limited lives per round - lives are refreshed per round/game (not wave.)
-description=
 description=Zombies wave population, intervals, and more can all be configured in the panel or in sandbox options.
 description=
 description=[h3]Commissioned by [url=https://www.twitch.tv/djackz]Djackz[/url][/h3]

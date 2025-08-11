@@ -121,13 +121,11 @@ function highscore.reCrown()
     highscore.currentPlayersSort = {}
     for username, data in pairs(highscore.currentPlayers) do
         local displayName = data.steam and data.steam.profileName or username
-        local dead, hide, spectating = true, false, false
+        local dead, hide = true, false
         local playerObj = highscore.fetchPlayerObject(username)
         if playerObj then
-            --spectating = Spectate and Spectate.isSpectating(playerObj) or false
-            --if spectating then playerObj:setZombiesDontAttack(true) end
-            dead = playerObj:isDead() --or spectating or false
-            hide = playerObj:isInvisible() --and not spectating
+            dead = playerObj:isDead()
+            hide = playerObj:isInvisible()
         end
 
         if not hide then
@@ -173,7 +171,7 @@ end
 function highscore.update(player, type, username)
     username = username or player:getUsername()
     if type == "died" then
-        highscore.currentPlayers[username].dead = true
+        highscore.currentPlayers[username].dead = LastStandTogether_Zone.def.wave
     end
 
     if type == "zombieKill" then
@@ -218,6 +216,7 @@ function highscore.receiveHighScore(data)
         if data.topWave then highscore.crowned.topWave = data.topWave end
         if data.topKills then highscore.crowned.topKills = data.topKills end
     end
+
     highscore.reCrown()
 end
 

@@ -33,7 +33,10 @@ if not isServer() then
     Events.OnCreatePlayer.Add(LastStandTogether_Zone.onPlayerCreate)
 end
 
+
 if isClient() then
+
+    Events.OnConnected.Add(requestHighScores)
 
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
@@ -46,10 +49,7 @@ if isClient() then
             table.insert(LastStandTogether_Zone.playerDeaths, {username=_data.username, expire=getTimestampMs()+LastStandTogether_Zone.deathLogFade} )
         end
         if _command == "updateZoneDefZombies" then LastStandTogether_Zone.sendZombieCount(_data) end
-        if _command == "updateZone" then
-            LastStandTogether_Zone.def = _data
-            LastStandTogether_Zone.sendZoneDef()--this called on clientside sets the wave UI
-        end
+        if _command == "updateZone" then LastStandTogether_Zone.def = _data end
     end
     Events.OnServerCommand.Add(onServerCommand)--what clients gets from the server
 end

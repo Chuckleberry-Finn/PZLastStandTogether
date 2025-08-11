@@ -140,8 +140,18 @@ Welcome to the Last Stand!
    (Should help with zombie depop at higher populations/cell-edge depop.)
 [ ------ ]
 
-[ 8/7/25 ]
+[ 8/_/25 ]
 - Fix: Auto-Select-Random-Building not working.
 - Fix: Select-Random-Building in MP not working.
-- Added: Janky Spectator Mode. (WASD for movement, up/down for Z +/-)
+- Fix: Panel prevents non-admin hosts from modifying options. (now with a warning)
+   Hosts can't actually change sandbox options - which created confusion when setting changes wouldn't occur.
+- New Sandbox Option to control when players can respawn.
+   Three options: On-Game-Start, Each-Wave, Whenever.
+- Removed support for 7 Lives To Live Redux. (sorry)
+- Added: Spectator Mode. (Janky, also sorry)
+   Camera Controls: WASD for movement, up/down for Z +/-
+   Trying to respawn will result in your character's death.
+   Jank: Sometimes the camera will refuse to utilize the cutaways for buildings (can't see inside).
+- Tweak: Sandbox 'ZombieLore.Transmission' value set to 4 (None) - for spectator mode to work better.
+- Tweak: Resetting shops now restocks them too.
 [ ------ ]

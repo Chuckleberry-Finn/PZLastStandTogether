@@ -47,6 +47,8 @@ function zone.setSandboxForLastStand()
         ["ZombieConfig.RespawnUnseenHours"] = 0.0,
         ["ZombieConfig.RespawnMultiplier"] = 0.0,
         ["ZombieConfig.RedistributeHours"] = 0.0,
+        ["ZombieLore.Transmission"] = 4,
+
     }
     for o,value in pairs(optionsToValues) do
         local option = options:getOptionByName(o)
@@ -61,13 +63,18 @@ end
 function zone.onPlayerDeath(player)
     if not zone.def.center then return end
 
+    local pUsername = player:getUsername()
+
+    local currentScore = zone.highscore.currentPlayers[pUsername]
+    if currentScore and currentScore.dead then return end
+
     if (not isClient() and not isServer()) then
-        table.insert(zone.playerDeaths, {username=player:getUsername(), expire=getTimestampMs()+zone.deathLogFade} )
+        table.insert(zone.playerDeaths, {username=pUsername, expire=getTimestampMs()+zone.deathLogFade} )
     end
     if not isClient() then zone.highscore.update(player, "died") end
 
     if isClient() then sendClientCommand("LastStandTogether", "updateZoneDefPlayerDeaths", {}) end
-    if isServer() then sendServerCommand("LastStandTogether", "updateZoneDefPlayerDeaths", { username=player:getUsername() }) end
+    if isServer() then sendServerCommand("LastStandTogether", "updateZoneDefPlayerDeaths", { username=pUsername }) end
 end
 
 
@@ -97,20 +104,6 @@ function zone.getAllPlayers()
     return players
 end
 
---[[
-function zone.killSpectators(players)
-    if not players then return false end
-    if not Spectate then return end
-    for i=0, players:size()-1 do
-        ---@type IsoPlayer|IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
-        local player = players:get(i)
-        if player and Spectate.isSpectating(player) then
-            player:Kill()
-        end
-    end
-    return true
-end
---]]
 
 function zone.allPlayersDead(players)
     if (not zone.def or not zone.def.center) then return end
@@ -144,6 +137,7 @@ function zone.teleportPlayersToZone(players)
                 player:setLy(zone.def.center.y)
                 player:setZ(0)
             end
+
         end
     end
     return true
@@ -300,39 +294,41 @@ end
 
 zone.clientSideLoginCheck = 2
 function zone.onPlayerCreate(playerID)
-    --if Spectate and Spectate.isSpectating(getSpecificPlayer(playerID)) then return end
     zone.clientSideLoginCheck = 2
     Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
 end
 
---[[
-function zone.respawnPlayer()
-    if MainScreen.instance:isReallyVisible() then return end
-    setGameSpeed(1)
-    ISPostDeathUI:setVisible(false)
-    local joypadData = JoypadState.players[ISPostDeathUI.playerIndex+1]
-    if joypadData then
-        CoopCharacterCreation.newPlayer(joypadData.id, joypadData)
-    else
-        CoopCharacterCreation:newPlayerMouse()
+
+zone.clientSideValidateCheck = 2
+function zone.validateLogin(playerObj)
+
+    local minX = zone.def.center.x - (zone.def.dimensions.w*2)
+    local maxX = zone.def.center.x + (zone.def.dimensions.w*2)
+    local minY = zone.def.center.y - (zone.def.dimensions.h*2)
+    local maxY = zone.def.center.y + (zone.def.dimensions.h*2)
+
+    local inside = playerObj:getX() >= minX and playerObj:getX() <= maxX and playerObj:getY() >= minY and playerObj:getY() <= maxY
+    if inside then
+        zone.clientSideValidateCheck = zone.clientSideValidateCheck - 1
+        if zone.clientSideValidateCheck <= 0 then
+
+            local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
+            local currentScore = zone.highscore.currentPlayers[playerObj:getUsername()]
+            local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and zone.def.wave == currentScore.dead))
+
+            local isDead = currentScore and currentScore.dead
+            if isDead and cannotRespawn then
+                playerObj:Kill(nil)
+            end
+        end
+        Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.validateLogin)
     end
 end
---]]
+
 
 function zone.onLogin(playerObj)
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
-
-        --[[
-        if Spectate then
-            local record = zone.highscore.currentPlayers and zone.highscore.currentPlayers[playerObj:getUsername()]
-            if not record and Spectate.isSpectating(playerObj) then
-                Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
-                sendServerCommand(playerObj, "LastStandTogether", "respawn", {})
-                return
-            end
-        end
-        --]]
 
         lastStandTogetherWaveAlert:setToScreen()
         if isClient() then
@@ -341,6 +337,15 @@ function zone.onLogin(playerObj)
         else
             zone.highscore.setAllPlayers()
         end
+
+        local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
+        local currentScore = zone.highscore.currentPlayers[getPlayer():getUsername()]
+        local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and zone.def.wave == currentScore.dead))
+        if cannotRespawn then
+            zone.clientSideValidateCheck = 2
+            Events.OnPlayerUpdate.Add(LastStandTogether_Zone.validateLogin)
+        end
+
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
 end
@@ -403,6 +408,8 @@ function zone.resetShopMarkers()
         local defaultShops = require "LastStandTogether_defaultShops.lua"
         for shopID,shopData in pairs(defaultShops) do shops[shopID] = copyTable(shopData) end
     end
+
+    STORE_HANDLER.restocking()
 
     for shopID,_ in pairs(shops) do
         ---@type IsoObject
@@ -619,22 +626,6 @@ function zone.setToBuilding(buildingDef)
     zone.def.center = {x=centerX, y=centerY}
     zone.initiateLoop = true
     zone.highscore.load()
-
-    if LivesToLive then
-        ---Workshop ID: 3296856214
-        ---Mod ID: BB_LivesToLiveRedux
-        ---Compat Patch
-        for i=1, #LivesToLive.playerList do
-            local playerData = LivesToLive.playerList[i]
-            if playerData then playerData.currentLives = SandboxVars.LivesToLive.StartAmount end
-        end
-        local onlinePlayers = getOnlinePlayers()
-        for i = 0, onlinePlayers:size()-1 do
-            local player = onlinePlayers:get(i)
-            if player then sendServerCommand(player, "LivesToLive", "Refresh", {}) end
-        end
-    end
-
     zone.highscore.reset()
     zone.finalSteps = false
     Events.OnTick.Add(zone.scheduledFinalSetup)
@@ -647,7 +638,7 @@ function zone.scheduledFinalSetup()
     if not players then return end
 
     if not zone.finalSteps then
-        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefAndScores"}--, "killSpectators"}
+        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefAndScores"}
         zone.finalStepsTime = getTimestampMs() + 100
         return
     end
@@ -656,15 +647,6 @@ function zone.scheduledFinalSetup()
 
     if #zone.finalSteps > 0 then
         local step = zone.finalSteps[#zone.finalSteps]
-
-        --[[
-        if step == "killSpectators" then
-            if Spectate then zone.killSpectators(players) end
-            zone.finalSteps[#zone.finalSteps] = nil
-            zone.finalStepsTime = getTimestampMs() + 50
-
-        else
-        --]]
 
         if step == "sendDefAndScores" then
             zone.sendZoneDef()
@@ -709,7 +691,6 @@ end
 
 
 function zone.allPlayersHaveDied()
-
     local now = getTimestampMs()
     if not zone.def.resetCooldown then
         zone.def.resetCooldown = now+zone.resetCooldown
@@ -724,7 +705,6 @@ end
 
 function zone.setToBuildingRandom()
     ---@type BuildingDef
-    print("Last Stand Together: setToBuildingRandom!")
     local buildingDef = zone.seekNewBuilding()
     zone.setToBuilding(buildingDef)
 end
@@ -756,16 +736,10 @@ end
 
 function zone.seekNewBuilding()
     local metaGrid = getWorld():getMetaGrid()
-    if not metaGrid then
-        print("Last Stand Together: No Meta Grid Found")
-        return
-    end
+    if not metaGrid then print("Last Stand Together: No Meta Grid Found") return end
 
     local buildings = metaGrid and zone.IsoMetaGridGetBuildings(metaGrid)
-    if not buildings then
-        print("Last Stand Together: No Buildings Found")
-        return
-    end
+    if not buildings then print("Last Stand Together: No Buildings Found") return end
 
     local buildingPool = {}
     local buildingSizeMinimum = SandboxVars.LastStandTogether.AutoSelectBuildingSizeMinimum or 20

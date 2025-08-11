@@ -3,6 +3,7 @@ local _internal = require "shop-shared"
 
 lastStandTogetherWaveAlert = ISPanel:derive("lastStandTogetherWaveAlert")
 
+
 function lastStandTogetherWaveAlert.walletBalance(player)
     local wallet = getWallet(player)
 

@@ -84,3 +84,9 @@ option LastStandTogether.MoneyPerKill
 	page = LastStandTogether, translation = LastStandTogether_MoneyPerKill,
 }
 
+option LastStandTogether.PlayerRespawn
+{
+	type = enum, numValues = 3, default = 1,
+	page = LastStandTogether, translation = LastStandTogether_PlayerRespawn,
+	valueTranslation = LastStandTogether_RespawnPolicy,
+}
