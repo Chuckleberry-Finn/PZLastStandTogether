@@ -142,16 +142,17 @@ function ISPostDeathUI:prerender()
             end
         end
 
-
         local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
         local currentScore = LST_zone.highscore.currentPlayers[getPlayer():getUsername()]
-        local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and LST_zone.def.wave == currentScore.dead))
-        local respawnAvailable = (not cannotRespawn)
+        local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and zoneDef.wave == currentScore.dead))
+        local respawnAvailable = (not cannotRespawn) or (respawnRule==3) or (respawnRule == 2 and not zoneDef.wave)
 
         if not respawnAvailable then
             self:drawTextCentre("Respawn Not Available", self.buttonRespawn.x+(self.buttonRespawn.width/2), self.buttonRespawn.y+(self.buttonRespawn.height/2), 1, 0.2, 0.2, 1, UIFont.Medium)
         end
 
         self.buttonRespawn:setVisible(respawnAvailable)
+    else
+        self.buttonRespawn:setVisible(true)
     end
 end

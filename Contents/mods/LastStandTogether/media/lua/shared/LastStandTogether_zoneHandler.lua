@@ -195,9 +195,10 @@ function zone.scheduleWave()
 
     local currentTime = getTimestampMs()
 
+    zone.clearZombies()
+
     if not zone.def.wave then
         zone.def.wave = 0
-        zone.clearZombies()
         local setupTime = 60000 * (SandboxVars.LastStandTogether.SetUpGracePeriod or 3)
         zone.def.nextWaveTime = currentTime + setupTime
     else
@@ -675,7 +676,7 @@ function zone.scheduledFinalSetup()
                 zone.establishShopFront(buildingDef)
                 zone.finalSteps[#zone.finalSteps] = nil
             end
-            zone.finalStepsTime = getTimestampMs() + 200
+            zone.finalStepsTime = getTimestampMs() + 300
 
         elseif step == "clearZombies" then
             local x = zone.def.center.x
@@ -686,7 +687,7 @@ function zone.scheduledFinalSetup()
                 zone.clearZombies()
                 zone.finalSteps[#zone.finalSteps] = nil
             end
-            zone.finalStepsTime = getTimestampMs() + 500
+            zone.finalStepsTime = getTimestampMs() + 300
         end
         return
     end
