@@ -42,30 +42,18 @@ local function CameraMove()
         ISPostDeathUI.spectateOffsets = ISPostDeathUI.spectateOffsets or {x=player:getX(), y=player:getY(), z=player:getZ()}
 
         local LST_zone = LastStandTogether_Zone
-        --if not LST_zone then return end
+        if not LST_zone then return end
 
         local zoneDef = LST_zone.def
-        --if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
+        if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
 
         local x, y, z = nil, nil, ISPostDeathUI.spectateOffsets.z
 
-        local building = player:getBuilding()
-        if building then
-            if isKeyDown(Keyboard.KEY_UP) then
-                local newZ = z+1
-                if getSquare(ISPostDeathUI.spectateOffsets.x, ISPostDeathUI.spectateOffsets.y, newZ) then
-                    z = newZ
-                end
-            end
-
-            if isKeyDown(Keyboard.KEY_DOWN) then
-                local newZ = math.max(0, (z-1))
-                if newZ~=z and getSquare(ISPostDeathUI.spectateOffsets.x, ISPostDeathUI.spectateOffsets.y, newZ) then
-                    z = newZ
-                end
-            end
-        else
-            z = 0
+        if isKeyDown(Keyboard.KEY_UP) then
+            z = (z or ISPostDeathUI.spectateOffsets.z)+0.2
+        end
+        if isKeyDown(Keyboard.KEY_DOWN) then
+            z = math.max(0, ((z or ISPostDeathUI.spectateOffsets.z)-0.2))
         end
 
         if isKeyDown(Keyboard.KEY_A) then
@@ -86,30 +74,29 @@ local function CameraMove()
             y = (y or ISPostDeathUI.spectateOffsets.y)+0.1
         end
 
-        if x and  x ~= ISPostDeathUI.spectateOffsets.x then ISPostDeathUI.spectateOffsets.x = x end
-        if y and y ~= ISPostDeathUI.spectateOffsets.y then ISPostDeathUI.spectateOffsets.y = y end
-        if z and z ~= ISPostDeathUI.spectateOffsets.z then ISPostDeathUI.spectateOffsets.z = z end
 
-        --[[
+        if x and  x ~= ISPostDeathUI.spectateOffsets.x then
             local minX = zoneDef.center.x - (zoneDef.dimensions.w*0.95)
             local maxX = zoneDef.center.x + (zoneDef.dimensions.w*0.95)
+            ISPostDeathUI.spectateOffsets.x = math.max(minX, math.min(x, maxX))
+        end
+
+        if y and y ~= ISPostDeathUI.spectateOffsets.y then
             local minY = zoneDef.center.y - (zoneDef.dimensions.h*0.95)
             local maxY = zoneDef.center.y + (zoneDef.dimensions.h*0.95)
+            ISPostDeathUI.spectateOffsets.y = math.max(minY, math.min(y, maxY))
+        end
 
-            local clampedX = math.max(minX, math.min(x, maxX))
-            local clampedY = math.max(minY, math.min(y, maxY))
+        if z and z ~= ISPostDeathUI.spectateOffsets.z then ISPostDeathUI.spectateOffsets.z = z end
 
-            player:setX(clampedX)
-            player:setLx(clampedX)
+        local square = getSquare(ISPostDeathUI.spectateOffsets.x, ISPostDeathUI.spectateOffsets.y, math.floor(ISPostDeathUI.spectateOffsets.z))
+        if not square then ISPostDeathUI.spectateOffsets.z = ISPostDeathUI.spectateOffsets.z-0.2 end
 
-            player:setY(clampedY)
-            player:setLy(clampedY)
-        --]]
         player:setX(ISPostDeathUI.spectateOffsets.x)
         player:setLx(ISPostDeathUI.spectateOffsets.x)
         player:setY(ISPostDeathUI.spectateOffsets.y)
         player:setLy(ISPostDeathUI.spectateOffsets.y)
-        player:setZ(ISPostDeathUI.spectateOffsets.z)
+        player:setZ(math.floor(ISPostDeathUI.spectateOffsets.z))
         player:setJustMoved(true)
         player:setMoveDelta(1)
     end
@@ -125,12 +112,11 @@ function ISPostDeathUI:prerender()
     local isZone = (zoneDef and zoneDef.center and zoneDef.center ~= nil) or false
 
     local player = getPlayer()
-    if isZone or 1==1 then
+    if isZone then
         if player:isDead() then
             local kX, kY = -self.x+getCore():getScreenWidth()-(6.5*48), -self.y+(getCore():getScreenHeight()-(2.5*48))
 
             self:drawText("Movement", kX+(3*48)+8, kY+9+spectateKeys.fontHeight, 0.9, 0.9, 0.9, 0.6, UIFont.AutoNormSmall)
-
             self:drawTextCentre("Z Level ("..getPlayer():getZ()..")", kX+(5*48)+21, kY-8-(spectateKeys.fontHeight*2), 0.9, 0.9, 0.9, 0.6, UIFont.AutoNormSmall)
 
             for i=1, #spectateKeys.keys do
