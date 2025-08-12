@@ -156,3 +156,8 @@ Welcome to the Last Stand!
 - Tweak: Resetting shops now restocks them too.
 - Refactor: End-game process to avoid edge cases.
 [ ------ ]
+
+[ 8/11/25 - Hot Fix 1]
+- Tweak: Sandbox option for Transmission only becomes 4 when initially 3.
+- Tweak: Turning undead is disabled, but dying from infection is not. :)
+[ ------ ]

@@ -43,9 +43,6 @@ local function CameraMove()
         local zoneDef = LST_zone.def
         if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
 
-        player:setCanSeeAll(true)
-        player:setCanHearAll(true)
-
         local x, y, z = nil, nil, player:getZ()
 
         local building = player:getBuilding()
@@ -125,7 +122,7 @@ function ISPostDeathUI:prerender()
 
             self:drawText("Movement", kX+(3*48)+8, kY+9+spectateKeys.fontHeight, 0.9, 0.9, 0.9, 0.6, UIFont.AutoNormSmall)
 
-            self:drawTextCentre("Z Level", kX+(5*48)+21, kY-8-(spectateKeys.fontHeight*2), 0.9, 0.9, 0.9, 0.6, UIFont.AutoNormSmall)
+            self:drawTextCentre("Z Level ("..getPlayer():getZ()..")", kX+(5*48)+21, kY-8-(spectateKeys.fontHeight*2), 0.9, 0.9, 0.9, 0.6, UIFont.AutoNormSmall)
 
             for i=1, #spectateKeys.keys do
                 local k = spectateKeys.keys[i]
@@ -138,6 +135,9 @@ function ISPostDeathUI:prerender()
 
             if not ISPostDeathUI.waitTimeForSpectate then
                 ISPostDeathUI.waitTimeForSpectate = getTimestampMs() + 500
+                player:setCanSeeAll(true)
+                player:setCanHearAll(true)
+                IsoCamera.setCamCharacter(getPlayer())
                 Events.OnTick.Add(CameraMove)
             end
         end
