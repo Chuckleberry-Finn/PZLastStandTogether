@@ -3,7 +3,6 @@ local zoneRender = {}
 zoneRender.shopTexture = getTexture("media/textures/ui/shopMarker.png")
 zoneRender.shopTexture_up = getTexture("media/textures/ui/shopMarker_up.png")
 zoneRender.shopTexture_down = getTexture("media/textures/ui/shopMarker_down.png")
-zoneRender.spectateDot = getTexture("media/textures/ui/spectateDot.png")
 
 function zoneRender.drawEdge(x1, y1, x2, y2, width, color)
     local dx, dy = x2 - x1, y2 - y1
@@ -58,12 +57,6 @@ function zoneRender.drawZoneEffects()
     local dx = math.abs(zoneDef.center.x-pX)
     local dy = math.abs(zoneDef.center.y-pY)
     local zoom = getCore():getZoom(0)
-
-    if player:isDead() then
-        local sx1, sy1 = ISCoordConversion.ToScreen(pX, pY, pZ)
-        local size = 8 * zoom
-        getRenderer():render(zoneRender.spectateDot, sx1-(size/2), sy1-(size/2), size, size, 1, 1, 1, 0.7, nil)
-    end
 
     local building = player:getCurrentBuilding()
     local buildingDef = building and building:getDef()

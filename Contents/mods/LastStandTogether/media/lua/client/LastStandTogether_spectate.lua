@@ -34,29 +34,33 @@ local function CameraMove()
 
     if not ISPostDeathUI or not ISPostDeathUI.instance then return end
     if getTimestampMs() < ISPostDeathUI.waitTimeForSpectate then return end
+    ISPostDeathUI.waitTimeForSpectate = -1
+    ISPostDeathUI.spectateDot = getTexture("media/textures/ui/spectateDot.png")
 
     if player and player:isDead() then
 
+        ISPostDeathUI.spectateOffsets = ISPostDeathUI.spectateOffsets or {x=player:getX(), y=player:getY(), z=player:getZ()}
+
         local LST_zone = LastStandTogether_Zone
-        if not LST_zone then return end
+        --if not LST_zone then return end
 
         local zoneDef = LST_zone.def
-        if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
+        --if not zoneDef or not zoneDef.center or not zoneDef.dimensions then return end
 
-        local x, y, z = nil, nil, player:getZ()
+        local x, y, z = nil, nil, ISPostDeathUI.spectateOffsets.z
 
         local building = player:getBuilding()
         if building then
             if isKeyDown(Keyboard.KEY_UP) then
                 local newZ = z+1
-                if getSquare(player:getX(), player:getY(), newZ) then
+                if getSquare(ISPostDeathUI.spectateOffsets.x, ISPostDeathUI.spectateOffsets.y, newZ) then
                     z = newZ
                 end
             end
 
             if isKeyDown(Keyboard.KEY_DOWN) then
                 local newZ = math.max(0, (z-1))
-                if newZ~=z and getSquare(player:getX(), player:getY(), newZ) then
+                if newZ~=z and getSquare(ISPostDeathUI.spectateOffsets.x, ISPostDeathUI.spectateOffsets.y, newZ) then
                     z = newZ
                 end
             end
@@ -65,25 +69,28 @@ local function CameraMove()
         end
 
         if isKeyDown(Keyboard.KEY_A) then
-            x = (x or player:getX())-0.2
-            y = (y or player:getY())+0.2
+            x = (x or ISPostDeathUI.spectateOffsets.x)-0.1
+            y = (y or ISPostDeathUI.spectateOffsets.y)+0.1
         end
         if isKeyDown(Keyboard.KEY_D) then
-            x = (x or player:getX())+0.2
-            y = (y or player:getY())-0.2
+            x = (x or ISPostDeathUI.spectateOffsets.x)+0.1
+            y = (y or ISPostDeathUI.spectateOffsets.y)-0.1
         end
         if isKeyDown(Keyboard.KEY_W) then
-            x = (x or player:getX())-0.2
-            y = (y or player:getY())-0.2
+            x = (x or ISPostDeathUI.spectateOffsets.x)-0.1
+            y = (y or ISPostDeathUI.spectateOffsets.y)-0.1
 
         end
         if isKeyDown(Keyboard.KEY_S) then
-            x = (x or player:getX())+0.2
-            y = (y or player:getY())+0.2
+            x = (x or ISPostDeathUI.spectateOffsets.x)+0.1
+            y = (y or ISPostDeathUI.spectateOffsets.y)+0.1
         end
 
-        if x and y then
+        if x and  x ~= ISPostDeathUI.spectateOffsets.x then ISPostDeathUI.spectateOffsets.x = x end
+        if y and y ~= ISPostDeathUI.spectateOffsets.y then ISPostDeathUI.spectateOffsets.y = y end
+        if z and z ~= ISPostDeathUI.spectateOffsets.z then ISPostDeathUI.spectateOffsets.z = z end
 
+        --[[
             local minX = zoneDef.center.x - (zoneDef.dimensions.w*0.95)
             local maxX = zoneDef.center.x + (zoneDef.dimensions.w*0.95)
             local minY = zoneDef.center.y - (zoneDef.dimensions.h*0.95)
@@ -97,12 +104,14 @@ local function CameraMove()
 
             player:setY(clampedY)
             player:setLy(clampedY)
-
-            player:setZ(z)
-
-            player:setJustMoved(true)
-            player:setMoveDelta(1)
-        end
+        --]]
+        player:setX(ISPostDeathUI.spectateOffsets.x)
+        player:setLx(ISPostDeathUI.spectateOffsets.x)
+        player:setY(ISPostDeathUI.spectateOffsets.y)
+        player:setLy(ISPostDeathUI.spectateOffsets.y)
+        player:setZ(ISPostDeathUI.spectateOffsets.z)
+        player:setJustMoved(true)
+        player:setMoveDelta(1)
     end
 end
 
@@ -116,7 +125,7 @@ function ISPostDeathUI:prerender()
     local isZone = (zoneDef and zoneDef.center and zoneDef.center ~= nil) or false
 
     local player = getPlayer()
-    if isZone then
+    if isZone or 1==1 then
         if player:isDead() then
             local kX, kY = -self.x+getCore():getScreenWidth()-(6.5*48), -self.y+(getCore():getScreenHeight()-(2.5*48))
 
@@ -139,6 +148,12 @@ function ISPostDeathUI:prerender()
                 player:setCanHearAll(true)
                 IsoCamera.setCamCharacter(getPlayer())
                 Events.OnTick.Add(CameraMove)
+            elseif ISPostDeathUI.waitTimeForSpectate == -1 then
+                local pX, pY, pZ = player:getX(), player:getY(), player:getZ()
+                local sx1, sy1 = ISCoordConversion.ToScreen(pX, pY, pZ)
+                local zoom = getCore():getZoom(0)
+                local size = 6
+                getRenderer():render(ISPostDeathUI.spectateDot, (sx1-(size/2))/zoom, (sy1-(size/2))/zoom, size, size, 1, 1, 1, 0.7, nil)
             end
         end
 

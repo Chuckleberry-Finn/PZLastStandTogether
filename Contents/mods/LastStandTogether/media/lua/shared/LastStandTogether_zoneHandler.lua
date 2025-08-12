@@ -53,9 +53,6 @@ function zone.setSandboxForLastStand()
         if option then option:setValue(value) end
     end
 
-    local transmission = options:getOptionByName("ZombieLore.Transmission")
-    if transmission and transmission:getValue() == 3 then transmission:setValue(4) end
-
     if isClient then options:sendToServer() end
     options:toLua()
 end
@@ -67,12 +64,8 @@ function zone.onPlayerDeath(player)
 
     local pUsername = player:getUsername()
 
-    local bodyDamage = player:getBodyDamage()
-    if bodyDamage then bodyDamage:setInfectionLevel(0) end
-
     local currentScore = zone.highscore.currentPlayers[pUsername]
     if currentScore and currentScore.dead then return end
-
 
     if (not isClient() and not isServer()) then
         table.insert(zone.playerDeaths, {username=pUsername, expire=getTimestampMs()+zone.deathLogFade} )

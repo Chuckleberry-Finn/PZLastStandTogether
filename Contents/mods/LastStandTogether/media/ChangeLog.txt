@@ -164,3 +164,8 @@ Welcome to the Last Stand!
 - Fix: Respawn rule logic for 'respawn every wave'/'whenever' was flawed.
 - Tweak: Game-Reset timings tweaked a bit.
 [ ------ ]
+
+[ 8/12/25 ]
+- Refactor: Moved spectate 'dot' rendering to spectate file (out of zone rendering).
+- Tweak: Zombie Transmission is untouched again. Spectate mode is not limited by it.
+[ ------ ]
