@@ -172,5 +172,7 @@ Welcome to the Last Stand!
 [ ------ ]
 
 [ 8/12/25 - Hotfix 1 ]
-- Fix: Respawn Accept Logic
+- Fix: Respawn UI 'Accept' Logic.
+- Tweak: Clearing Zombies ran conditionally on wave 0.
+- NEW: Shops can now load server-side from an `exportedShops.txt` present.
 [ ------ ]

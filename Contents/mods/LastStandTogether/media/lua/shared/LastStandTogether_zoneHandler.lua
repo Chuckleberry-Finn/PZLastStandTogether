@@ -263,6 +263,11 @@ function zone.schedulerLoop()
     local zombiesLeft = (zone.def.currentZombies or 0) + (zone.def.zombiesToSpawn or 0)
 
     local zombiesInCell = getWorld():getCell():getZombieList():size()
+
+    if zone.def.wave ==0 and zombiesInCell > 0 then
+        zone.clearZombies()
+    end
+
     if zombiesLeft > 0 and zombiesInCell <= 0 then
         local need = math.max(0, zombiesLeft - zombiesInCell)
         local spawned = (need>0) and waveGen.spawnZombies(need)
@@ -287,7 +292,10 @@ function zone.schedulerLoop()
         return
     end
 
-    if currentTime > zone.def.nextWaveTime and zombiesLeft <= 0 then zone.scheduleWave() return end
+    if currentTime > zone.def.nextWaveTime and zombiesLeft <= 0 then
+        zone.scheduleWave()
+        return
+    end
 
 end
 
@@ -440,6 +448,25 @@ function zone.resetShopMarkers()
 end
 
 
+function zone.loadShopsFromServer()
+    local reader = getFileReader("exportedShops.txt", false)
+    if not reader then return end
+
+    local lines = {}
+    local line = reader:readLine()
+    while line do
+        table.insert(lines, line)
+        line = reader:readLine()
+    end
+    reader:close()
+
+    local totalStr = table.concat(lines, "\n")
+
+    local tbl, err = _internal.stringToTable(totalStr)
+    return tbl, err
+end
+
+
 ---@param buildingDef BuildingDef
 function zone.establishShopFront(buildingDef)
 
@@ -494,8 +521,21 @@ function zone.establishShopFront(buildingDef)
     end
 
     local empty, shops = zone.checkIfShopsEmpty()
+
     if empty then
-        zone.def.error = "Warning: Default Shops Enabled!"
+        local tbl, err = zone.loadShopsFromServer()
+        if err then
+            zone.def.error = " ERROR: shops failed to load from server! (Check Logs) "
+            print("ERROR: shops failed to load from server! \n"..err)
+        elseif tbl then
+            empty = false
+            zone.def.error = "Shops Loaded From Server Files! "
+            for shopID,shopData in pairs(tbl) do shops[shopID] = copyTable(shopData) end
+        end
+    end
+
+    if empty then
+        zone.def.error = zone.def.error .. "Warning: Default Shops Enabled! "
         local defaultShops = require "LastStandTogether_defaultShops.lua"
         for shopID,shopData in pairs(defaultShops) do shops[shopID] = copyTable(shopData) end
     end
@@ -576,6 +616,10 @@ end
 
 
 function zone.clearZombies()
+    local now = getTimestampMs()
+    if zone.clearingZombies and zone.clearingZombies > now then return end
+    zone.clearingZombies = now + 1000
+
     local cell = getCell()
     local zombiesInCell = cell:getZombieList()
     local zombiesInCellSize = zombiesInCell:size()
@@ -597,7 +641,6 @@ function zone.clearZombies()
             zpopClearZombies(x, y)
         end
     end
-
 end
 
 
