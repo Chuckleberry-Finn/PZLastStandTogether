@@ -172,9 +172,10 @@ Welcome to the Last Stand!
 [ ------ ]
 
 [ 8/13/25 ]
-- Fix: Respawn UI 'Accept' Logic.
+- Fix: Respawn UI 'Accept' logic failing with certain respawn-policies.
 - Tweak: Clearing Zombies ran conditionally on wave 0.
-- NEW: Shops can now load server-side from an `exportedShops.txt` present.
+- NEW: Shops (if none are present) will now attempt a server-side load of `Lua/exportedShops.txt`.
+    Shops will still fallback to default shops if none are present, and that file is not found.
 - Tweaked: Zombies-Left vs Zombies-In-Cell check.
 - Added: New 'Count-Safety' mechanism.
     30-second cycle when the total zombies left is less than 10%.

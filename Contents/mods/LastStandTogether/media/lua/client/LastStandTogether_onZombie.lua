@@ -33,12 +33,19 @@ function onZombie.phaseTo(zombie, x, y)
 
     local zX, zY = zombie:getX(), zombie:getY()
 
-    local stepX = x ~= 0 and (x > 0 and 1 or -1) or 0
-    local stepY = y ~= 0 and (y > 0 and 1 or -1) or 0
-    if stepX==0 and stepY==0 then return end
+    local angle = (math.atan2 and math.atan2(y, x)) or math.atan(y, x)
 
-    local newX = zX + stepX*0.67
-    local newY = zY + stepY*0.67
+    local dirX, dirY = ((angle and math.cos(angle)) or 1), ((angle and math.sin(angle)) or 1)
+
+    local dist = math.sqrt(x*x + y*y)
+    if dist == 0 then return end
+
+    local step = math.max(0.67, math.min(3, dist))
+    local stepX = dirX * step
+    local stepY = dirY * step
+
+    local newX = zX + stepX
+    local newY = zY + stepY
     zombie:setX(newX)
     zombie:setY(newY)
     zombie:setLx(newX)
@@ -62,6 +69,8 @@ function onZombie.update(zombie)
 
     if (math.abs(dx) > zoneDef.dimensions.w) or (math.abs(dy) > zoneDef.dimensions.h) then
 
+        if zombie:getThumpTarget() then zombie:setThumpTarget(nil) end
+
         local player = getPlayer()
         if zombie:getTarget() ~= player then
             zombie:spotted(player, true)
@@ -70,7 +79,7 @@ function onZombie.update(zombie)
         local phaseCheck = onZombie.onUpdateLocationSafety[zombie]
 
         onZombie.onUpdateLocationSafety[zombie] = (phaseCheck and phaseCheck.loc==zombie:getSquare() and phaseCheck)
-                or {time=getTimestampMs()+5000, loc=zombie:getSquare()}
+                or {time=getTimestampMs()+5555, loc=zombie:getSquare()}
         --- if phase check value exists and the square is the same return back OR create new
 
         if phaseCheck and phaseCheck.time < getTimestampMs() then
@@ -80,8 +89,10 @@ function onZombie.update(zombie)
     else
         onZombie.onUpdateLocationSafety[zombie] = nil
     end
-
-    if getDebug() or getPlayer():isNoClip() then zombie:addLineChatElement("!", 1, 1, 1, UIFont.Small, 1000, "default") end
+    
+    if getDebug() or getPlayer():isNoClip() then
+        zombie:addLineChatElement("!", 1, 1, 1, UIFont.Small, 1000, "default")
+    end
 end
 
 

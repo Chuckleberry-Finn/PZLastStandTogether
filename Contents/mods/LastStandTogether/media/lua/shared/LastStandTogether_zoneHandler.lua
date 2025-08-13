@@ -291,7 +291,7 @@ function zone.schedulerLoop()
         return
     end
 
-    if zombiesLeft > 0 and (zombiesLeft/zone.def.zombiesSpawned < 0.1) then
+    if zombiesLeft > 0 and (zombiesLeft/zone.def.zombiesSpawned < 0.1) and zombiesLeft <= 10 then
         zone.checkZombieCountSafety()
     end
 
