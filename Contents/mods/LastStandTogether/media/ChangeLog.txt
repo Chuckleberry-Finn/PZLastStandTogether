@@ -171,8 +171,12 @@ Welcome to the Last Stand!
 - Tweak: Spectate Mode to work smoother.
 [ ------ ]
 
-[ 8/12/25 - Hotfix 1 ]
+[ 8/13/25 ]
 - Fix: Respawn UI 'Accept' Logic.
 - Tweak: Clearing Zombies ran conditionally on wave 0.
 - NEW: Shops can now load server-side from an `exportedShops.txt` present.
+- Tweaked: Zombies-Left vs Zombies-In-Cell check.
+- Added: New 'Count-Safety' mechanism.
+    30-second cycle when the total zombies left is less than 10%.
+    If the count number remains the same as the previous cycle an additional zombie is spawned.
 [ ------ ]

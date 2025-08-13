@@ -19,6 +19,7 @@ zone.def.currentZombies = 0
 zone.def.zombiesToSpawn = 0
 zone.def.zombiesSpawned = 0
 zone.def.spawnTickTimer = 0
+zone.def.zombieCountSafety = {}
 
 zone.def.resetCooldown = false
 zone.def.warningNoPlayers = false
@@ -213,6 +214,27 @@ function zone.scheduleWave()
 end
 
 
+function zone.checkZombieCountSafety()
+    local now = getTimestampMs()
+    local bump = 30000
+
+    zone.def.zombieCountSafety = zone.def.zombieCountSafety or {}
+
+    if zone.def.zombieCountSafety.time and zone.def.zombieCountSafety.time > now then return end
+    zone.def.zombieCountSafety.time = now + bump
+
+    local currentZombies = zone.def.currentZombies
+    if zone.def.zombieCountSafety.zombieCount and zone.def.zombieCountSafety.zombieCount == currentZombies then
+        local spawned = waveGen.spawnZombies(1)
+        print("WARNING: Count-Safety Spawned "..spawned.." Zombie.")
+        zone.def.error = "WARNING: Count-Safety Spawned "..spawned.." Zombie."
+        zone.sendZoneDef()
+    end
+
+    zone.def.zombieCountSafety.zombieCount = currentZombies
+end
+
+
 function zone.schedulerLoop()
     if not (zone.initiateLoop and zone.def and zone.def.center) then
         local random = (SandboxVars.LastStandTogether.AutoSelectRandomBuilding or false)
@@ -251,7 +273,7 @@ function zone.schedulerLoop()
         if not zone.def.spawnTickTimer or currentTime > zone.def.spawnTickTimer then
             local batchSize = math.min(100, zone.def.zombiesToSpawn)
             local spawned = waveGen.spawnZombies(batchSize)
-            zone.def.zombiesToSpawn = math.max(0,zone.def.zombiesToSpawn - spawned)
+            zone.def.zombiesToSpawn = math.max(0, zone.def.zombiesToSpawn - spawned)
             zone.def.spawnTickTimer = currentTime + ((SandboxVars.LastStandTogether.InWaveSpawnInterval or 2) * 60000)
             zone.def.zombiesSpawned = (zone.def.zombiesSpawned or 0) + spawned
             zone.def.currentZombies = (zone.def.currentZombies or 0) + spawned
@@ -262,18 +284,24 @@ function zone.schedulerLoop()
 
     local zombiesLeft = (zone.def.currentZombies or 0) + (zone.def.zombiesToSpawn or 0)
 
-    local zombiesInCell = getWorld():getCell():getZombieList():size()
+    local zombiesInCell = getCell():getZombieList():size()
 
-    if zone.def.wave ==0 and zombiesInCell > 0 then
+    if zone.def.wave == 0 and zombiesInCell > 0 then
         zone.clearZombies()
+        return
     end
 
-    if zombiesLeft > 0 and zombiesInCell <= 0 then
+    if zombiesLeft > 0 and (zombiesLeft/zone.def.zombiesSpawned < 0.1) then
+        zone.checkZombieCountSafety()
+    end
+
+    if zombiesLeft > 0 and zombiesLeft > zombiesInCell then
         local need = math.max(0, zombiesLeft - zombiesInCell)
-        local spawned = (need>0) and waveGen.spawnZombies(need)
-        print("WARNING: Spawned fallback zombies. spawned:", spawned, "  needed:",need)
-        zone.def.error = "WARNING: Fall-back spawner spawned "..spawned.." zombies."
+        local spawned = (need > 0) and waveGen.spawnZombies(need)
+        print("WARNING: Zombies In Cell: ", zombiesInCell," is less than count:", zombiesLeft,"  wanted:", need"  actually-spawned:", spawned)
+        zone.def.error = "WARNING: Zombies In Cell less than Expected. Spawned "..spawned.." zombies."
         zone.sendZoneDef()
+        return
     end
 
     if not zone.def.nextWaveTime then --- set wave timer for next wave when all zombies are dead
