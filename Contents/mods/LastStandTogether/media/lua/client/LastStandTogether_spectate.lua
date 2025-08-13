@@ -18,8 +18,12 @@ function CoopCharacterCreation:accept()
 
     local LST_zone = LastStandTogether_Zone
     local currentScore = LST_zone.highscore.currentPlayers[getPlayer():getUsername()]
+    local zoneDef = LST_zone and LST_zone.def
 
-    if currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and LST_zone.def.wave == currentScore.dead)) then
+    local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and zoneDef.wave == currentScore.dead))
+    local respawnAvailable = (not cannotRespawn) or (respawnRule==3) or (respawnRule == 2 and not zoneDef.wave)
+
+    if not respawnAvailable then
         self:cancel()
         return
     end

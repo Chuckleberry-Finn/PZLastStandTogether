@@ -170,3 +170,7 @@ Welcome to the Last Stand!
 - Tweak: Zombie Transmission is untouched again. Spectate mode is not limited by it.
 - Tweak: Spectate Mode to work smoother.
 [ ------ ]
+
+[ 8/12/25 - Hotfix 1 ]
+- Fix: Respawn Accept Logic
+[ ------ ]
