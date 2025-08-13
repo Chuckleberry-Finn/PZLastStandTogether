@@ -406,6 +406,38 @@ function zone.checkIfShopsEmpty()
 end
 
 
+function zone.loadOrCreateShops()
+    local empty, shops = zone.checkIfShopsEmpty()
+
+    if empty then
+        local tbl, err = zone.loadShopsFromServer()
+        if err then
+            zone.def.error = " ERROR: shops failed to load from server! (Check Logs) "
+            print("ERROR: shops failed to load from server! \n"..err)
+        elseif tbl then
+            empty = false
+            zone.def.error = "Shops Loaded From Server Files! "
+            print("Shops Loaded From Server Files!")
+            for shopID,shopData in pairs(tbl) do shops[shopID] = copyTable(shopData) end
+        end
+    end
+
+    if empty then
+        zone.def.error = zone.def.error .. "Warning: Default Shops Enabled! "
+        print("Warning: Default Shops Enabled!")
+        local defaultShops = require "LastStandTogether_defaultShops.lua"
+        for shopID,shopData in pairs(defaultShops) do shops[shopID] = copyTable(shopData) end
+    end
+
+    if not shops then
+        zone.def.error = zone.def.error .. "Warning: Shops failed to generate! "
+        print("ERROR: Shops failed to generate!")
+    end
+
+    return shops
+end
+
+
 function zone.setRoomsWithShopsMarkers()
     for roomID, shopLocations in pairs(zone.def.shopMarkersInRoom) do
         if #shopLocations > 0 then
@@ -438,12 +470,8 @@ function zone.resetShopMarkers()
     zone.def.shopMarkersInRoom = {}
     zone.def.shopMarkersRooms = {}
 
-    local empty, shops = zone.checkIfShopsEmpty()
-    if empty then
-        zone.def.error = "Warning: Default Shops Enabled!"
-        local defaultShops = require "LastStandTogether_defaultShops.lua"
-        for shopID,shopData in pairs(defaultShops) do shops[shopID] = copyTable(shopData) end
-    end
+    local shops = zone.loadOrCreateShops()
+    if not shops then return end
 
     STORE_HANDLER.restocking()
 
@@ -548,25 +576,8 @@ function zone.establishShopFront(buildingDef)
         return
     end
 
-    local empty, shops = zone.checkIfShopsEmpty()
-
-    if empty then
-        local tbl, err = zone.loadShopsFromServer()
-        if err then
-            zone.def.error = " ERROR: shops failed to load from server! (Check Logs) "
-            print("ERROR: shops failed to load from server! \n"..err)
-        elseif tbl then
-            empty = false
-            zone.def.error = "Shops Loaded From Server Files! "
-            for shopID,shopData in pairs(tbl) do shops[shopID] = copyTable(shopData) end
-        end
-    end
-
-    if empty then
-        zone.def.error = zone.def.error .. "Warning: Default Shops Enabled! "
-        local defaultShops = require "LastStandTogether_defaultShops.lua"
-        for shopID,shopData in pairs(defaultShops) do shops[shopID] = copyTable(shopData) end
-    end
+    local shops = zone.loadOrCreateShops()
+    if not shops then return end
 
     local sortedRooms = {}
     for roomID, containers in pairs(roomContainers) do table.insert(sortedRooms, { id = roomID, containers = containers }) end
@@ -582,7 +593,10 @@ function zone.establishShopFront(buildingDef)
     end
 
     local assignedShops = 0
-    print("Lasts Stand Together: allContainers for shops: ", #allContainers)
+    print("Lasts Stand Together: available containers for shops: ", #allContainers)
+
+    STORE_HANDLER.restocking()
+
     for shopID,_ in pairs(shops) do
         ---@type IsoObject
         local storeObj = STORE_HANDLER.getStoreByID(shopID)
@@ -609,6 +623,7 @@ function zone.establishShopFront(buildingDef)
     print("Lasts Stand Together: assigned shops: ", assignedShops)
 
     zone.setRoomsWithShopsMarkers()
+    zone.sendZoneDef()
 end
 
 

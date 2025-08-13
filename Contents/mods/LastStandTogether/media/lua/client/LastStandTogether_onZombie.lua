@@ -89,7 +89,7 @@ function onZombie.update(zombie)
     else
         onZombie.onUpdateLocationSafety[zombie] = nil
     end
-    
+
     if getDebug() or getPlayer():isNoClip() then
         zombie:addLineChatElement("!", 1, 1, 1, UIFont.Small, 1000, "default")
     end
