@@ -330,7 +330,6 @@ end
 
 zone.clientSideLoginCheck = 2
 function zone.onPlayerCreate(playerID)
-    if not zone.def or not zone.def.center then return end
     zone.clientSideLoginCheck = 2
     Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
 end
@@ -376,10 +375,12 @@ function zone.onLogin(playerObj)
             zone.highscore.setAllPlayers()
         end
 
-        local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
-        if respawnRule ~= 3 then
-            zone.clientSideValidateCheck = 5
-            Events.OnPlayerUpdate.Add(LastStandTogether_Zone.validateLogin)
+        if zone.def and zone.def.center then
+            local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
+            if respawnRule ~= 3 then
+                zone.clientSideValidateCheck = 5
+                Events.OnPlayerUpdate.Add(LastStandTogether_Zone.validateLogin)
+            end
         end
 
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
