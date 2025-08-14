@@ -330,6 +330,7 @@ end
 
 zone.clientSideLoginCheck = 2
 function zone.onPlayerCreate(playerID)
+    if not zone.def or not zone.def.center then return end
     zone.clientSideLoginCheck = 2
     Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
 end
@@ -363,6 +364,7 @@ end
 
 
 function zone.onLogin(playerObj)
+
     zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
     if zone.clientSideLoginCheck <= 0 then
 
