@@ -124,7 +124,7 @@ function highscore.reCrown()
         local dead, hide = true, false
         local playerObj = highscore.fetchPlayerObject(username)
         if playerObj then
-            dead = playerObj:isDead()
+            dead = data.dead or playerObj:isDead()
             hide = playerObj:isInvisible()
         end
 
@@ -170,6 +170,9 @@ end
 ---@param player IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
 function highscore.update(player, type, username)
     username = username or player:getUsername()
+
+    if not highscore.currentPlayers[username] then return end
+
     if type == "died" then
         highscore.currentPlayers[username].dead = LastStandTogether_Zone.def.wave
     end

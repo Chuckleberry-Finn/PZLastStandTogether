@@ -19,6 +19,7 @@ if isServer() then
         if _command == "requestHighscores" then
             local player = not _data.login and _player or nil
             LastStandTogether_Zone.highscore.sendHighScore(player)
+            if _data.login then LastStandTogether_Zone.validateLogin(_player) end
         end
         if _command == "resetShopMarkers" then LastStandTogether_Zone.resetShopMarkers() end
         if _command == "updateZoneDefPlayerDeaths" then LastStandTogether_Zone.onPlayerDeath(_player) end
@@ -29,22 +30,12 @@ end
 
 Events.OnInitWorld.Add(LastStandTogether_Zone.setSandboxForLastStand)
 
-if not isServer() then
-    Events.OnCreatePlayer.Add(LastStandTogether_Zone.onPlayerCreate)
-end
-
 
 if isClient() then
-
-    Events.OnConnected.Add(requestHighScores)
-
     local function onServerCommand(_module, _command, _data)
         if _module ~= "LastStandTogether" then return end
-
-        --if _command == "respawn" then LastStandTogether_Zone.respawnPlayer() end
-
+        if _command == "validationFailed" then LastStandTogether_Zone.validationFailed(getPlayer()) end
         if _command == "receiveHighScore" then LastStandTogether_Zone.highscore.receiveHighScore(_data) end
-
         if _command == "updateZoneDefPlayerDeaths" then
             table.insert(LastStandTogether_Zone.playerDeaths, {username=_data.username, expire=getTimestampMs()+LastStandTogether_Zone.deathLogFade} )
         end
@@ -52,4 +43,9 @@ if isClient() then
         if _command == "updateZone" then LastStandTogether_Zone.def = _data end
     end
     Events.OnServerCommand.Add(onServerCommand)--what clients gets from the server
+end
+
+
+if not isServer() then
+    Events.OnCreatePlayer.Add(LastStandTogether_Zone.onPlayerCreate)
 end

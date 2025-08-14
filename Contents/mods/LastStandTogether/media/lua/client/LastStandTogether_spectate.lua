@@ -94,7 +94,7 @@ local function CameraMove()
         if z and z ~= ISPostDeathUI.spectateOffsets.z then ISPostDeathUI.spectateOffsets.z = z end
 
         local square = getSquare(ISPostDeathUI.spectateOffsets.x, ISPostDeathUI.spectateOffsets.y, math.floor(ISPostDeathUI.spectateOffsets.z))
-        if not square then ISPostDeathUI.spectateOffsets.z = ISPostDeathUI.spectateOffsets.z-0.2 end
+        if not square and (ISPostDeathUI.spectateOffsets.z > 0) then ISPostDeathUI.spectateOffsets.z = ISPostDeathUI.spectateOffsets.z-0.2 end
 
         player:setX(ISPostDeathUI.spectateOffsets.x)
         player:setLx(ISPostDeathUI.spectateOffsets.x)

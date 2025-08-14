@@ -298,7 +298,7 @@ function zone.schedulerLoop()
     if zombiesLeft > 0 and zombiesLeft > zombiesInCell then
         local need = math.max(0, zombiesLeft - zombiesInCell)
         local spawned = (need > 0) and waveGen.spawnZombies(need)
-        print("WARNING: Zombies In Cell: ", zombiesInCell," is less than count:", zombiesLeft,"  wanted:", need"  actually-spawned:", spawned)
+        print("WARNING: Zombies In Cell: ", zombiesInCell," is less than count:", zombiesLeft,"  wanted:", need, "  actually-spawned:", spawned)
         zone.def.error = "WARNING: Zombies In Cell less than Expected. Spawned "..spawned.." zombies."
         zone.sendZoneDef()
         return
@@ -328,60 +328,39 @@ function zone.schedulerLoop()
 end
 
 
-zone.clientSideLoginCheck = 2
-function zone.onPlayerCreate(playerID)
-    zone.clientSideLoginCheck = 2
-    Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
+function zone.validationFailed(playerObj)
+    playerObj:setX(zone.def.center.x)
+    playerObj:setY(zone.def.center.y)
+    playerObj:setLx(zone.def.center.x)
+    playerObj:setLy(zone.def.center.y)
+    playerObj:setZ(0)
+    playerObj:Kill(nil)
 end
 
 
 function zone.validateLogin(playerObj)
-
-    if not zone.def or not zone.def.center then
-        Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.validateLogin)
-        return
-    end
-
-    local minX = zone.def.center.x - (zone.def.dimensions.w*2)
-    local maxX = zone.def.center.x + (zone.def.dimensions.w*2)
-    local minY = zone.def.center.y - (zone.def.dimensions.h*2)
-    local maxY = zone.def.center.y + (zone.def.dimensions.h*2)
-
-    local inside = playerObj:getX() >= minX and playerObj:getX() <= maxX and playerObj:getY() >= minY and playerObj:getY() <= maxY
-    if inside then
-        zone.clientSideValidateCheck = (zone.clientSideValidateCheck or 5) - 1
-        if zone.clientSideValidateCheck <= 0 then
-
-            local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
-            if respawnRule ~= 3 then
-                local currentScore = zone.highscore.currentPlayers[playerObj:getUsername()]
-                local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and zone.def.wave == currentScore.dead))
-                local isDead = currentScore and currentScore.dead
-                if isDead and cannotRespawn then
-                    playerObj:Kill(nil)
-                end
-            end
+    if not zone.def or not zone.def.center then print(" x NO ZONE") return end
+    local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
+    if respawnRule ~= 3 then
+        local currentScore = zone.highscore.currentPlayers[playerObj:getUsername()]
+        local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and zone.def.wave == currentScore.dead))
+        local isDead = currentScore and currentScore.dead
+        if isDead and cannotRespawn then
+            sendServerCommand(playerObj, "LastStandTogether", "validationFailed", {})
         end
-        Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.validateLogin)
     end
 end
 
 
-function zone.onLogin(playerObj)
-
-    zone.clientSideLoginCheck = zone.clientSideLoginCheck - 1
-    if zone.clientSideLoginCheck <= 0 then
-
+function zone.onPlayerCreate() Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin) end
+function zone.onLogin()
+    zone.clientSideLoginCheck = (zone.clientSideLoginCheck or 2) - 1
+    if zone.clientSideLoginCheck <=0 then
         lastStandTogetherWaveAlert:setToScreen()
         if isClient() then
-            sendClientCommand(playerObj,"LastStandTogether", "requestZone", {})
-            sendClientCommand(playerObj,"LastStandTogether", "requestHighscores", {login=true})
-        else
-            zone.highscore.setAllPlayers()
+            sendClientCommand(getPlayer(),"LastStandTogether", "requestZone", {})
+            sendClientCommand(getPlayer(),"LastStandTogether", "requestHighscores", {login=true})
         end
-
-        Events.OnPlayerUpdate.Add(LastStandTogether_Zone.validateLogin)
-
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
 end
