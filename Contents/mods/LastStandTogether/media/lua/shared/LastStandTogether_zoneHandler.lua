@@ -28,7 +28,7 @@ zone.def.buildingID = false
 zone.def.shopMarkers = {}
 zone.def.shopMarkersRooms = {}
 
-zone.resetCooldown = 35000
+zone.resetCooldown = isServer() and 80000 or 20000
 zone.playerDeaths = {}
 
 zone.players = {}
@@ -335,8 +335,12 @@ function zone.onPlayerCreate(playerID)
 end
 
 
-zone.clientSideValidateCheck = 0
 function zone.validateLogin(playerObj)
+
+    if not zone.def or not zone.def.center then
+        Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.validateLogin)
+        return
+    end
 
     local minX = zone.def.center.x - (zone.def.dimensions.w*2)
     local maxX = zone.def.center.x + (zone.def.dimensions.w*2)
@@ -345,16 +349,17 @@ function zone.validateLogin(playerObj)
 
     local inside = playerObj:getX() >= minX and playerObj:getX() <= maxX and playerObj:getY() >= minY and playerObj:getY() <= maxY
     if inside then
-        zone.clientSideValidateCheck = zone.clientSideValidateCheck - 1
+        zone.clientSideValidateCheck = (zone.clientSideValidateCheck or 5) - 1
         if zone.clientSideValidateCheck <= 0 then
 
             local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
-            local currentScore = zone.highscore.currentPlayers[playerObj:getUsername()]
-            local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and zone.def.wave == currentScore.dead))
-
-            local isDead = currentScore and currentScore.dead
-            if isDead and cannotRespawn then
-                playerObj:Kill(nil)
+            if respawnRule ~= 3 then
+                local currentScore = zone.highscore.currentPlayers[playerObj:getUsername()]
+                local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and zone.def.wave == currentScore.dead))
+                local isDead = currentScore and currentScore.dead
+                if isDead and cannotRespawn then
+                    playerObj:Kill(nil)
+                end
             end
         end
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.validateLogin)
@@ -375,13 +380,7 @@ function zone.onLogin(playerObj)
             zone.highscore.setAllPlayers()
         end
 
-        if zone.def and zone.def.center then
-            local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
-            if respawnRule ~= 3 then
-                zone.clientSideValidateCheck = 5
-                Events.OnPlayerUpdate.Add(LastStandTogether_Zone.validateLogin)
-            end
-        end
+        Events.OnPlayerUpdate.Add(LastStandTogether_Zone.validateLogin)
 
         Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
     end
@@ -725,7 +724,7 @@ function zone.scheduledFinalSetup()
     if not players then return end
 
     if not zone.finalSteps then
-        zone.finalSteps = { "clearZombies", "establishShops", "teleport", "sendDefAndScores"}
+        zone.finalSteps = { "clearZombies", "establishShops", "sendScores", "teleport", "sendDef"}
         zone.finalStepsTime = getTimestampMs() + 100
         return
     end
@@ -735,9 +734,8 @@ function zone.scheduledFinalSetup()
     if #zone.finalSteps > 0 then
         local step = zone.finalSteps[#zone.finalSteps]
 
-        if step == "sendDefAndScores" then
+        if step == "sendDef" then
             zone.sendZoneDef()
-            zone.highscore.sendHighScore()
             zone.finalSteps[#zone.finalSteps] = nil
             zone.finalStepsTime = getTimestampMs() + 100
 
@@ -746,6 +744,11 @@ function zone.scheduledFinalSetup()
             zone.teleportPlayersToZone(tpPlayers)
             zone.finalSteps[#zone.finalSteps] = nil
             zone.finalStepsTime = getTimestampMs() + 400
+
+        elseif step == "sendScores" then
+            zone.highscore.sendHighScore()
+            zone.finalSteps[#zone.finalSteps] = nil
+            zone.finalStepsTime = getTimestampMs() + 100
 
         elseif step == "establishShops" then
             local x = zone.def.center.x
