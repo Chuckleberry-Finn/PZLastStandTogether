@@ -335,7 +335,7 @@ function zone.onPlayerCreate(playerID)
 end
 
 
-zone.clientSideValidateCheck = 2
+zone.clientSideValidateCheck = 0
 function zone.validateLogin(playerObj)
 
     local minX = zone.def.center.x - (zone.def.dimensions.w*2)
@@ -375,10 +375,8 @@ function zone.onLogin(playerObj)
         end
 
         local respawnRule = SandboxVars.LastStandTogether.PlayerRespawn
-        local currentScore = zone.highscore.currentPlayers[getPlayer():getUsername()]
-        local cannotRespawn = currentScore and ((respawnRule == 1 and currentScore.dead) or (respawnRule == 2 and zone.def.wave == currentScore.dead))
-        if cannotRespawn then
-            zone.clientSideValidateCheck = 2
+        if respawnRule ~= 3 then
+            zone.clientSideValidateCheck = 5
             Events.OnPlayerUpdate.Add(LastStandTogether_Zone.validateLogin)
         end
 

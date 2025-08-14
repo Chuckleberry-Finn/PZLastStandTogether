@@ -181,3 +181,7 @@ Welcome to the Last Stand!
     30-second cycle when the total zombies left is less than 10%.
     If the count number remains the same as the previous cycle an additional zombie is spawned.
 [ ------ ]
+
+[ 8/13/25 ]
+
+[ ------ ]
