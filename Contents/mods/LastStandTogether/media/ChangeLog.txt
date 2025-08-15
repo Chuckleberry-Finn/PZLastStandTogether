@@ -188,3 +188,7 @@ Fix:
 - Moved 'send score' event after 'teleport' event in game start.
 - Tweaked 'all players died' timing for server.
 [ ------ ]
+
+[ 8/-/25 ]
+- Added disclaimer to spectate mode.
+[ ------ ]

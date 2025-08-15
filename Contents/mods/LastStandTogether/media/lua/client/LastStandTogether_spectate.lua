@@ -123,6 +123,9 @@ function ISPostDeathUI:prerender()
             self:drawText("Movement", kX+(3*48)+8, kY+9+spectateKeys.fontHeight, 0.9, 0.9, 0.9, 0.6, UIFont.AutoNormSmall)
             self:drawTextCentre("Z Level ("..getPlayer():getZ()..")", kX+(5*48)+21, kY-8-(spectateKeys.fontHeight*2), 0.9, 0.9, 0.9, 0.6, UIFont.AutoNormSmall)
 
+            self:drawTextRight("Spectate-Mode is Super Janky/Unstable - Solutions are being looked into.",
+                    kX+(6*48), kY+(2*48)-4, 0.9, 0.2, 0.2, 0.5, UIFont.AutoNormSmall)
+
             for i=1, #spectateKeys.keys do
                 local k = spectateKeys.keys[i]
                 if k then
