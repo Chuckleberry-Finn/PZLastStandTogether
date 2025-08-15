@@ -182,7 +182,7 @@ Welcome to the Last Stand!
     If the count number remains the same as the previous cycle an additional zombie is spawned.
 [ ------ ]
 
-[ 8/14/25 ]
+[ 8/15/25 ]
 Fix:
 - Respawn-Policy logic fixed.
 - Moved 'send score' event after 'teleport' event in game start.
