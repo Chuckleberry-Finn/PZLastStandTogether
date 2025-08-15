@@ -136,7 +136,6 @@ function ISPostDeathUI:prerender()
                 ISPostDeathUI.waitTimeForSpectate = getTimestampMs() + 500
                 player:setCanSeeAll(true)
                 player:setCanHearAll(true)
-                IsoCamera.setCamCharacter(getPlayer())
                 Events.OnTick.Add(CameraMove)
             elseif ISPostDeathUI.waitTimeForSpectate == -1 then
                 local pX, pY, pZ = player:getX(), player:getY(), player:getZ()
