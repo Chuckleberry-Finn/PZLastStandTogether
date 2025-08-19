@@ -1,8 +1,8 @@
 version=1
 id=3534542229
 title=Last Stand Together
-description=[h1]Make your last stand![/h1]
-description=[h2]Laststand Together is a multiplayer readaptation of the Last Stand game mode.[/h2]
+description=[h1]A multiplayer version of Project Zomboid’s Last Stand mode.[/h1]
+description=[h2]This mod lets you set up a Last Stand survival zone in multiplayer (or singleplayer). You and your friends pick a building, and waves of zombies will attack. The goal is simple: survive as long as you can.[/h2]
 description=
 description=[b]Instructions:[/b] In Singplayer or in MP as admin/host (or debug mode) hit escape and view the Setup Panel. Select a building in Project Zomboid to be your base of operations.
 description=
