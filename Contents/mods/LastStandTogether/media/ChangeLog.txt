@@ -189,7 +189,7 @@ Fix:
 - Tweaked 'all players died' timing for server.
 [ ------ ]
 
-[ 8/-/25 ]
+[ 8/24/25 ]
 - Added disclaimer to spectate mode.
 - Changed default MoneyPerKill to 2.
 - Adjust shop prices, merged music shop into weapons.
