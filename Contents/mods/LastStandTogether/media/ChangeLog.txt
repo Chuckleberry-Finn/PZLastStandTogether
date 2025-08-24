@@ -193,4 +193,5 @@ Fix:
 - Added disclaimer to spectate mode.
 - Changed default MoneyPerKill to 2.
 - Adjust shop prices, merged music shop into weapons.
+- checkZombieCountSafety spawner time set to 60 seconds (from 30 seconds.)
 [ ------ ]

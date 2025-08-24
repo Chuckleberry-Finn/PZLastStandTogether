@@ -216,7 +216,7 @@ end
 
 function zone.checkZombieCountSafety()
     local now = getTimestampMs()
-    local bump = 30000
+    local bump = 60000
 
     zone.def.zombieCountSafety = zone.def.zombieCountSafety or {}
 
