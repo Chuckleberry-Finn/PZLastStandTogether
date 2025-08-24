@@ -191,4 +191,5 @@ Fix:
 
 [ 8/-/25 ]
 - Added disclaimer to spectate mode.
+- Changed default MoneyPerKill to 2.
 [ ------ ]

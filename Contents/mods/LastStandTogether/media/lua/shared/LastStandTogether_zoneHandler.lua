@@ -165,7 +165,7 @@ function zone.onZombieDead(zombie)
     --sends money handling for clients
     if not isServer() then
         if attackerPlayer then
-            local value = SandboxVars.LastStandTogether.MoneyPerKill
+            local value = SandboxVars.LastStandTogether.MoneyPerKill or 2
             local walletID = getOrSetWalletID(attackerPlayer)
             if not walletID then
                 local moneyTypes = _internal.getMoneyTypes()
