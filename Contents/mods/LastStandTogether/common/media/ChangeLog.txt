@@ -1,0 +1,218 @@
+[ ALERT_CONFIG ]
+link1 = Chuck's Kofi = https://steamcommunity.com/linkfilter/?u=https://ko-fi.com/chuckleberryfinn,
+link2 = Workshop = https://steamcommunity.com/id/Chuckleberry_Finn/myworkshopfiles/?appid=108600,
+link3 = Github = https://steamcommunity.com/linkfilter/?u=https://github.com/Chuckleberry-Finn,
+[ ------ ]
+
+[ 7/18/25 ]
+Welcome to the Last Stand!
+[ ------ ]
+
+[ 7/18/25 - hotfix ]
+- Fix UI issue when Last-Stand Disabled.
+- Pings to zombies come from players not the house.
+[ ------ ]
+
+[ 7/20/25]
+- Fixed sandbox-panel covering options menu.
+- Fixed wave announcer broadcasting to other players.
+- Refactored some internal code stuffs. (Shops is empty check)
+- Added server-sided updates to zombie deaths.
+- Added retargeting for zombies out of bounds.
+- Added safety check to spawn more zombies if needed.
+- Added wallet-balance to UI.
+[ ------ ]
+
+[ 7/20/25 - Hotfix 1 ]
+- Fix wallet UI loading + added background rectangle.
+- Floored the number of zombies.
+[ ------ ]
+
+[ 7/21/25 ]
+- Added Cooldown Multiplier and Cooldown Max Sandbox options.
+- Added check for ghost/invisible/dead for spawning / attraction system.
+- Added protection to spawning zombies on water.
+- Tied zombie count directly to spawned Zs.
+- Added shop markers system. (Shops now appear marked on the map)
+- Added death log as players die.
+- Raised interval for attraction on players.
+[ ------ ]
+
+[ 7/22/25 ]
+- Fixed shop-marker z-axis rendering.
+- Added removal of all zombies in world when mode is started.
+- Made the death-log ease-out fade slower.
+- Added sound for player-deaths.
+- Lowered the minimum of any sandbox times to 0.2 (11~ seconds)
+- Redid wave logic to allow trickle-in spawning.
+- Added extra sandbox options for trickle-in spawning.
+[ ------ ]
+
+[ 7/23/25 ]
+- Added zombie-phasing when stuck. (Only applies when out of the zone.)
+- Fixed issue with zombie removal at start of the mode.
+- DEBUG: Added some debug-only test related features.
+[ ------ ]
+
+[ 7/23/25 - hotfix ]
+- Further increased death-alert time.
+- Re-added player-spotting.
+[ ------ ]
+
+[ 7/23/25 - hotfix 2 ]
+- Fixed wave fraction.
+- Re-added collide event to phasing.
+- Made phasing much more aggressive. (May be intensive)
+- Made the death-log last 30 seconds.
+[ ------ ]
+
+[ 7/24/25 ]
+- Extended Phasing Requirement-Time.
+  - Zombies phase when they're on the same square for too long. (was 50ms, now 100ms)
+- Fixed/Changed the zombies-remaining total. (from toSpawn+spawned to toSpawn+current)
+- Tweaked out-of-room shop-marker to be less transparent.
+- Death-alert minimum fade to 40% (from 0%)
+- Upped default sandbox wave-cooldown-multi to 1.05 (from 1.01)
+- Upped default sandbox money-per-kill to $1.5 (from $1)
+[ ------ ]
+
+[ 7/24/25 - hotfix 1 ]
+- Made phase-check work off timestamp rather than ticks.
+  - (Now rather than "ticks", if the zombie is still for 5 seconds it phases to the zone.)
+[ ------ ]
+
+[ 7/25/25 ]
+- New Art for posters, previews, and menu.
+- Fixed issue in sandbox-panel with entry.
+[ ------ ]
+
+[ 7/27/25 ]
+- Panel now hides during menu options, scoreboard, and invite screens.
+- Panel can be activated in Single-Player without debug.
+- Check for active last stand for onPlayerDeath event.
+- Death-log duration changed to 20 seconds from 30.
+[ ------ ]
+
+[ 7/28/25 ]
+- Reworked the menu panel:
+  - Menu now can be moved.
+  - Menu auto-adjusts position to main options.
+  - Menu layout for art and buttons has been reworked.
+    - Visually it's identical, but contact me for any issues.
+[ ------ ]
+
+[ 7/30/25 ]
+- Tweak: Lowered death-log fade % to 20% (from 40%)
+- Added player highscores with top scores!
+[ ------ ]
+
+[ 8/1/25 ]
+- Tweak: Invisible players won't show up on the leaderboard. (For observing admins)
+- Tweak: Highscore Skull now opens its mouth during display.
+- Refactored: Highscore data only sends necessary data for syncing.
+   (Rather than the entire top-wave, top-kills, and current players.)
+- Refactored the zone boundary system to wrap to the building.
+  - Rather than square it off by the largest side.
+- Added select random building button to the setup panel.
+- Added automated random-select system with sandbox options.
+[ ------ ]
+
+[ 8/1/25 - hotfix ]
+- BB_LivesToLiveRedux Compat Patch to reset Lives.
+[ ------ ]
+
+[ 8/1/25 - hotfix 2 ]
+- New rounds resets current kills.
+[ ------ ]
+
+[ 8/4/25 ]
+- Tweak: Added sanity-checks for wallet handling. (Other mods were causing bugs.)
+- Fix: Added sanity checks for zombie kills. (Other mods were causing bugs.)
+[ ------ ]
+
+[ 8/6/25 ]
+- Fix: UI resets on respawn.
+- Added: Warning on UI when waiting for players.
+- Tweak: Increased delay to 'all survivors have died' message.
+- Reworked Single-Player experience to be smoother when dying/respawning.
+- Refactored 'player login' code to better handle edge-cases.
+- Refactored fall-back spawner logic.
+   (Should help with zombie depop at higher populations/cell-edge depop.)
+[ ------ ]
+
+[ 8/11/25 ]
+- Fix: Auto-Select-Random-Building not working.
+- Fix: Select-Random-Building in MP not working.
+- Fix: Panel prevents non-admin hosts from modifying options. (now with a warning)
+   Hosts can't actually change sandbox options - which created confusion when setting changes wouldn't occur.
+- New Sandbox Option to control when players can respawn.
+   Three options: On-Game-Start, Each-Wave, Whenever.
+- Removed support for 7 Lives To Live Redux. (sorry)
+- Added: Spectator Mode. (Janky, also sorry)
+   Camera Controls: WASD for movement, up/down for Z +/-
+   Trying to respawn will result in your character's death.
+   Jank: Sometimes the camera will refuse to utilize the cutaways for buildings (can't see inside).
+- Tweak: Sandbox 'ZombieLore.Transmission' value set to 4 (None) - for spectator mode to work better.
+- Tweak: Resetting shops now restocks them too.
+- Refactor: End-game process to avoid edge cases.
+[ ------ ]
+
+[ 8/11/25 - Hot Fix 1]
+- Tweak: Sandbox option for Transmission only becomes 4 when initially 3.
+- Tweak: Turning undead is disabled, but dying from infection is not. :)
+- Tweak: `clearZombies` fires at the start of every wave, not just startup.
+- Fix: Respawn rule logic for 'respawn every wave'/'whenever' was flawed.
+- Tweak: Game-Reset timings tweaked a bit.
+[ ------ ]
+
+[ 8/12/25 ]
+- Refactor: Moved spectate 'dot' rendering to spectate file (out of zone rendering).
+- Tweak: Zombie Transmission is untouched again. Spectate mode is not limited by it.
+- Tweak: Spectate Mode to work smoother.
+[ ------ ]
+
+[ 8/13/25 ]
+- Fix: Respawn UI 'Accept' logic failing with certain respawn-policies.
+- Tweak: Clearing Zombies ran conditionally on wave 0.
+- NEW: Shops (if none are present) will now attempt a server-side load of `Lua/exportedShops.txt`.
+    Shops will still fallback to default shops if none are present, and that file is not found.
+- Tweaked: Zombies-Left vs Zombies-In-Cell check.
+- Added: New 'Count-Safety' mechanism.
+    30-second cycle when the total zombies left is less than 10%.
+    If the count number remains the same as the previous cycle an additional zombie is spawned.
+[ ------ ]
+
+[ 8/15/25 ]
+Fix:
+- Respawn-Policy logic fixed.
+- Moved 'send score' event after 'teleport' event in game start.
+- Tweaked 'all players died' timing for server.
+[ ------ ]
+
+[ 8/24/25 ]
+- Added disclaimer to spectate mode.
+- Changed default MoneyPerKill to 2.
+- Adjust shop prices, merged music shop into weapons.
+- checkZombieCountSafety spawner time set to 60 seconds (from 30 seconds.)
+[ ------ ]
+
+[ 8/25/25 ]
+- Update default shops.
+[ ------ ]
+
+[ 4/4/26 ]
+B42 Update:
+- Txt to Json translation. (PZ-Translator v3)
+
+- Game mode persists through server reboots
+ - Current player scores, as well as wave number, zombie count, etc
+ - Round resumes with "Resuming — Waiting for Players" state until players join
+ - This data is stored as a Json per-save/server
+  - Found in cache/Lua/GAMEMODE/SAVENAME/
+
+- Tweaked zombie clearing
+- Reduced unnecessary data sent to clients
+- Fixed issue with shop assignment
+- Updated shops integration
+ - Tweaked marker behaviors
+[ ------ ]
