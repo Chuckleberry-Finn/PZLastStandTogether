@@ -5,4 +5,4 @@ poster=poster.png
 icon=icon.png
 author=Chuckleberry Finn
 require=pz-shops-and-traders,ChuckleberryFinnAlertSystem,errorMagnifier,
-versionMin=42.15
+versionMin=42.16

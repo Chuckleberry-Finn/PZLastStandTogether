@@ -1,7 +1,5 @@
 require "ISUI/ISPanel"
 
-if (isClient()) and ((not getDebug()) and (not getPlayer():getRole():hasCapability(Capability.SandboxOptions))) then return end
-
 lastStandTogetherPanel = ISPanel:derive("lastStandTogetherPanel")
 
 function lastStandTogetherPanel:update()
@@ -221,8 +219,14 @@ function lastStandTogetherPanel:initialise()
 end
 
 
+function lastStandTogetherPanel:confirmPermissions()
+    return ((not isClient()) or isAdmin() or (getDebug() or getPlayer():getRole():hasCapability(Capability.SandboxOptions)))
+end
+
+
 function lastStandTogetherPanel:open()
     if lastStandTogetherPanel.instance then lastStandTogetherPanel.instance:close() end
+    if not lastStandTogetherPanel:confirmPermissions() then return end
     local alert = lastStandTogetherPanel:new()
     alert:initialise()
     alert:addToUIManager()
