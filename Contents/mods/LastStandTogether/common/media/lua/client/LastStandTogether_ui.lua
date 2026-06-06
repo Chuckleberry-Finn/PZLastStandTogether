@@ -265,6 +265,13 @@ function lastStandTogetherWaveAlert:render()
         tempTextY = tempTextY + self.textMediumH
     end
 
+    if getDebug() then
+        local cellCount = getCell():getZombieList():size()
+        local debugText = "actual zombies in cell: " .. cellCount
+        self:drawTextCentre(debugText, self.width/2, tempTextY, 1, 1, 1, 0.7, UIFont.Small)
+        tempTextY = tempTextY + self.textSmallH
+    end
+
     if #LastStandTogether_Zone.playerDeaths > 0 then tempTextY = tempTextY + self.textMediumH*0.25 end
 
     for n=1, #LastStandTogether_Zone.playerDeaths do

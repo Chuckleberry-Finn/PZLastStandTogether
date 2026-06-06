@@ -533,10 +533,14 @@ function zone.schedulerLoop()
 
     if zombiesLeft > 0 and zombiesLeft > zombiesInCell then
         local need = math.max(0, zombiesLeft - zombiesInCell)
-        local spawned = (need > 0) and waveGen.spawnZombies(need)
-        print("WARNING: Zombies In Cell: ", zombiesInCell," is less than count:", zombiesLeft,"  wanted:", need, "  actually-spawned:", spawned)
-        zone.def.error = "Zombies went missing - respawning "..spawned.." to compensate."
-        zone.sendZoneDef()
+        if not zone.missingZombieTimer or currentTime > zone.missingZombieTimer then
+            zone.missingZombieTimer = currentTime + 5000
+            local spawned = waveGen.spawnZombies(need)
+            print("WARNING: Zombies In Cell: ", zombiesInCell, " tracked: ", zombiesLeft, "  wanted: ", need, "  spawned: ", spawned)
+            zone.def.error = "Zombies went missing - respawning " .. (spawned or 0) .. " to compensate."
+            if isServer() then zone.sendZombieCount() end
+            zone.sendZoneDef()
+        end
         return
     end
 

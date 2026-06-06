@@ -216,3 +216,8 @@ B42 Update:
 - Updated shops integration
  - Tweaked marker behaviors
 [ ------ ]
+
+[ 6/5/26 ]
+- Fix: Tweak missing zombie fixes.
+- Added true zombies in cell counter for debug.
+[ ------ ]
