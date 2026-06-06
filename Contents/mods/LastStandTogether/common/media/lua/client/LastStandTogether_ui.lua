@@ -267,7 +267,7 @@ function lastStandTogetherWaveAlert:render()
 
     if getDebug() then
         local cellCount = getCell():getZombieList():size()
-        local debugText = "actual zombies in cell: " .. cellCount
+        local debugText = "(DEBUG) actual zombies in cell: " .. cellCount
         self:drawTextCentre(debugText, self.width/2, tempTextY, 1, 1, 1, 0.7, UIFont.Small)
         tempTextY = tempTextY + self.textSmallH
     end
