@@ -29,6 +29,11 @@ if isServer() then
         if _command == "applyOutOfBoundsDamage" then
             if _player and _data.dmg then _player:getBodyDamage():ReduceGeneralHealth(_data.dmg) end
         end
+
+        if _command == "spawnZombieTest" then
+            addZombiesInOutfit(_player:getX()+5, _player:getY()+5, 0, 1, nil, nil)
+            --sendClientCommand("LastStandTogether", "spawnZombieTest", { })
+        end
     end
     Events.OnClientCommand.Add(onClientCommand)--what the server gets from the client
 end

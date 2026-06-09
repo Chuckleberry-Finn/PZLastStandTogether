@@ -221,3 +221,8 @@ B42 Update:
 - Fix: Tweak missing zombie fixes.
 - Added true zombies in cell counter for debug.
 [ ------ ]
+
+[ 6/7/26 ]
+- Fixed the issues with spawning.
+- Reworked clearing zombies mechanic to trim instead.
+[ ------ ]

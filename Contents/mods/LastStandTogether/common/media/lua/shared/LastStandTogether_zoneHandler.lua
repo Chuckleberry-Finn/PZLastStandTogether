@@ -174,7 +174,7 @@ end
 function zone.setSandboxForLastStand()
     local options = getSandboxOptions()
     local optionsToValues = {
-        ["ZombieConfig.PopulationMultiplier"] = 0.0001,
+        ["ZombieConfig.PopulationMultiplier"] = 0.15,
         ["ZombieConfig.PopulationStartMultiplier"] = 0.0,
         ["ZombieConfig.PopulationPeakMultiplier"] = 0.0,
         ["ZombieConfig.RespawnHours"] = 0.0,
@@ -208,7 +208,6 @@ function zone.onPlayerDeath(player)
 
     if isClient() then sendClientCommand("LastStandTogether", "updateZoneDefPlayerDeaths", {}) end
     if isServer() then sendServerCommand("LastStandTogether", "updateZoneDefPlayerDeaths", { username=pUsername }) end
-
     if not isClient() and zone.def.wave then
         local players = zone.getAllPlayers()
         if players and zone.allPlayersDead(players) then
@@ -420,7 +419,7 @@ function zone.checkZombieCountSafety()
     zone.def.zombieCountSafety.time = now + 15000
 
     local tracked = zone.def.currentZombies or 0
-    local inCell = getCell():getZombieList():size()
+    local inCell = zone.getTrueZombieCount()
 
     if tracked > 0 and inCell < tracked then
         local need = tracked - inCell
@@ -437,6 +436,20 @@ function zone.checkZombieCountSafety()
     end
 
     zone.def.zombieCountSafety.zombieCount = tracked
+end
+
+
+function zone.getTrueZombieCount()
+    local zombiesRaw = getCell():getZombieList()
+    local zombiesInCell = 0
+    for i=0, zombiesRaw:size()-1 do
+        ---@type IsoPlayer|IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
+        local zombie = zombiesRaw:get(i)
+        if zombie then
+            zombiesInCell = zombiesInCell + 1
+        end
+    end
+    return zombiesInCell
 end
 
 
@@ -519,7 +532,7 @@ function zone.schedulerLoop()
 
     local zombiesLeft = (zone.def.currentZombies or 0) + (zone.def.zombiesToSpawn or 0)
 
-    local zombiesInCell = getCell():getZombieList():size()
+    local zombiesInCell = zone.getTrueZombieCount()
 
     if zone.def.wave == 0 and zombiesInCell > 0 then
         if not zone.clearingZombies or currentTime > zone.clearingZombies then
@@ -531,7 +544,9 @@ function zone.schedulerLoop()
         zone.checkZombieCountSafety()
     end
 
+    print("zombiesLeft: ", zombiesLeft, " zombiesInCell: ", zombiesInCell)
     if zombiesLeft > 0 and zombiesLeft > zombiesInCell then
+        print("something is wrong")
         local need = math.max(0, zombiesLeft - zombiesInCell)
         if not zone.missingZombieTimer or currentTime > zone.missingZombieTimer then
             zone.missingZombieTimer = currentTime + 5000
@@ -895,8 +910,10 @@ end
 
 function zone.clearZombies()
     local now = getTimestampMs()
-    if zone.clearingZombies and zone.clearingZombies > now then return end
-    zone.clearingZombies = now + 1000
+    if zone then
+        if zone.clearingZombies and zone.clearingZombies > now then return end
+        zone.clearingZombies = now + 1000
+    end
 
     local cell = getCell()
     local zombiesInCell = cell:getZombieList()
@@ -923,10 +940,11 @@ end
 
 
 function zone.trimZombies()
+
     local cell = getCell()
     local zombieList = cell:getZombieList()
     local inCell = zombieList:size()
-    local target = zone.def.currentZombies or 0
+    local target = zone and zone.def and zone.def.currentZombies or 0
     local toRemove = math.max(0, inCell - target)
 
     if toRemove > 0 then
@@ -1051,7 +1069,7 @@ function zone.scheduledFinalSetup()
     if #zone.finalSteps <= 0 then
         if zone.restoring then
             zone.restoring = false
-            zone.def.currentZombies = getCell():getZombieList():size()
+            zone.def.currentZombies = zone.getTrueZombieCount()
         end
         Events.OnTick.Remove(zone.scheduledFinalSetup)
     end
