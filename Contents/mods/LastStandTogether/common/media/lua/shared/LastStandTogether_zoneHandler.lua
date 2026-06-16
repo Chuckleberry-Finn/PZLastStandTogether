@@ -174,7 +174,7 @@ end
 function zone.setSandboxForLastStand()
     local options = getSandboxOptions()
     local optionsToValues = {
-        ["ZombieConfig.PopulationMultiplier"] = 0.15,
+        ["ZombieConfig.PopulationMultiplier"] = 0.01,
         ["ZombieConfig.PopulationStartMultiplier"] = 0.0,
         ["ZombieConfig.PopulationPeakMultiplier"] = 0.0,
         ["ZombieConfig.RespawnHours"] = 0.0,
@@ -410,6 +410,15 @@ function zone.scheduleWave()
 end
 
 
+function zone.forceZombieSpawns(expectedCount)
+    local inCell = zone.def.currentZombies --zone.getTrueZombieCount()
+    if expectedCount > 0 and inCell > expectedCount then
+        local need = inCell-expectedCount
+        waveGen.spawnZombies(need)
+    end
+end
+
+
 function zone.checkZombieCountSafety()
     local now = getTimestampMs()
 
@@ -544,9 +553,17 @@ function zone.schedulerLoop()
         zone.checkZombieCountSafety()
     end
 
+    --[[
     print("zombiesLeft: ", zombiesLeft, " zombiesInCell: ", zombiesInCell)
+    local cellZombies = getCell():getZombieList()
+    for z=0, cellZombies:size()-1 do
+        ---@type IsoZombie
+        local zombie = cellZombies:get(z)
+        print(z, " ", zombie:getOnlineID(), " ", zombie)
+    end
+    --]]
+
     if zombiesLeft > 0 and zombiesLeft > zombiesInCell then
-        print("something is wrong")
         local need = math.max(0, zombiesLeft - zombiesInCell)
         if not zone.missingZombieTimer or currentTime > zone.missingZombieTimer then
             zone.missingZombieTimer = currentTime + 5000
@@ -916,6 +933,7 @@ function zone.clearZombies()
     end
 
     local cell = getCell()
+    ---@type ArrayList
     local zombiesInCell = cell:getZombieList()
     local zombiesInCellSize = zombiesInCell:size()
 

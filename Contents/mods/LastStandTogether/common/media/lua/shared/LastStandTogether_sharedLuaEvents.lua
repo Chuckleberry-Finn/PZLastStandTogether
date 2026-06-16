@@ -34,6 +34,9 @@ if isServer() then
             addZombiesInOutfit(_player:getX()+5, _player:getY()+5, 0, 1, nil, nil)
             --sendClientCommand("LastStandTogether", "spawnZombieTest", { })
         end
+
+        if _command == "receivedZombieCount" then LastStandTogether_Zone.forceZombieSpawns(_data.zombieCount) end
+
     end
     Events.OnClientCommand.Add(onClientCommand)--what the server gets from the client
 end
@@ -60,6 +63,12 @@ if isClient() then
 
         if _command == "teleportEntity" then
             LastStandTogether_Zone.handleTeleportEntity(_data)
+        end
+
+        if _command == "confirmZombieCountWithClient" then
+            local cellZombies = getCell():getZombieList()
+            local zombieCount = cellZombies:size()
+            sendClientCommand("LastStandTogether", "receivedZombieCount", {zombieCount=zombieCount})
         end
     end
     Events.OnServerCommand.Add(onServerCommand)--what clients gets from the server

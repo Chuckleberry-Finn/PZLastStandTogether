@@ -8,15 +8,15 @@ function waveGenerator.spawnZombies(numberOf)
     local zoneDef = LST_zone.def
     if not zoneDef or not zoneDef.center or not zoneDef.dimensions then print("ERROR: spawnZombies FAILED! - zoneDef invalid!") return end
 
-    local x1 = zoneDef.center.x-80
-    local y1 = zoneDef.center.y-80
-    local x2 = zoneDef.center.x+80
-    local y2 = zoneDef.center.y+80
+    local wOffset = zoneDef.dimensions.w * 2.66
+    local hOffset = zoneDef.dimensions.h * 2.66
+
+    local x1 = zoneDef.center.x-wOffset
+    local y1 = zoneDef.center.y-hOffset
+    local x2 = zoneDef.center.x+wOffset
+    local y2 = zoneDef.center.y+hOffset
 
     numberOf = math.floor(numberOf)
-
-    local player = 0
-    local players = (isServer() and getOnlinePlayers())
 
     local spawnedZombies = 0
     local attempts = 0
@@ -48,6 +48,7 @@ function waveGenerator.spawnZombies(numberOf)
         local square = getSquare(x, y, 0)
         if square and not square:isSolidTrans() then
             local spawned = addZombiesInOutfit(x, y, 0, 1, nil, nil)
+            --addZombieSitting(x, y, 0)
             if spawned and spawned:size() > 0 then
                 ---@type IsoObject|IsoMovingObject|IsoGameCharacter|IsoZombie
                 local zombie = spawned:get(0)
@@ -55,24 +56,35 @@ function waveGenerator.spawnZombies(numberOf)
             else
                 print("ERROR: WAVE-GEN: spawnZombie FAILED!")
             end
-
-            if isServer() then
-                ---@type IsoPlayer|IsoObject|IsoGameCharacter
-                local playerObj = players:get(player)
-                if not playerObj:isDead() and not playerObj:isInvisible() then
-                    AddWorldSound(players:get(player), 600, 600)
-                end
-                player = player + 1
-                if player >= players:size() then player = 0 end
-            else
-                local playerObj = getPlayer()
-                if not playerObj:isDead() and not playerObj:isInvisible() then
-                    AddWorldSound(playerObj, 600, 600)
-                end
-            end
         end
-
     end
+
+    getWorldSoundManager():addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 100, true, 1000, 100)
+
+    if isServer() then
+        local players = getOnlinePlayers()
+        local random = ZombRand(players:size())
+        local player = players:get(random)
+        sendServerCommand(player, "LastStandTogether", "confirmZombieCountWithClient", {})
+    end
+
+    --sendServerCommand()
+    --[[
+    if isServer() then
+        ---@type IsoPlayer|IsoObject|IsoGameCharacter
+        local playerObj = players:get(player)
+        if not playerObj:isDead() and not playerObj:isInvisible() then
+            AddWorldSound(players:get(player), 600, 600)
+        end
+        player = player + 1
+        if player >= players:size() then player = 0 end
+    else
+        local playerObj = getPlayer()
+        if not playerObj:isDead() and not playerObj:isInvisible() then
+            AddWorldSound(playerObj, 600, 600)
+        end
+    end
+    --]]
 
     if attempts >= maxAttempts then
         print("WARNING: Max attempts reached when spawning zombies, consider a different location.   spawnedZombies:",spawnedZombies, "  expected: ",numberOf)

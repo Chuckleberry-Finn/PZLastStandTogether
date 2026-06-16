@@ -226,3 +226,7 @@ B42 Update:
 - Fixed the issues with spawning.
 - Reworked clearing zombies mechanic to trim instead.
 [ ------ ]
+
+[ 6/15/26 ]
+- Reworked zombie spawn to correct for issues with zombie culling.
+[ ------ ]

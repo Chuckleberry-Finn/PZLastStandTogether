@@ -207,7 +207,8 @@ function lastStandTogetherWaveAlert:prerender()
         if self.currentZombies > 0 and (not self.player:isDead() and not self.player:isInvisible()) then
             if (not self.lastYellOut) or (currentTime > self.lastYellOut) then
                 self.lastYellOut = currentTime+10000
-                AddWorldSound(self.player, 600, 600)
+                --AddWorldSound(self.player, 600, 600)
+                getWorldSoundManager():addSound(self.player, self.player:getX(), self.player:getY(), self.player:getZ(), 600, 100, true, 1000, 100)
             end
         end
 
