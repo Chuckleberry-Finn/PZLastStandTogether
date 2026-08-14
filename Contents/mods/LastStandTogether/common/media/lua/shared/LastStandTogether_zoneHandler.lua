@@ -29,6 +29,9 @@ zone.def.shopMarkers = {}
 zone.def.shopMarkersRooms = {}
 
 zone.resetCooldown = isServer() and 80000 or 20000
+zone.confirmRequestCooldownMs = 10000
+zone.confirmRequestGraceMs = 2000
+zone.confirmRequest = {}
 zone.playerDeaths = {}
 
 zone.players = {}
@@ -411,11 +414,32 @@ end
 
 
 function zone.forceZombieSpawns(expectedCount)
-    local inCell = zone.def.currentZombies --zone.getTrueZombieCount()
+    local inCell = zone.def.currentZombies
     if expectedCount > 0 and inCell > expectedCount then
         local need = inCell-expectedCount
-        waveGen.spawnZombies(need)
+        waveGen.spawnZombies(need, false)
     end
+end
+
+
+function zone.requestZombieCountConfirmation()
+    if not isServer() then return end
+
+    local now = getTimestampMs()
+    if zone.confirmRequest.nextAllowed and now < zone.confirmRequest.nextAllowed then return end
+
+    zone.confirmRequest.nextAllowed = now + zone.confirmRequestCooldownMs
+    zone.confirmRequest.pendingTime = now + zone.confirmRequestGraceMs
+end
+
+
+function zone.sendZombieCountConfirmationRequest()
+    local players = getOnlinePlayers()
+    if players:size() <= 0 then return end
+
+    local random = ZombRand(players:size())
+    local player = players:get(random)
+    sendServerCommand(player, "LastStandTogether", "confirmZombieCountWithClient", {})
 end
 
 
@@ -432,7 +456,7 @@ function zone.checkZombieCountSafety()
 
     if tracked > 0 and inCell < tracked then
         local need = tracked - inCell
-        waveGen.spawnZombies(need)
+        waveGen.spawnZombies(need, true)
         if isServer() then zone.sendZombieCount() end
         zone.def.zombieCountSafety.zombieCount = tracked
         return
@@ -440,7 +464,7 @@ function zone.checkZombieCountSafety()
 
     local prev = zone.def.zombieCountSafety.zombieCount
     if prev and prev == tracked and tracked > 0 and inCell == 0 then
-        waveGen.spawnZombies(1)
+        waveGen.spawnZombies(1, true)
         if isServer() then zone.sendZombieCount() end
     end
 
@@ -491,9 +515,20 @@ function zone.schedulerLoop()
             if zone.clearingZombies then
                 zone.clearingZombies = zone.clearingZombies + adjust
             end
+            if zone.confirmRequest.pendingTime then
+                zone.confirmRequest.pendingTime = zone.confirmRequest.pendingTime + adjust
+            end
+            if zone.confirmRequest.nextAllowed then
+                zone.confirmRequest.nextAllowed = zone.confirmRequest.nextAllowed + adjust
+            end
         end
     end
     zone.lastTickTime = now
+
+    if isServer() and zone.confirmRequest.pendingTime and now > zone.confirmRequest.pendingTime then
+        zone.confirmRequest.pendingTime = nil
+        zone.sendZombieCountConfirmationRequest()
+    end
 
     local players = zone.getAllPlayers()
     local activePlayers = zone.hasActivePlayers(players)
@@ -529,7 +564,7 @@ function zone.schedulerLoop()
     if zone.def.zombiesToSpawn and zone.def.zombiesToSpawn > 0 then
         if not zone.def.spawnTickTimer or currentTime > zone.def.spawnTickTimer then
             local batchSize = math.min(100, zone.def.zombiesToSpawn)
-            local spawned = waveGen.spawnZombies(batchSize)
+            local spawned = waveGen.spawnZombies(batchSize, false)
             zone.def.zombiesToSpawn = math.max(0, zone.def.zombiesToSpawn - spawned)
             zone.def.spawnTickTimer = currentTime + ((SandboxVars.LastStandTogether.InWaveSpawnInterval or 2) * 60000)
             zone.def.zombiesSpawned = (zone.def.zombiesSpawned or 0) + spawned
@@ -567,7 +602,7 @@ function zone.schedulerLoop()
         local need = math.max(0, zombiesLeft - zombiesInCell)
         if not zone.missingZombieTimer or currentTime > zone.missingZombieTimer then
             zone.missingZombieTimer = currentTime + 5000
-            local spawned = waveGen.spawnZombies(need)
+            local spawned = waveGen.spawnZombies(need, true)
             print("WARNING: Zombies In Cell: ", zombiesInCell, " tracked: ", zombiesLeft, "  wanted: ", need, "  spawned: ", spawned)
             zone.def.error = "Zombies went missing - respawning " .. (spawned or 0) .. " to compensate."
             if isServer() then zone.sendZombieCount() end

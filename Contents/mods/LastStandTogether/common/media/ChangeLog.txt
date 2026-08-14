@@ -230,3 +230,10 @@ B42 Update:
 [ 6/15/26 ]
 - Reworked zombie spawn to correct for issues with zombie culling.
 [ ------ ]
+
+[ 8/14/26 ]
+- Moved support of the mod to B42.20
+- Added cooldowns and better checks for OVER-corrective spawning (formerly to combat culling issues).
+
+HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
+[ ------ ]

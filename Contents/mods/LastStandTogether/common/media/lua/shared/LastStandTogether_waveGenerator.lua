@@ -1,6 +1,6 @@
 local waveGenerator = {}
 
-function waveGenerator.spawnZombies(numberOf)
+function waveGenerator.spawnZombies(numberOf, isCorrective)
 
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then print("ERROR: spawnZombies FAILED! - NO LST_zone!") return end
@@ -61,30 +61,9 @@ function waveGenerator.spawnZombies(numberOf)
 
     getWorldSoundManager():addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 100, true, 1000, 100)
 
-    if isServer() then
-        local players = getOnlinePlayers()
-        local random = ZombRand(players:size())
-        local player = players:get(random)
-        sendServerCommand(player, "LastStandTogether", "confirmZombieCountWithClient", {})
+    if isServer() and isCorrective then
+        LST_zone.requestZombieCountConfirmation()
     end
-
-    --sendServerCommand()
-    --[[
-    if isServer() then
-        ---@type IsoPlayer|IsoObject|IsoGameCharacter
-        local playerObj = players:get(player)
-        if not playerObj:isDead() and not playerObj:isInvisible() then
-            AddWorldSound(players:get(player), 600, 600)
-        end
-        player = player + 1
-        if player >= players:size() then player = 0 end
-    else
-        local playerObj = getPlayer()
-        if not playerObj:isDead() and not playerObj:isInvisible() then
-            AddWorldSound(playerObj, 600, 600)
-        end
-    end
-    --]]
 
     if attempts >= maxAttempts then
         print("WARNING: Max attempts reached when spawning zombies, consider a different location.   spawnedZombies:",spawnedZombies, "  expected: ",numberOf)

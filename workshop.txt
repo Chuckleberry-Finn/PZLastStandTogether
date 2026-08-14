@@ -1,17 +1,19 @@
 version=1
 id=3534542229
 title=Last Stand Together
-description=[h1]A multiplayer version of Project Zomboid’s Last Stand mode.[/h1]
+description=[h1]A multiplayer adaption of Project Zomboid’s Last Stand mode.[/h1]
+description=[h2][b]WARNING: This mod is an overhaul to how Zomboid functions, it wipes the entire world of zombies and all players are subject to play in the Last Stand Zone. Key features would simply not work in a modular-event-zone format. As such, NO this mod is not suggested for adding and removing from a server. [/b][/h2]
 description=[h2]This mod lets you set up a Last Stand survival zone in multiplayer (or singleplayer). You and your friends pick a building, and waves of zombies will attack. The goal is simple: survive as long as you can.[/h2]
-description=
-description=[b]Instructions:[/b] In Singplayer or in MP as admin/host (or debug mode) hit escape and view the Setup Panel. Select a building in Project Zomboid to be your base of operations.
-description=
-description=Full (and automatic) integration with [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2853615523]Shops and Traders[/url] (see: required items). Shops arranged using Shops and Traders will automatically fill the building's most container-heavy room.
-description=
+description=Also features an "automatic" mode which selects a building FROM the entire map at random when everyone is dead.
 description=Zombies wave population, intervals, and more can all be configured in the panel or in sandbox options.
 description=
-description=[h3]Commissioned by [url=https://www.twitch.tv/djackz]Djackz[/url][/h3]
+description=[b]Instructions:[/b] In Singplayer or in MP as admin/host (or debug mode) hit escape and view the Setup Panel. Stand inside of your building of choice and get ready to defend your base of operations.
 description=
+description=Full (and automatic) integration with [url=https://steamcommunity.com/sharedfiles/filedetails/?id=2853615523]Shops and Traders[/url] (see: required items). Shops arranged using Shops and Traders will automatically fill the building's most container-heavy room. Comes with a standard array of shops.
+description=
+description=
+description=[h3]Commissioned by [url=https://www.twitch.tv/djackz]Djackz[/url][/h3]
+description=[h3]Further sponsored by [i]BowlOfOodaLoops[/i][/h3]
 description=
 description=[url=https://ko-fi.com/chuckleberryfinn][img]https://raw.githubusercontent.com/ChuckTheSheep/chuckImages/main/kofi.png[/img][/url][url=https://discord.gg/SReMnbV4V7][img]https://raw.githubusercontent.com/Chuckleberry-Finn/chuckImages/main/PZmodCommBanner3.png[/img][/url]
 description=
@@ -21,8 +23,7 @@ description=
 description=[url=https://chuckleberry-finn.github.io/issues/][img]https://raw.githubusercontent.com/Chuckleberry-Finn/chuckImages/main/bugHunt.png[/img][/url]
 description=
 description=
-description=
-description=[url=https://indifferentbroccoli.com/project-zomboid-server-hosting?fpr=chuckleberry][img]https://raw.githubusercontent.com/Chuckleberry-Finn/chuckImages/refs/heads/main/IB_BANNER/IB_BANNER.gif[/img][/url]
+description=[b][i][h1] [/h1][/i][/b]
 description=
 description=
 description=[h3]Copyright 2026 Chuckleberry Finn. This item is not authorized for posting on Steam, except under the Steam account named Chuckleberry Finn.[/h3]
