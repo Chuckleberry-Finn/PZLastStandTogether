@@ -244,3 +244,8 @@ HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 - Added: Guns of Marz weapons merged into the Guns shop, sorted by weapon type (pistols, revolvers, shotguns, rifles, etc.)
 - Tweak: Rebalanced every shop's prices.
 [ ------ ]
+
+[ 8/22/26 ]
+- Tweak: Shop marker rendering now calls into the Shops and Traders API instead of duplicating its own copy, cutting down on repeated code between the two mods.
+- Fix: Shop name labels.
+[ ------ ]

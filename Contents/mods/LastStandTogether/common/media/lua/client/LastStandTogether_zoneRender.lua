@@ -1,8 +1,6 @@
-local zoneRender = {}
+local shopMarkerSystem = require "shop-markers.lua"
 
-zoneRender.shopTexture = getTexture("media/textures/ui/shopMarker.png")
-zoneRender.shopTexture_up = getTexture("media/textures/ui/shopMarker_up.png")
-zoneRender.shopTexture_down = getTexture("media/textures/ui/shopMarker_down.png")
+local zoneRender = {}
 
 
 function zoneRender.drawEdge(x1, y1, x2, y2, width, color)
@@ -113,7 +111,10 @@ function zoneRender.drawZoneEffects()
 
                             local x1, y1, x2, y2, x3, y3, x4, y4, alpha = zoneRender.shopMarkerScaler(shop.x, shop.y, shop.z+0.33, 64, zoom, 1)
 
-                            getRenderer():render(zoneRender.shopTexture, x1, y1, x2, y2, x3, y3, x4, y4, 1, 1, 1, alpha, nil)
+                            shopMarkerSystem.drawMarkerQuad("", x1, y1, x2, y2, x3, y3, x4, y4, alpha)
+
+                            local markerKey = "lst_room_"..roomID.."_"..s
+                            shopMarkerSystem.checkHover(markerKey, shop.shopID, shop.x, shop.y, shop.z+0.33)
                         end
                     end
                 else
@@ -126,7 +127,10 @@ function zoneRender.drawZoneEffects()
                     local scale = 15 * normalized
                     local x1, y1, x2, y2, x3, y3, x4, y4, alpha = zoneRender.shopMarkerScaler(coord.x, coord.y, pZ+0.5, 100, zoom*1.5, (scale/0.33))
 
-                    getRenderer():render(zoneRender["shopTexture"..zDiff], x1, y1, x2, y2, x3, y3, x4, y4, 1, 1, 1, alpha, nil)
+                    shopMarkerSystem.drawMarkerQuad(zDiff, x1, y1, x2, y2, x3, y3, x4, y4, alpha)
+
+                    local markerKey = "lst_room_"..roomID
+                    shopMarkerSystem.checkHover(markerKey, coord.shopID, coord.x, coord.y, pZ+0.5)
                 end
             end
         end
