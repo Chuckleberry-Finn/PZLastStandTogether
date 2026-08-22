@@ -84,7 +84,7 @@ function waveGenerator.spawnZombies(numberOf, isCorrective)
         verifyRetries = verifyRetries + 1
     end
 
-    getWorldSoundManager():addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 100, true, 1000, 100)
+    getWorldSoundManager():addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 100, false, 1000, 100)
 
     if isServer() and isCorrective then
         LST_zone.requestZombieCountConfirmation()

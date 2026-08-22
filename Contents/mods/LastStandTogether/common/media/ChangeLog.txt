@@ -256,3 +256,7 @@ HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 - Added: 2-Minute-No-Kill listener to force spawn 5 more zombies.
 - Fix: Rooms in the claimed building are now marked explored before the round starts, so story-zombies shouldn't spawn.
 [ ------ ]
+
+[ 8/22/26 hotfix2 ]
+- Removed 'human stress' parameter from the luring events.
+[ ------ ]

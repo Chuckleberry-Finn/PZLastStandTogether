@@ -208,7 +208,7 @@ function lastStandTogetherWaveAlert:prerender()
             if (not self.lastYellOut) or (currentTime > self.lastYellOut) then
                 self.lastYellOut = currentTime+10000
                 --AddWorldSound(self.player, 600, 600)
-                getWorldSoundManager():addSound(self.player, self.player:getX(), self.player:getY(), self.player:getZ(), 600, 100, true, 1000, 100)
+                getWorldSoundManager():addSound(self.player, self.player:getX(), self.player:getY(), self.player:getZ(), 600, 100, false, 1000, 100)
             end
         end
 
