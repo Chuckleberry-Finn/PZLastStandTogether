@@ -262,11 +262,12 @@ function zone.enforceZoneBoundaries()
     if not isServer() then return end
     if not zone.def or not zone.def.center or not zone.def.dimensions then return end
 
-    local players = zone.getAllPlayers()
-    if not players or players:size() <= 0 then return end
-
     local cell = getCell()
     local zombiesInCell = cell:getZombieList()
+    local players = zone.getAllPlayers()
+    local hasPlayers = players and players:size() > 0
+
+    local luringRadius = math.max(zone.def.dimensions.w, zone.def.dimensions.h) + 20
 
     for i=0, zombiesInCell:size()-1 do
         ---@type IsoZombie
@@ -275,20 +276,23 @@ function zone.enforceZoneBoundaries()
             local zX, zY = zombie:getX(), zombie:getY()
             local dx = zone.def.center.x - zX
             local dy = zone.def.center.y - zY
+            local distFromCenter = math.sqrt(dx*dx + dy*dy)
 
-            if (math.abs(dx) > zone.def.dimensions.w) or (math.abs(dy) > zone.def.dimensions.h) then
-                local nearestPlayer = zone.getNearestPlayer(players, zX, zY)
-                if nearestPlayer and zombie:getTarget() ~= nearestPlayer then
-                    zombie:setTarget(nearestPlayer)
+            if distFromCenter <= luringRadius then
+                local nearestPlayer = hasPlayers and zone.getNearestPlayer(players, zX, zY)
+
+                if nearestPlayer then
+                    if zombie:getTarget() ~= nearestPlayer then
+                        zombie:setTarget(nearestPlayer)
+                    end
+                    if zombie:getThumpTarget() then zombie:setThumpTarget(nil) end
                 end
 
-                if zombie:getThumpTarget() then zombie:setThumpTarget(nil) end
-
-                local dist = math.sqrt(dx*dx + dy*dy)
-                if dist > 0 then
-                    local step = math.max(2, math.min(6, dist))
-                    local newX = zX + (dx/dist)*step
-                    local newY = zY + (dy/dist)*step
+                local outOfBounds = (math.abs(dx) > zone.def.dimensions.w) or (math.abs(dy) > zone.def.dimensions.h)
+                if (outOfBounds or not nearestPlayer) and distFromCenter > 0 then
+                    local step = math.max(2, math.min(6, distFromCenter))
+                    local newX = zX + (dx/distFromCenter)*step
+                    local newY = zY + (dy/distFromCenter)*step
                     zone.teleportEntity(zombie, newX, newY, zombie:getZ())
                 end
             end
