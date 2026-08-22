@@ -249,3 +249,10 @@ HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 - Tweak: Shop marker rendering now calls into the Shops and Traders API instead of duplicating its own copy, cutting down on repeated code between the two mods.
 - Fix: Shop name labels.
 [ ------ ]
+
+[ 8/22/26 hotfix1 ]
+- Fix: All Zombies (not just ones outside the area) now get lured toward the nearest player/zone-center.
+- Fix: Shop hover-name labels.
+- Added: 2-Minute-No-Kill listener to force spawn 5 more zombies.
+- Fix: Rooms in the claimed building are now marked explored before the round starts, so story-zombies shouldn't spawn.
+[ ------ ]

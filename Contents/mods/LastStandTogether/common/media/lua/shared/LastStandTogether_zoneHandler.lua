@@ -383,6 +383,7 @@ function zone.onZombieDead(zombie)
         end
 
         zone.def.currentZombies = math.max(0, (zone.def.currentZombies or 0) - 1)
+        zone.def.lastKillTime = getTimestampMs()
     end
 
     if isServer() then
@@ -468,6 +469,7 @@ function zone.scheduleWave()
         zone.def.zombiesSpawned = 0
         zone.def.spawnTickTimer = 0
         zone.def.nextWaveTime = false
+        zone.def.lastKillTime = currentTime
     end
 
     zone.schedulingProcess = false
@@ -531,6 +533,37 @@ function zone.checkZombieCountSafety()
     end
 
     zone.def.zombieCountSafety.zombieCount = tracked
+end
+
+
+zone.killInactivityMinutes = 2
+zone.killInactivityForceSpawn = 5
+function zone.checkKillInactivity()
+    if not isServer() then return end
+    if not zone.def or not zone.def.center then return end
+
+    local now = getTimestampMs()
+    zone.def.lastKillTime = zone.def.lastKillTime or now
+
+    if zone.inactivityCheckTimer and now < zone.inactivityCheckTimer then return end
+    zone.inactivityCheckTimer = now + 60000
+
+    local inactivityThreshold = zone.killInactivityMinutes * 60000
+    if now - zone.def.lastKillTime < inactivityThreshold then return end
+
+    local tracked = zone.def.currentZombies or 0
+    local inCell = zone.getTrueZombieCount()
+    if tracked > 0 and inCell < tracked then
+        local forceCount = zone.killInactivityForceSpawn
+        waveGen.spawnZombies(forceCount, true)
+        zone.def.lastKillTime = now
+        zone.def.currentZombies = (zone.def.currentZombies or 0) + forceCount
+        zone.def.error = "No kills for a while - force spawning "..forceCount.." zombies."
+        if isServer() then zone.sendZombieCount() end
+        zone.sendZoneDef()
+    else
+        zone.def.lastKillTime = now
+    end
 end
 
 
@@ -655,6 +688,10 @@ function zone.schedulerLoop()
         zone.checkZombieCountSafety()
     end
 
+    if zombiesLeft > 0 then
+        zone.checkKillInactivity()
+    end
+
     --[[
     print("zombiesLeft: ", zombiesLeft, " zombiesInCell: ", zombiesInCell)
     local cellZombies = getCell():getZombieList()
@@ -678,7 +715,7 @@ function zone.schedulerLoop()
         return
     end
 
-    if not zone.def.nextWaveTime then --- set wave timer for next wave when all zombies are dead
+    if not zone.def.nextWaveTime then
         if zombiesLeft <= 0 and (zone.def.zombiesSpawned or 0) > 0 then
             local base = 60000 * (SandboxVars.LastStandTogether.CoolDownBetweenWave or 2)
             local multi = (SandboxVars.LastStandTogether.CoolDownMulti or 1.01)
@@ -805,7 +842,7 @@ function zone.loadOrCreateShops()
             end
             shops[shopID] = shop
         end
-        --- Persist defaults into the JSON file so they survive restarts
+
         if not isClient() or isServer() then
             for shopID,shopData in pairs(shops) do GLOBAL_STORES[shopID] = shops[shopID] end
             STORE_HANDLER.saveToFile()
@@ -871,10 +908,11 @@ function zone.resetShopMarkers()
                         ---@type IsoObject
                         local container = objects:get(o)
                         local objModData = container and container:getModData()
-                        if objModData and objModData.storeObjID then
+                        if objModData and objModData.storeObjID == shopID then
                             zone.def.shopMarkersInRoom[roomID] = zone.def.shopMarkersInRoom[roomID] or {}
                             local zOffset = container:isTableTopObject() and 0.25 or 0
                             table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=(sq:getZ()+zOffset), shopID=shopID })
+                            break
                         end
                     end
                 end
@@ -1096,6 +1134,13 @@ function zone.setToBuilding(buildingDef)
     end
 
     buildingDef:setAlarmed(false) ---lol
+
+    local rooms = buildingDef:getRooms()
+    for r=0, rooms:size()-1 do
+        ---@type RoomDef
+        local roomDef = rooms:get(r)
+        if roomDef then roomDef:setExplored(true) end
+    end
 
     local buildingID = buildingDef and buildingDef:getID()
     zone.def.buildingID = buildingID
