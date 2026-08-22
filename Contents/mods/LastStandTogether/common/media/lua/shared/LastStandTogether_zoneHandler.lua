@@ -870,7 +870,7 @@ function zone.resetShopMarkers()
                         if objModData and objModData.storeObjID then
                             zone.def.shopMarkersInRoom[roomID] = zone.def.shopMarkersInRoom[roomID] or {}
                             local zOffset = container:isTableTopObject() and 0.25 or 0
-                            table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=(sq:getZ()+zOffset) })
+                            table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=(sq:getZ()+zOffset), shopID=shopID })
                         end
                     end
                 end
@@ -978,7 +978,7 @@ function zone.establishShopFront(buildingDef)
                         assignedShops = assignedShops + 1
                         zone.def.shopMarkersInRoom[roomID] = zone.def.shopMarkersInRoom[roomID] or {}
                         local zOffset = container:isTableTopObject() and 0.25 or 0
-                        table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=(sq:getZ()+zOffset) })
+                        table.insert(zone.def.shopMarkersInRoom[roomID],{ x=sq:getX(), y=sq:getY(), z=(sq:getZ()+zOffset), shopID=shopID })
                         STORE_HANDLER.updateStore(storeObj, shopID)
                     end
                 end
