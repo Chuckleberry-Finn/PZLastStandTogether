@@ -239,6 +239,64 @@ function zone.sendZombieCount(data)
 end
 
 
+function zone.getNearestPlayer(players, x, y)
+    local nearest, nearestDistSq
+    for i=0, players:size()-1 do
+        ---@type IsoPlayer
+        local player = players:get(i)
+        if player and not player:isDead() and not player:isInvisible() then
+            local dx = player:getX()-x
+            local dy = player:getY()-y
+            local distSq = dx*dx + dy*dy
+            if not nearestDistSq or distSq < nearestDistSq then
+                nearestDistSq = distSq
+                nearest = player
+            end
+        end
+    end
+    return nearest
+end
+
+
+function zone.enforceZoneBoundaries()
+    if not isServer() then return end
+    if not zone.def or not zone.def.center or not zone.def.dimensions then return end
+
+    local players = zone.getAllPlayers()
+    if not players or players:size() <= 0 then return end
+
+    local cell = getCell()
+    local zombiesInCell = cell:getZombieList()
+
+    for i=0, zombiesInCell:size()-1 do
+        ---@type IsoZombie
+        local zombie = zombiesInCell:get(i)
+        if zombie and not zombie:isDead() then
+            local zX, zY = zombie:getX(), zombie:getY()
+            local dx = zone.def.center.x - zX
+            local dy = zone.def.center.y - zY
+
+            if (math.abs(dx) > zone.def.dimensions.w) or (math.abs(dy) > zone.def.dimensions.h) then
+                local nearestPlayer = zone.getNearestPlayer(players, zX, zY)
+                if nearestPlayer and zombie:getTarget() ~= nearestPlayer then
+                    zombie:setTarget(nearestPlayer)
+                end
+
+                if zombie:getThumpTarget() then zombie:setThumpTarget(nil) end
+
+                local dist = math.sqrt(dx*dx + dy*dy)
+                if dist > 0 then
+                    local step = math.max(2, math.min(6, dist))
+                    local newX = zX + (dx/dist)*step
+                    local newY = zY + (dy/dist)*step
+                    zone.teleportEntity(zombie, newX, newY, zombie:getZ())
+                end
+            end
+        end
+    end
+end
+
+
 function zone.getAllPlayers()
     if (not zone.def or not zone.def.center) then return end
     local players = (isClient() or isServer()) and getOnlinePlayers() or IsoPlayer.getPlayers()
@@ -547,6 +605,11 @@ function zone.schedulerLoop()
     zone.def.warningNoPlayers = false
 
     local currentTime = getTimestampMs()
+
+    if isServer() and (not zone.boundaryEnforceTimer or currentTime > zone.boundaryEnforceTimer) then
+        zone.boundaryEnforceTimer = currentTime + 1000
+        zone.enforceZoneBoundaries()
+    end
 
     if not zone.def.wave and not zone.def.nextWaveTime then
         zone.scheduleWave()

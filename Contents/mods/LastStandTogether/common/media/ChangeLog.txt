@@ -237,3 +237,10 @@ B42 Update:
 
 HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 [ ------ ]
+
+[ 8/21/26 ]
+- Fix: Zombies wandering out of the zone now get corrected server-side, so they reliably chase players again instead of getting stuck.
+- Fix: Zombie spawn corrections were landing outside the loaded area and vanishing - spawns are now kept in range and verified before moving on.
+- Added: Guns of Marz weapons merged into the Guns shop, sorted by weapon type (pistols, revolvers, shotguns, rifles, etc.)
+- Tweak: Rebalanced every shop's prices.
+[ ------ ]

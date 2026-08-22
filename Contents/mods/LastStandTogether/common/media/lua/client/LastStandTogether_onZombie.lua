@@ -4,6 +4,7 @@ local onZombie = {}
 function onZombie.collide(zombie, obj)
 
     if not instanceof(zombie,"IsoZombie") then return end
+    if zombie:isRemoteZombie() then return end
 
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
@@ -56,6 +57,8 @@ onZombie.onUpdateLocationSafety = {}
 
 ---@param zombie IsoZombie
 function onZombie.update(zombie)
+
+    if zombie:isRemoteZombie() then return end
 
     local LST_zone = LastStandTogether_Zone
     if not LST_zone then return end
