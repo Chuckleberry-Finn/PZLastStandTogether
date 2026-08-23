@@ -159,6 +159,8 @@ function lastStandTogetherWaveAlert:prerender()
 
         self.textLine1 = "All Survivors Have Fallen"
         self.textLine2 = resetText and ("Reset In: " .. resetText) or ""
+        self.textLine3 = ""
+        self.textLine4 = ""
 
         if not self.announcedFallen and resetMs < (LastStandTogether_Zone.resetCooldown * 0.80) then
             self.waveAnnounceParts = nil
@@ -208,7 +210,7 @@ function lastStandTogetherWaveAlert:prerender()
             if (not self.lastYellOut) or (currentTime > self.lastYellOut) then
                 self.lastYellOut = currentTime+10000
                 --AddWorldSound(self.player, 600, 600)
-                getWorldSoundManager():addSound(self.player, self.player:getX(), self.player:getY(), self.player:getZ(), 600, 100, false, 1000, 100)
+                getWorldSoundManager():addSound(self.player, self.player:getX(), self.player:getY(), self.player:getZ(), 333, 999)
             end
         end
 
@@ -268,7 +270,9 @@ function lastStandTogetherWaveAlert:render()
 
     if getDebug() then
         local cellCount = getCell():getZombieList():size()
-        local debugText = "(DEBUG) actual zombies in cell: " .. cellCount
+        local serverTrueCount = zoneDef.serverTrueCount
+        local debugText = "(DEBUG) actual zombies in cell (client view): " .. cellCount ..
+            (serverTrueCount and ("  |  server true count: " .. serverTrueCount) or "")
         self:drawTextCentre(debugText, self.width/2, tempTextY, 1, 1, 1, 0.7, UIFont.Small)
         tempTextY = tempTextY + self.textSmallH
     end

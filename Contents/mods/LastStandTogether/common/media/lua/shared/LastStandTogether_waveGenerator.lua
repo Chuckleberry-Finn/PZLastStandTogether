@@ -60,9 +60,10 @@ function waveGenerator.spawnZombies(numberOf, isCorrective)
     if not zoneDef or not zoneDef.center or not zoneDef.dimensions then print("ERROR: spawnZombies FAILED! - zoneDef invalid!") return end
 
     local ringPadding = 12
+    local minSpawnDistance = 50
     local maxLoadedTileRadius = 60
-    local wOffset = math.min(maxLoadedTileRadius, (zoneDef.dimensions.w/2) + ringPadding)
-    local hOffset = math.min(maxLoadedTileRadius, (zoneDef.dimensions.h/2) + ringPadding)
+    local wOffset = math.min(maxLoadedTileRadius, math.max(minSpawnDistance, (zoneDef.dimensions.w/2) + ringPadding))
+    local hOffset = math.min(maxLoadedTileRadius, math.max(minSpawnDistance, (zoneDef.dimensions.h/2) + ringPadding))
 
     local x1 = zoneDef.center.x-wOffset
     local y1 = zoneDef.center.y-hOffset
@@ -75,7 +76,7 @@ function waveGenerator.spawnZombies(numberOf, isCorrective)
     local spawnedZombies = waveGenerator.spawnZombieRing(numberOf, x1, y1, x2, y2)
 
     local verifyRetries = 0
-    local maxVerifyRetries = 3
+    local maxVerifyRetries = 100
     while verifyRetries < maxVerifyRetries do
         local actualGained = LST_zone.getTrueZombieCount() - trueCountBefore
         local shortfall = spawnedZombies - actualGained
@@ -84,7 +85,7 @@ function waveGenerator.spawnZombies(numberOf, isCorrective)
         verifyRetries = verifyRetries + 1
     end
 
-    getWorldSoundManager():addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 600, 100, false, 1000, 100)
+    getWorldSoundManager():addSound(nil, zoneDef.center.x, zoneDef.center.y, 0, 333, 999)
 
     if isServer() and isCorrective then
         LST_zone.requestZombieCountConfirmation()

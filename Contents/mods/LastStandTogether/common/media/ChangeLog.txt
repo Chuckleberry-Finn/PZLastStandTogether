@@ -260,3 +260,8 @@ HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 [ 8/22/26 hotfix2 ]
 - Removed 'human stress' parameter from the luring events.
 [ ------ ]
+
+[ 8/23/26 ]
+- Experimental Solution to Zombies Failing to Spawn.
+- Raised the price and lowered the stock of pipe-bombs.
+[ ------ ]

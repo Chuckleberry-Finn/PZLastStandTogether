@@ -93,7 +93,7 @@ function onZombie.update(zombie)
     end
 
     if getDebug() or getPlayer():isNoClip() then
-        zombie:addLineChatElement("!", 1, 1, 1, UIFont.Small, 1000, "default")
+        zombie:addLineChatElement("!", 1, 1, 1, UIFont.NewMedium, 1000, "default")
     end
 end
 

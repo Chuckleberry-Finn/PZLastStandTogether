@@ -177,13 +177,14 @@ end
 function zone.setSandboxForLastStand()
     local options = getSandboxOptions()
     local optionsToValues = {
-        ["ZombieConfig.PopulationMultiplier"] = 0.01,
+        ["ZombieConfig.PopulationMultiplier"] = 0.0,
         ["ZombieConfig.PopulationStartMultiplier"] = 0.0,
         ["ZombieConfig.PopulationPeakMultiplier"] = 0.0,
         ["ZombieConfig.RespawnHours"] = 0.0,
         ["ZombieConfig.RespawnUnseenHours"] = 0.0,
         ["ZombieConfig.RespawnMultiplier"] = 0.0,
         ["ZombieConfig.RedistributeHours"] = 0.0,
+        ["ZombieConfig.ZombiesCountBeforeDelete"] = 0,
     }
     for o,value in pairs(optionsToValues) do
         local option = options:getOptionByName(o)
@@ -226,6 +227,7 @@ function zone.sendZombieCount(data)
         if data.zombiesToSpawn then zone.def.zombiesToSpawn = data.zombiesToSpawn end
         if data.zombiesSpawned then zone.def.zombiesSpawned = data.zombiesSpawned end
         if data.currentZombies then zone.def.currentZombies = data.currentZombies end
+        if data.serverTrueCount then zone.def.serverTrueCount = data.serverTrueCount end
     end
 
     if isServer() then
@@ -234,6 +236,7 @@ function zone.sendZombieCount(data)
             zombiesToSpawn = zone.def.zombiesToSpawn,
             zombiesSpawned = zone.def.zombiesSpawned,
             currentZombies = zone.def.currentZombies,
+            serverTrueCount = zone.getTrueZombieCount(),
         })
     end
 end
@@ -267,8 +270,6 @@ function zone.enforceZoneBoundaries()
     local players = zone.getAllPlayers()
     local hasPlayers = players and players:size() > 0
 
-    local luringRadius = math.max(zone.def.dimensions.w, zone.def.dimensions.h) + 20
-
     for i=0, zombiesInCell:size()-1 do
         ---@type IsoZombie
         local zombie = zombiesInCell:get(i)
@@ -278,23 +279,22 @@ function zone.enforceZoneBoundaries()
             local dy = zone.def.center.y - zY
             local distFromCenter = math.sqrt(dx*dx + dy*dy)
 
-            if distFromCenter <= luringRadius then
-                local nearestPlayer = hasPlayers and zone.getNearestPlayer(players, zX, zY)
+            local nearestPlayer = hasPlayers and zone.getNearestPlayer(players, zX, zY)
 
-                if nearestPlayer then
-                    if zombie:getTarget() ~= nearestPlayer then
-                        zombie:setTarget(nearestPlayer)
-                    end
-                    if zombie:getThumpTarget() then zombie:setThumpTarget(nil) end
+            if nearestPlayer then
+                if zombie:getTarget() ~= nearestPlayer then
+                    zombie:setTarget(nearestPlayer)
                 end
+                zombie:spotted(nearestPlayer, true)
+                if zombie:getThumpTarget() then zombie:setThumpTarget(nil) end
+            end
 
-                local outOfBounds = (math.abs(dx) > zone.def.dimensions.w) or (math.abs(dy) > zone.def.dimensions.h)
-                if (outOfBounds or not nearestPlayer) and distFromCenter > 0 then
-                    local step = math.max(2, math.min(6, distFromCenter))
-                    local newX = zX + (dx/distFromCenter)*step
-                    local newY = zY + (dy/distFromCenter)*step
-                    zone.teleportEntity(zombie, newX, newY, zombie:getZ())
-                end
+            local outOfBounds = (math.abs(dx) > zone.def.dimensions.w) or (math.abs(dy) > zone.def.dimensions.h)
+            if (outOfBounds or not nearestPlayer) and distFromCenter > 0 then
+                local step = math.max(2, math.min(6, distFromCenter))
+                local newX = zX + (dx/distFromCenter)*step
+                local newY = zY + (dy/distFromCenter)*step
+                zone.teleportEntity(zombie, newX, newY, zombie:getZ())
             end
         end
     end
@@ -481,7 +481,13 @@ function zone.forceZombieSpawns(expectedCount)
     local inCell = zone.def.currentZombies
     if expectedCount > 0 and inCell > expectedCount then
         local need = inCell-expectedCount
-        waveGen.spawnZombies(need, false)
+        if need >= 5 or need/inCell >= 0.25 then
+            print("FORCE-SPAWN: server tracked=", inCell, " client reported=", expectedCount, " gap=", need, " - spawning to compensate")
+            waveGen.spawnZombies(need, false)
+            if isServer() then zone.sendZombieCount() end
+        else
+            print("FORCE-SPAWN: server tracked=", inCell, " client reported=", expectedCount, " gap=", need, " - below threshold, ignoring")
+        end
     end
 end
 
@@ -557,7 +563,6 @@ function zone.checkKillInactivity()
         local forceCount = zone.killInactivityForceSpawn
         waveGen.spawnZombies(forceCount, true)
         zone.def.lastKillTime = now
-        zone.def.currentZombies = (zone.def.currentZombies or 0) + forceCount
         zone.def.error = "No kills for a while - force spawning "..forceCount.." zombies."
         if isServer() then zone.sendZombieCount() end
         zone.sendZoneDef()
@@ -643,6 +648,15 @@ function zone.schedulerLoop()
 
     local currentTime = getTimestampMs()
 
+    if isServer() and zone.def.wave and zone.def.wave > 0 and (not zone.debugCountBroadcastTimer or currentTime > zone.debugCountBroadcastTimer) then
+        zone.debugCountBroadcastTimer = currentTime + 3000
+        zone.sendZombieCount()
+    end
+
+    if isServer() and zone.def.wave and zone.def.wave > 0 and (zone.def.currentZombies or 0) > 0 then
+        zone.requestZombieCountConfirmation()
+    end
+
     if isServer() and (not zone.boundaryEnforceTimer or currentTime > zone.boundaryEnforceTimer) then
         zone.boundaryEnforceTimer = currentTime + 1000
         zone.enforceZoneBoundaries()
@@ -664,13 +678,41 @@ function zone.schedulerLoop()
     if zone.def.zombiesToSpawn and zone.def.zombiesToSpawn > 0 then
         if not zone.def.spawnTickTimer or currentTime > zone.def.spawnTickTimer then
             local batchSize = math.min(100, zone.def.zombiesToSpawn)
-            local spawned = waveGen.spawnZombies(batchSize, false)
-            zone.def.zombiesToSpawn = math.max(0, zone.def.zombiesToSpawn - spawned)
-            zone.def.spawnTickTimer = currentTime + ((SandboxVars.LastStandTogether.InWaveSpawnInterval or 2) * 60000)
-            zone.def.zombiesSpawned = (zone.def.zombiesSpawned or 0) + spawned
-            zone.def.currentZombies = (zone.def.currentZombies or 0) + spawned
+            local beforeCount = zone.getTrueZombieCount()
+            waveGen.spawnZombies(batchSize, false)
+            local confirmedAdded = math.max(0, zone.getTrueZombieCount() - beforeCount)
+            zone.def.zombiesToSpawn = math.max(0, zone.def.zombiesToSpawn - confirmedAdded)
+            zone.def.zombiesSpawned = (zone.def.zombiesSpawned or 0) + confirmedAdded
+            zone.def.currentZombies = (zone.def.currentZombies or 0) + confirmedAdded
+
+            print("WAVE-GEN BATCH: requested=", batchSize, " confirmedAdded=", confirmedAdded, " zombiesToSpawn now=", zone.def.zombiesToSpawn)
+
+            if confirmedAdded < batchSize * 0.5 then
+                zone.def.spawnTickTimer = currentTime + 10000
+                zone.def.error = "Batch spawn came up short (" .. confirmedAdded .. "/" .. batchSize .. ") - retrying shortly."
+                print("WARNING: batch spawn came up short (", confirmedAdded, "/", batchSize, ") - retrying in 10s instead of the full interval")
+            else
+                zone.def.spawnTickTimer = currentTime + ((SandboxVars.LastStandTogether.InWaveSpawnInterval or 2) * 60000)
+            end
             if isServer() then zone.sendZombieCount() end
         end
+
+        local alreadySpawned = zone.def.currentZombies or 0
+        if alreadySpawned > 0 then
+            local zombiesInCellNow = zone.getTrueZombieCount()
+            if alreadySpawned > zombiesInCellNow then
+                local need = alreadySpawned - zombiesInCellNow
+                if not zone.missingZombieTimer or currentTime > zone.missingZombieTimer then
+                    zone.missingZombieTimer = currentTime + 5000
+                    waveGen.spawnZombies(need, true)
+                    print("WARNING: Zombies In Cell: ", zombiesInCellNow, " tracked: ", alreadySpawned, "  wanted: ", need)
+                    zone.def.error = "Zombies went missing - respawning to compensate."
+                    if isServer() then zone.sendZombieCount() end
+                    zone.sendZoneDef()
+                end
+            end
+        end
+
         return
     end
 
@@ -706,9 +748,9 @@ function zone.schedulerLoop()
         local need = math.max(0, zombiesLeft - zombiesInCell)
         if not zone.missingZombieTimer or currentTime > zone.missingZombieTimer then
             zone.missingZombieTimer = currentTime + 5000
-            local spawned = waveGen.spawnZombies(need, true)
-            print("WARNING: Zombies In Cell: ", zombiesInCell, " tracked: ", zombiesLeft, "  wanted: ", need, "  spawned: ", spawned)
-            zone.def.error = "Zombies went missing - respawning " .. (spawned or 0) .. " to compensate."
+            waveGen.spawnZombies(need, true)
+            print("WARNING: Zombies In Cell: ", zombiesInCell, " tracked: ", zombiesLeft, "  wanted: ", need)
+            zone.def.error = "Zombies went missing - respawning to compensate."
             if isServer() then zone.sendZombieCount() end
             zone.sendZoneDef()
         end
@@ -1040,6 +1082,7 @@ function zone.setToCurrentBuilding(player)
     local building = player:getCurrentBuilding()
     if not building then
         zone.def = {}
+        zone.deleteStateFile()
         zone.def.error = "You must be inside a building to start the game."
         zone.sendZoneDef()
         return
@@ -1048,6 +1091,7 @@ function zone.setToCurrentBuilding(player)
     local buildingDef = building and building:getDef()
     if not buildingDef then
         zone.def = {}
+        zone.deleteStateFile()
         zone.def.error = "This building could not be read. Try a different one."
         zone.sendZoneDef()
         return
@@ -1056,6 +1100,7 @@ function zone.setToCurrentBuilding(player)
     local buildingID = buildingDef and buildingDef:getID()
     if building and zone.def.buildingID and zone.def.buildingID == buildingID then
         zone.def = {}
+        zone.deleteStateFile()
         zone.def.error = "Game ended. Select a new building or press Start again to restart."
         zone.sendZoneDef()
         return
@@ -1131,6 +1176,7 @@ function zone.setToBuilding(buildingDef)
 
     if not zone.restoring then
         zone.def = {}
+        zone.deleteStateFile()
     end
 
     buildingDef:setAlarmed(false) ---lol
@@ -1269,11 +1315,21 @@ function zone.seekNewBuilding()
         ---@type BuildingDef
         local building = buildings:get(i)
         if building then
+            if not zone.allBuildingsExplored then
+                local rooms = building:getRooms()
+                for r=0, rooms:size()-1 do
+                    ---@type RoomDef
+                    local roomDef = rooms:get(r)
+                    if roomDef then roomDef:setExplored(true) end
+                end
+            end
+
             if (building:getW() > buildingSizeMinimum) and (building:getH() > buildingSizeMinimum) then
                 table.insert(buildingPool, building)
             end
         end
     end
+    zone.allBuildingsExplored = true
 
     local buildingSelection = buildingPool[ZombRand(#buildingPool)+1]
     return buildingSelection

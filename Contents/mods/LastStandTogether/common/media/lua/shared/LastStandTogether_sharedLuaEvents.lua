@@ -48,7 +48,7 @@ if not isClient() then --SP and Server
 end
 
 Events.OnInitWorld.Add(LastStandTogether_Zone.setSandboxForLastStand)
-
+Events.OnLoad.Add(LastStandTogether_Zone.setSandboxForLastStand)
 
 if isClient() then
     local function onServerCommand(_module, _command, _data)
