@@ -128,9 +128,6 @@ function zoneRender.drawZoneEffects()
                     local x1, y1, x2, y2, x3, y3, x4, y4, alpha = zoneRender.shopMarkerScaler(coord.x, coord.y, pZ+0.5, 100, zoom*1.5, (scale/0.33))
 
                     shopMarkerSystem.drawMarkerQuad(zDiff, x1, y1, x2, y2, x3, y3, x4, y4, alpha)
-
-                    local markerKey = "lst_room_"..roomID
-                    shopMarkerSystem.checkHover(markerKey, coord.shopID, coord.x, coord.y, pZ+0.5)
                 end
             end
         end
@@ -188,7 +185,6 @@ function zoneRender.drawZoneEffects()
                 end
 
                 zoneRender.pending.teleport[player] = {x=clampedX, y=clampedY, z=pZ}
-                --LastStandTogether_Zone.teleportEntity(player, clampedX, clampedY, pZ)
             end
         end
 
@@ -210,8 +206,6 @@ function zoneRender.drawZoneEffects()
             LST_zone.players[player] = nil
             local dmg = SandboxVars.LastStandTogether.OutOfBoundsDamage or 5
             zoneRender.pending.dmg[player] = dmg
-            --player:getBodyDamage():ReduceGeneralHealth(dmg)
-            --player:playSound("BulletHitBody")
         end
 
         getRenderer():renderRect((sx1-(w/2)), sy1-(h*zoom), (fill * w), h, color.r, color.g, color.b, color.a)

@@ -25,7 +25,6 @@ zone.def.resetCooldown = false
 zone.def.warningNoPlayers = false
 
 zone.def.buildingID = false
-zone.def.shopMarkers = {}
 zone.def.shopMarkersRooms = {}
 
 zone.resetCooldown = isServer() and 80000 or 20000
@@ -432,11 +431,6 @@ function zone.teleportEntity(entity, x, y, z)
         return
     end
 
-    --if instanceof(entity, "IsoZombie") and isClient() then
-    --    sendClientCommand(getPlayer(), "LastStandTogether", "teleportEntity", {entityType="zombie", onlineID=entity:getOnlineID(), x=x, y=y, z=z})
-    --    return
-    --end
-
     entity:setX(x)
     entity:setY(y)
     entity:setLastX(x)
@@ -485,8 +479,6 @@ function zone.forceZombieSpawns(expectedCount)
             print("FORCE-SPAWN: server tracked=", inCell, " client reported=", expectedCount, " gap=", need, " - spawning to compensate")
             waveGen.spawnZombies(need, false)
             if isServer() then zone.sendZombieCount() end
-        else
-            print("FORCE-SPAWN: server tracked=", inCell, " client reported=", expectedCount, " gap=", need, " - below threshold, ignoring")
         end
     end
 end
@@ -685,8 +677,6 @@ function zone.schedulerLoop()
             zone.def.zombiesSpawned = (zone.def.zombiesSpawned or 0) + confirmedAdded
             zone.def.currentZombies = (zone.def.currentZombies or 0) + confirmedAdded
 
-            print("WAVE-GEN BATCH: requested=", batchSize, " confirmedAdded=", confirmedAdded, " zombiesToSpawn now=", zone.def.zombiesToSpawn)
-
             if confirmedAdded < batchSize * 0.5 then
                 zone.def.spawnTickTimer = currentTime + 10000
                 zone.def.error = "Batch spawn came up short (" .. confirmedAdded .. "/" .. batchSize .. ") - retrying shortly."
@@ -733,16 +723,6 @@ function zone.schedulerLoop()
     if zombiesLeft > 0 then
         zone.checkKillInactivity()
     end
-
-    --[[
-    print("zombiesLeft: ", zombiesLeft, " zombiesInCell: ", zombiesInCell)
-    local cellZombies = getCell():getZombieList()
-    for z=0, cellZombies:size()-1 do
-        ---@type IsoZombie
-        local zombie = cellZombies:get(z)
-        print(z, " ", zombie:getOnlineID(), " ", zombie)
-    end
-    --]]
 
     if zombiesLeft > 0 and zombiesLeft > zombiesInCell then
         local need = math.max(0, zombiesLeft - zombiesInCell)
@@ -1110,6 +1090,16 @@ function zone.setToCurrentBuilding(player)
 end
 
 
+function zone.resetNativePopulation()
+    local meta = getWorld():getMetaGrid()
+    for x = 0, meta:getMaxX() do
+        for y = 0, meta:getMaxY() do
+            zpopClearZombies(x, y)
+        end
+    end
+end
+
+
 function zone.clearZombies()
     local now = getTimestampMs()
     if zone then
@@ -1133,12 +1123,7 @@ function zone.clearZombies()
         end
     end
 
-    local meta = getWorld():getMetaGrid()
-    for x = 0, meta:getMaxX() do
-        for y = 0, meta:getMaxY() do
-            zpopClearZombies(x, y)
-        end
-    end
+    zone.resetNativePopulation()
 end
 
 
@@ -1161,12 +1146,7 @@ function zone.trimZombies()
         end
     end
 
-    local meta = getWorld():getMetaGrid()
-    for x = 0, meta:getMaxX() do
-        for y = 0, meta:getMaxY() do
-            zpopClearZombies(x, y)
-        end
-    end
+    zone.resetNativePopulation()
 end
 
 
