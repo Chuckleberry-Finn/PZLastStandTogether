@@ -8,24 +8,26 @@ function waveGenerator.spawnZombieRing(numberOf, x1, y1, x2, y2)
     local attempts = 0
     local maxAttempts = 1000
 
+    local random_instance = newrandom()
+
     while spawnedZombies < numberOf and attempts <= maxAttempts do
 
-        local side = ZombRand(4)+1
+        local side = random_instance:random(4)
 
         local x, y = x1, y1
 
         if side == 1 then
             x = x1
-            y = ZombRand(y1,y2)+1
+            y = random_instance:random(y1,y2)
         elseif side == 2 then
             x = x2
-            y = ZombRand(y1,y2)+1
+            y = random_instance:random(y1,y2)
 
         elseif side == 3 then
-            x = ZombRand(x1,x2)+1
+            x = random_instance:random(x1,x2)
             y = y1
         else --4
-            x = ZombRand(x1,x2)+1
+            x = random_instance:random(x1,x2)
             y = y2
         end
 

@@ -499,7 +499,8 @@ function zone.sendZombieCountConfirmationRequest()
     local players = getOnlinePlayers()
     if players:size() <= 0 then return end
 
-    local random = ZombRand(players:size())
+    local random_instance = newrandom()
+    local random = random_instance:random(players:size()-1)
     local player = players:get(random)
     sendServerCommand(player, "LastStandTogether", "confirmZombieCountWithClient", {})
 end
@@ -1311,7 +1312,8 @@ function zone.seekNewBuilding()
     end
     zone.allBuildingsExplored = true
 
-    local buildingSelection = buildingPool[ZombRand(#buildingPool)+1]
+    local random_instance = newrandom()
+    local buildingSelection = buildingPool[random_instance:random(#buildingPool)]
     return buildingSelection
 end
 
