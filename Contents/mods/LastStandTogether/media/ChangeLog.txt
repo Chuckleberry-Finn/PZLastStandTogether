@@ -199,3 +199,7 @@ Fix:
 [ 8/25/25 ]
 - Update default shops.
 [ ------ ]
+
+[ 8/26/26 ]
+- Removed loadstring use in favor of shop's `stringToTable`.
+[ ------ ]

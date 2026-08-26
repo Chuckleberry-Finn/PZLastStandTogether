@@ -265,3 +265,7 @@ HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 - Experimental Solution to Zombies Failing to Spawn.
 - Raised the price and lowered the stock of pipe-bombs.
 [ ------ ]
+
+[ 8/26/26 ]
+- B41 Hotfix Only. Removed loadstring use.
+[ ------ ]

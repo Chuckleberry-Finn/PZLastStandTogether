@@ -1,3 +1,5 @@
+local _internal = require "shop-shared"
+
 local highscore = {}
 
 highscore.currentPlayers = {}
@@ -371,7 +373,7 @@ function highscore.load()
     end
     reader:close()
 
-    local chunk, err = loadstring(content)
+    local chunk, err = _internal.stringToTable(content)
     if not chunk then print("Failed to load high scores:", err) return end
 
     local ok, data = pcall(chunk)
