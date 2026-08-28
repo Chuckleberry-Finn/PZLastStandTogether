@@ -498,10 +498,9 @@ end
 function zone.sendZombieCountConfirmationRequest()
     local players = getOnlinePlayers()
     if players:size() <= 0 then return end
-
     local random_instance = newrandom()
-    local random = random_instance:random(players:size()-1)
-    local player = players:get(random)
+    local random = random_instance:random(players:size())
+    local player = players:get(random-1)
     sendServerCommand(player, "LastStandTogether", "confirmZombieCountWithClient", {})
 end
 

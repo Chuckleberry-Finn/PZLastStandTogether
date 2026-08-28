@@ -269,3 +269,7 @@ HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 [ 8/26/26 ]
 - B41 Hotfix Only. Removed loadstring use.
 [ ------ ]
+
+[ 8/27/26 hotfix ]
+- Actually, fix broken random use
+[ ------ ]
