@@ -283,3 +283,12 @@ HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 - Added modoptions for zone line color for the colorblind. (Etsar)
 - Also made the line twice as thick.
 [ ------ ]
+
+[ 8/30/26 DOUBLE-BONUS UPDATE!! ]
+- Increased the cooldown to retry re-spawning to 30 seconds, from 5 seconds
+- Fix: Ammo-highlight needed GunWorks installed to work, oops (SoulMuncherr)
+- Set sandbox options for corpse removal to 6 hours (etsar)
+- Fix: Teleport-stuck protection for spawns (etsar)
+- Fix: Mannequins ignored for shop placement (marz, etsar)
+- Added session-ID tracking and which wipes players' inventories from previous games
+[ ------ ]

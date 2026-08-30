@@ -16,13 +16,15 @@ function ammoHighlight.getCompatibleAmmoTypes(gunFullType)
 
     local set = nil
 
-    local family = Ammo.ItemAmmoFamily[gunFullType]
-    if family then
-        local bulletTypes = Ammo.GetBulletTypesForFamily(family)
-        if bulletTypes then
-            set = set or {}
-            for i=1, #bulletTypes do
-                set[bulletTypes[i]] = true
+    if Ammo and Ammo.ItemAmmoFamily then
+        local family = Ammo.ItemAmmoFamily[gunFullType]
+        if family then
+            local bulletTypes = Ammo.GetBulletTypesForFamily(family)
+            if bulletTypes then
+                set = set or {}
+                for i=1, #bulletTypes do
+                    set[bulletTypes[i]] = true
+                end
             end
         end
     end
@@ -35,7 +37,7 @@ function ammoHighlight.getCompatibleAmmoTypes(gunFullType)
         set[scriptAmmoKey] = true
     end
 
-    if script and (family or scriptAmmoKey) then
+    if script and (set or scriptAmmoKey) then
         local tempWeapon = script:InstanceItem(nil)
         if tempWeapon and instanceof(tempWeapon, "HandWeapon") then
             local ammoBox = tempWeapon:getAmmoBox()

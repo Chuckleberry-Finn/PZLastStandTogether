@@ -53,6 +53,7 @@ function zone.saveState()
 
     local state = {
         buildingID = zone.def.buildingID,
+        sessionID = zone.def.sessionID,
         wave = zone.def.wave,
         popMulti = zone.def.popMulti,
         waveCooldown = zone.def.waveCooldown,
@@ -145,6 +146,7 @@ function zone.tryRestore()
     end
 
     zone.def.wave = state.wave
+    zone.def.sessionID = state.sessionID
     zone.def.popMulti = state.popMulti
     zone.def.waveCooldown = state.waveCooldown
     zone.def.zombiesSpawned = state.zombiesSpawned or 0
@@ -184,6 +186,7 @@ function zone.setSandboxForLastStand()
         ["ZombieConfig.RespawnMultiplier"] = 0.0,
         ["ZombieConfig.RedistributeHours"] = 0.0,
         ["ZombieConfig.ZombiesCountBeforeDelete"] = 0,
+        ["HoursForCorpseRemoval"] = 6.0,
     }
     for o,value in pairs(optionsToValues) do
         local option = options:getOptionByName(o)
@@ -342,6 +345,17 @@ end
 function zone.teleportPlayersToZone(players)
     if (not zone.def or not zone.def.center) then return end
     if not players then return false end
+
+    local teleportX, teleportY = zone.def.center.x, zone.def.center.y
+    local centerSquare = getSquare(zone.def.center.x, zone.def.center.y, 0)
+    if centerSquare and not centerSquare:isFree(true) then
+        local room = centerSquare:getRoom()
+        local freeTile = room and room:getFreeTile()
+        if freeTile then
+            teleportX, teleportY = freeTile:getX(), freeTile:getY()
+        end
+    end
+
     for i=0, players:size()-1 do
         ---@type IsoPlayer|IsoPlayer|IsoGameCharacter|IsoMovingObject|IsoObject
         local player = players:get(i)
@@ -351,7 +365,7 @@ function zone.teleportPlayersToZone(players)
             local dy = math.abs(zone.def.center.y-pY)
 
             if ((dx) > zone.def.dimensions.w*2.5) or ((dy) > zone.def.dimensions.h*2.5) then
-                zone.teleportEntity(player, zone.def.center.x, zone.def.center.y, 0)
+                zone.teleportEntity(player, teleportX, teleportY, 0)
             end
 
         end
@@ -678,7 +692,7 @@ function zone.schedulerLoop()
             zone.def.currentZombies = (zone.def.currentZombies or 0) + confirmedAdded
 
             if confirmedAdded < batchSize * 0.5 then
-                zone.def.spawnTickTimer = currentTime + 10000
+                zone.def.spawnTickTimer = currentTime + 30000
                 zone.def.error = "Batch spawn came up short (" .. confirmedAdded .. "/" .. batchSize .. ") - retrying shortly."
                 print("WARNING: batch spawn came up short (", confirmedAdded, "/", batchSize, ") - retrying in 10s instead of the full interval")
             else
@@ -693,7 +707,7 @@ function zone.schedulerLoop()
             if alreadySpawned > zombiesInCellNow then
                 local need = alreadySpawned - zombiesInCellNow
                 if not zone.missingZombieTimer or currentTime > zone.missingZombieTimer then
-                    zone.missingZombieTimer = currentTime + 5000
+                    zone.missingZombieTimer = currentTime + 30000
                     waveGen.spawnZombies(need, true)
                     print("WARNING: Zombies In Cell: ", zombiesInCellNow, " tracked: ", alreadySpawned, "  wanted: ", need)
                     zone.def.error = "Zombies went missing - respawning to compensate."
@@ -727,7 +741,7 @@ function zone.schedulerLoop()
     if zombiesLeft > 0 and zombiesLeft > zombiesInCell then
         local need = math.max(0, zombiesLeft - zombiesInCell)
         if not zone.missingZombieTimer or currentTime > zone.missingZombieTimer then
-            zone.missingZombieTimer = currentTime + 5000
+            zone.missingZombieTimer = currentTime + 30000
             waveGen.spawnZombies(need, true)
             print("WARNING: Zombies In Cell: ", zombiesInCell, " tracked: ", zombiesLeft, "  wanted: ", need)
             zone.def.error = "Zombies went missing - respawning to compensate."
@@ -786,7 +800,32 @@ function zone.validateLogin(playerObj)
 end
 
 
-function zone.onPlayerCreate() Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin) Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin) end
+function zone.checkPlayerSession(player)
+    if not isServer() then return end
+    if not player then return end
+    if not zone.def or not zone.def.sessionID then return end
+
+    local modData = player:getModData()
+    local playerSession = modData.lst_sessionID
+
+    if playerSession ~= zone.def.sessionID then
+        local inventory = player:getInventory()
+        if inventory then inventory:clear() end
+        modData.lst_sessionID = zone.def.sessionID
+        player:transmitModData()
+        print("[LastStandTogether] Wiped inventory for "..tostring(player:getDisplayName())..": carried over from a previous game session.")
+    end
+end
+
+
+function zone.onPlayerCreate(_player)
+    Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin)
+    Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin)
+
+    if isServer() then
+        zone.checkPlayerSession(getSpecificPlayer(_player))
+    end
+end
 function zone.onLogin()
     zone.clientSideLoginCheck = (zone.clientSideLoginCheck or 2) - 1
     if zone.clientSideLoginCheck <=0 then
@@ -976,7 +1015,7 @@ function zone.establishShopFront(buildingDef)
                         ---@type IsoObject
                         local obj = objects:get(o)
 
-                        if obj and obj:getContainer() then
+                        if obj and obj:getContainer() and not instanceof(obj, "IsoMannequin") then
                             local objectName = _internal.getWorldObjectDisplayName(obj)
                             if objectName then
                                 local objModData = obj:getModData()
@@ -1157,6 +1196,7 @@ function zone.setToBuilding(buildingDef)
     if not zone.restoring then
         zone.def = {}
         zone.deleteStateFile()
+        zone.def.sessionID = getTimestampMs() .. "-" .. ZombRand(999999)
     end
 
     buildingDef:setAlarmed(false) ---lol
