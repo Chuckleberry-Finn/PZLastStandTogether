@@ -278,3 +278,8 @@ HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 - Added Ammo/Weapon compat highlight in shops
 - Added a protection to Multiple games firing at once
 [ ------ ]
+
+[ 8/30/26 BONUS UPDATE! ]
+- Added modoptions for zone line color for the colorblind. (Etsar)
+- Also made the line twice as thick.
+[ ------ ]

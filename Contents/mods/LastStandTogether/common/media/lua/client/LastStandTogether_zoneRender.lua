@@ -1,4 +1,5 @@
 local shopMarkerSystem = require "shop-markers.lua"
+local modOptions = require "LastStandTogether_ModOptions.lua"
 
 local zoneRender = {}
 
@@ -167,7 +168,7 @@ function zoneRender.drawZoneEffects()
             local outerZoneColor = {r=0.854901961, g=0.125490196 , b=0.125490196, a=0.9}
             zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y,
                     zoneDef.dimensions.w*2, zoneDef.dimensions.h*2,
-                    outerZoneColor, 5)
+                    outerZoneColor, 10)
         end
 
 
@@ -213,7 +214,7 @@ function zoneRender.drawZoneEffects()
         LST_zone.players[player] = nil
     end
 
-    local zoneColor = {r=0.854901961, g=0.64705882352 , b=0.125490196, a=0.5}
+    local zoneColor = modOptions.getZoneColor()
     zoneRender.drawSquare(zoneDef.center.x, zoneDef.center.y, zoneDef.dimensions.w, zoneDef.dimensions.h, zoneColor, 3)
 end
 

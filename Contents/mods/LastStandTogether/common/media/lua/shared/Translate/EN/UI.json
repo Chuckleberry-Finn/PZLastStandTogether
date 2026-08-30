@@ -1,0 +1,6 @@
+{
+    "IGUI_PostDeath_Spectate": "SPECTATE",
+    "UI_ConfigMODID_LastStandTogether": "Last Stand Together",
+    "UI_LST_ZoneColor": "Zone Boundary Color",
+    "UI_LST_ZoneColorToolTip": "The color of the boundary line drawn around the active Last Stand zone."
+}
