@@ -786,7 +786,7 @@ function zone.validateLogin(playerObj)
 end
 
 
-function zone.onPlayerCreate() Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin) end
+function zone.onPlayerCreate() Events.OnPlayerUpdate.Remove(LastStandTogether_Zone.onLogin) Events.OnPlayerUpdate.Add(LastStandTogether_Zone.onLogin) end
 function zone.onLogin()
     zone.clientSideLoginCheck = (zone.clientSideLoginCheck or 2) - 1
     if zone.clientSideLoginCheck <=0 then
@@ -1191,6 +1191,7 @@ function zone.setToBuilding(buildingDef)
         zone.highscore.setAllPlayers()
     end
     zone.finalSteps = false
+    Events.OnTick.Remove(zone.scheduledFinalSetup)
     Events.OnTick.Add(zone.scheduledFinalSetup)
     zone.saveState()
 end

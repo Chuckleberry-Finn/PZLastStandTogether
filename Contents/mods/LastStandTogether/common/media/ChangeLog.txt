@@ -273,3 +273,8 @@ HOTFIX: Issue with scheduler in MP (tested SP more thoroughly, apologies).
 [ 8/27/26 hotfix ]
 - Actually, fix broken random use
 [ ------ ]
+
+[ 8/30/26 ]
+- Added Ammo/Weapon compat highlight in shops
+- Added a protection to Multiple games firing at once
+[ ------ ]
